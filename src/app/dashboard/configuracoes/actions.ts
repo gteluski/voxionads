@@ -5,8 +5,9 @@ import { adminAuth, adminDb } from '@/lib/firebase-admin'
 import { revalidatePath } from 'next/cache'
 
 async function getAuthenticatedUser() {
-  const session = cookies().get('session')?.value
+  const session = (await cookies()).get('session')?.value
   if (!session) return null
+
   try {
     const decodedClaims = await adminAuth.verifySessionCookie(session, true)
     return decodedClaims
