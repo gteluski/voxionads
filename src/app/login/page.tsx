@@ -1,31 +1,49 @@
 'use client'
 
 import { useState } from 'react'
-import { useFormStatus } from 'react-dom'
-import { login } from './actions'
+import { useRouter } from 'next/navigation'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 import { Lock, Mail } from 'lucide-react'
 
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--primary)] hover:bg-[#d6652c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary)] focus:ring-offset-[var(--background)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {pending ? 'Entrando...' : 'Entrar'}
-    </button>
-  )
-}
-
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
+  const router = useRouter()
 
-  async function clientAction(formData: FormData) {
-    const result = await login(formData)
-    if (result?.error) {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setPending(true)
+    setErrorMessage(null)
+
+    try {
+      // 1. Sign in with Firebase Client SDK
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const idToken = await userCredential.user.getIdToken()
+
+      // 2. Send token to Route Handler to set cookie
+      const res = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+      })
+
+      if (!res.ok) {
+        throw new Error('Falha ao criar sessão do servidor.')
+      }
+
+      // 3. Redirect to dashboard
+      router.push('/dashboard')
+      router.refresh()
+    } catch (error: any) {
+      console.error('Login error:', error)
       setErrorMessage('Credenciais inválidas.')
+    } finally {
+      setPending(false)
     }
   }
 
@@ -45,7 +63,7 @@ export default function LoginPage() {
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" action={clientAction}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1" htmlFor="email">
@@ -61,6 +79,8 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none relative block w-full px-3 py-2.5 pl-10 border border-white/10 bg-black/20 placeholder-[var(--text-secondary)] text-white rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] focus:z-10 sm:text-sm transition-colors"
                   placeholder="seu@email.com"
                 />
@@ -80,6 +100,8 @@ export default function LoginPage() {
                   type="password"
                   autoComplete="current-password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none relative block w-full px-3 py-2.5 pl-10 border border-white/10 bg-black/20 placeholder-[var(--text-secondary)] text-white rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] focus:z-10 sm:text-sm transition-colors"
                   placeholder="••••••••"
                 />
@@ -94,7 +116,13 @@ export default function LoginPage() {
           )}
 
           <div>
-            <SubmitButton />
+            <button
+              type="submit"
+              disabled={pending}
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--primary)] hover:bg-[#d6652c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary)] focus:ring-offset-[var(--background)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {pending ? 'Entrando...' : 'Entrar'}
+            </button>
           </div>
         </form>
       </div>

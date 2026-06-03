@@ -1,16 +1,20 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { adminDb } from '@/lib/firebase-admin'
 
 async function getAccessToken() {
-  const { data } = await supabase.from('settings').select('meta_access_token').limit(1).single()
-  return data?.meta_access_token || process.env.META_ACCESS_TOKEN
+  try {
+    const snapshot = await adminDb.collection('settings').limit(1).get()
+    if (!snapshot.empty) {
+      const data = snapshot.docs[0].data()
+      return data?.meta_access_token || process.env.META_ACCESS_TOKEN
+    }
+  } catch (error) {
+    console.error('Error fetching Meta access token from Firestore settings:', error)
+  }
+  return process.env.META_ACCESS_TOKEN
 }
+
 
 interface MetaAction {
   action_type: string

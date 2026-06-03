@@ -3,11 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Users, Clock, Settings, LogOut } from 'lucide-react'
-import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-
-import { User } from '@supabase/supabase-js'
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -19,31 +18,29 @@ const navigation = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      setLoading(false)
-    }
-    checkUser()
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [supabase])
+    return () => unsubscribe();
+  }, [])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/login')
+    try {
+      await signOut(auth)
+      await fetch('/api/auth/logout', { method: 'POST' })
+      router.push('/login')
+      router.refresh()
+    } catch (error) {
+      console.error('Erro ao deslogar:', error)
+    }
   }
+
 
   const isProtectedAdminRoute = 
     pathname === '/dashboard' || 

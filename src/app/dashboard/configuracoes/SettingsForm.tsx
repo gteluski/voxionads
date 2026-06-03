@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Key, Bell, User, Check, AlertCircle } from 'lucide-react'
 import { saveSettings } from './actions'
-import { User as SupabaseUser } from '@supabase/supabase-js'
 
 interface SettingsData {
   meta_access_token?: string
@@ -13,13 +12,18 @@ interface SettingsData {
   alert_frequency?: number | string
 }
 
+interface SettingsUser {
+  email?: string | null
+}
+
 export function SettingsForm({ 
   initialSettings, 
   user 
 }: { 
   initialSettings: SettingsData | null
-  user?: SupabaseUser | null 
+  user?: SettingsUser | null 
 }) {
+
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)

@@ -1,36 +1,25 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Helper function to decode JWT in the Edge Runtime (without Node.js dependencies)
+function decodeJwt(token: string) {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   const pathname = request.nextUrl.pathname
   const hasAccountId = request.nextUrl.searchParams.has('account_id')
   const isProtectedAdminRoute = 
@@ -38,6 +27,20 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/dashboard/clientes') || 
     pathname.startsWith('/dashboard/historico') || 
     pathname.startsWith('/dashboard/configuracoes')
+
+  // Check the Firebase session cookie
+  const session = request.cookies.get('session')?.value
+  let user = null
+
+  if (session) {
+    const payload = decodeJwt(session)
+    if (payload && payload.exp && payload.exp > Math.floor(Date.now() / 1000)) {
+      user = {
+        uid: payload.sub,
+        email: payload.email,
+      }
+    }
+  }
 
   if (!user && isProtectedAdminRoute) {
     const url = request.nextUrl.clone()
@@ -57,7 +60,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  return supabaseResponse
+  return NextResponse.next()
 }
 
 export const config = {
@@ -65,3 +68,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
+

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { adminDb } from '@/lib/firebase-admin'
 import { notFound } from 'next/navigation'
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
 import { StatCards } from '@/components/dashboard/StatCards'
@@ -41,6 +41,21 @@ async function fetchMetaInsights(
   }
 }
 
+async function fetchMetaCampaigns(accountId: string) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/meta/campaigns?account_id=${accountId}`, {
+      next: { revalidate: 300 } // Cache for 5 mins
+    })
+    const result = await res.json()
+    if (!res.ok) throw new Error(result.error)
+    return result
+  } catch (error) {
+    console.error('Error fetching meta campaigns:', error)
+    return null
+  }
+}
+
 export default async function ClientDashboardPage({ params, searchParams }: Props) {
   const { slug } = await params
   const resolvedSearchParams = await searchParams
@@ -50,27 +65,48 @@ export default async function ClientDashboardPage({ params, searchParams }: Prop
   const adsetId = typeof resolvedSearchParams.adset_id === 'string' ? resolvedSearchParams.adset_id : ''
   const adId = typeof resolvedSearchParams.ad_id === 'string' ? resolvedSearchParams.ad_id : ''
 
-  // Create public Supabase client using public environment credentials
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  let client = null
+  try {
+    const snapshot = await adminDb
+      .collection('clients')
+      .where('slug', '==', slug)
+      .limit(1)
+      .get()
 
-  const { data: client, error } = await supabase
-    .from('clients')
-    .select('name, meta_account_id')
-    .eq('slug', slug)
-    .single()
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0]
+      const data = doc.data()
+      if (data.status !== false && data.active !== false) {
+        client = {
+          name: data.name,
+          meta_account_id: data.meta_account_id
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching client by slug from Firestore:', error)
+  }
 
-  if (error || !client || !client.meta_account_id) {
+  if (!client || !client.meta_account_id) {
     notFound()
   }
 
-  const data = await fetchMetaInsights(client.meta_account_id, datePreset, campaignId, adsetId, adId)
-  
+
+  let data = null
+  let campaignsData = null
   let errorMsg = null
+
+  const [insightsRes, campaignsRes] = await Promise.all([
+    fetchMetaInsights(client.meta_account_id, datePreset, campaignId, adsetId, adId),
+    fetchMetaCampaigns(client.meta_account_id)
+  ])
+  data = insightsRes
+  campaignsData = campaignsRes
+
   if (!data || data.error) {
     errorMsg = data?.error || 'Erro ao carregar dados do Meta Ads'
+  } else if (!campaignsData || campaignsData.error) {
+    errorMsg = campaignsData?.error || 'Erro ao carregar dados das campanhas do Meta Ads'
   }
 
   const renderContent = () => {
@@ -83,9 +119,12 @@ export default async function ClientDashboardPage({ params, searchParams }: Prop
       )
     }
 
-    if (!data) return null
+    if (!data || !campaignsData) return null
 
-    const { summary, counts, topAds, campaigns, adsets, ads, account } = data
+    const { summary, counts, topAds, account } = data
+    const campaigns = campaignsData.campaigns || []
+    const adsets = campaignsData.adsets || []
+    const ads = campaignsData.ads || []
 
     const stats = [
       { name: 'Investimento Total', value: formatCurrency(summary.spend), tooltip: 'Valor total gasto na Meta Ads no período selecionado.' },

@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { auth, db } from '@/lib/firebase'
+import { doc, setDoc } from 'firebase/firestore'
+
 
 interface AccountInfo {
   id: string
@@ -47,26 +49,27 @@ export function SavedAccountsSync({ account }: { account: AccountInfo }) {
       recentList = [newRecentEntry, ...recentList.filter((a: { account_id: string }) => a.account_id !== accountId)].slice(0, 3)
       localStorage.setItem('voxion_recent_accounts', JSON.stringify(recentList))
 
-      // 3. Save to Supabase if authenticated
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        try {
-          await supabase
-            .from('saved_accounts')
-            .upsert({
-              user_id: user.id,
+      // 3. Save to Firestore if authenticated
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        unsubscribe()
+        if (user) {
+          try {
+            const docId = `${user.uid}_${accountId}`
+            await setDoc(doc(db, 'saved_accounts', docId), {
+              user_id: user.uid,
               account_id: accountId,
               account_name: account.name || account.business_name || accountId,
               business_name: account.business_name || '',
               last_accessed: new Date(now).toISOString()
             }, {
-              onConflict: 'user_id,account_id'
+              merge: true
             })
-        } catch (error) {
-          console.error('Failed to sync saved account to Supabase:', error)
+          } catch (error) {
+            console.error('Failed to sync saved account to Firestore:', error)
+          }
         }
-      }
+      })
+
 
       // 4. Notify other components that saved accounts changed
       window.dispatchEvent(new Event('voxion_saved_accounts_changed'))

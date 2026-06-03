@@ -1,31 +1,41 @@
 'use server'
 
-import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
+import { adminAuth, adminDb } from '@/lib/firebase-admin'
 import { revalidatePath } from 'next/cache'
 
+async function getAuthenticatedUser() {
+  const session = cookies().get('session')?.value
+  if (!session) return null
+  try {
+    const decodedClaims = await adminAuth.verifySessionCookie(session, true)
+    return decodedClaims
+  } catch (error) {
+    return null
+  }
+}
+
 export async function getSettings() {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthenticatedUser()
   if (!user) return null
 
-  const { data, error } = await supabase
-    .from('settings')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
-  if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-    console.error('Error fetching settings:', error)
+  try {
+    const doc = await adminDb.collection('settings').doc(user.uid).get()
+    const userSummary = { id: user.uid, email: user.email }
+    
+    if (!doc.exists) {
+      return { settings: null, user: userSummary }
+    }
+    
+    return { settings: { id: doc.id, ...doc.data() }, user: userSummary }
+  } catch (error) {
+    console.error('Error fetching settings from Firestore:', error)
+    return { settings: null, user: user ? { id: user.uid, email: user.email } : null }
   }
-
-  return { settings: data, user }
 }
 
 export async function saveSettings(formData: FormData) {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthenticatedUser()
   if (!user) return { error: 'Não autorizado' }
 
   const meta_access_token = formData.get('meta_access_token') as string
@@ -36,7 +46,7 @@ export async function saveSettings(formData: FormData) {
   const alert_frequency_str = formData.get('alert_frequency') as string
 
   const settingsData = {
-    user_id: user.id,
+    user_id: user.uid,
     meta_access_token: meta_access_token || null,
     alert_cpc: alert_cpc_str ? parseFloat(alert_cpc_str) : null,
     alert_cpm: alert_cpm_str ? parseFloat(alert_cpm_str) : null,
@@ -45,15 +55,11 @@ export async function saveSettings(formData: FormData) {
     updated_at: new Date().toISOString()
   }
 
-  // Upsert settings
-  const { error } = await supabase
-    .from('settings')
-    .upsert(settingsData, { onConflict: 'user_id' })
-
-  if (error) {
+  try {
+    await adminDb.collection('settings').doc(user.uid).set(settingsData, { merge: true })
+    revalidatePath('/dashboard/configuracoes')
+    return { success: true }
+  } catch (error: any) {
     return { error: error.message }
   }
-
-  revalidatePath('/dashboard/configuracoes')
-  return { success: true }
 }

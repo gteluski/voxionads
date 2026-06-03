@@ -38,6 +38,21 @@ async function fetchMetaInsights(
   }
 }
 
+async function fetchMetaCampaigns(accountId: string) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/meta/campaigns?account_id=${accountId}`, {
+      next: { revalidate: 300 } // Cache for 5 mins
+    })
+    const result = await res.json()
+    if (!res.ok) throw new Error(result.error)
+    return result
+  } catch (error) {
+    console.error('Error fetching meta campaigns:', error)
+    return null
+  }
+}
+
 export default async function DashboardPage({ 
   searchParams 
 }: { 
@@ -51,12 +66,21 @@ export default async function DashboardPage({
   const adId = typeof ad_id === 'string' ? ad_id : ''
   
   let data = null
+  let campaignsData = null
   let errorMsg = null
 
   if (accountId) {
-    data = await fetchMetaInsights(accountId, datePreset, campaignId, adsetId, adId)
+    const [insightsRes, campaignsRes] = await Promise.all([
+      fetchMetaInsights(accountId, datePreset, campaignId, adsetId, adId),
+      fetchMetaCampaigns(accountId)
+    ])
+    data = insightsRes
+    campaignsData = campaignsRes
+
     if (!data || data.error) {
       errorMsg = data?.error || 'Erro ao carregar dados'
+    } else if (!campaignsData || campaignsData.error) {
+      errorMsg = campaignsData?.error || 'Erro ao carregar dados das campanhas'
     }
   }
 
@@ -78,9 +102,12 @@ export default async function DashboardPage({
       )
     }
 
-    if (!data) return null
+    if (!data || !campaignsData) return null
 
-    const { summary, counts, breakdowns, topAds, campaigns, adsets, ads, account } = data
+    const { summary, counts, breakdowns, topAds, account } = data
+    const campaigns = campaignsData.campaigns || []
+    const adsets = campaignsData.adsets || []
+    const ads = campaignsData.ads || []
 
     const stats = [
       { name: 'Investimento Total', value: formatCurrency(summary.spend), tooltip: 'Valor total gasto na Meta Ads no período selecionado.' },

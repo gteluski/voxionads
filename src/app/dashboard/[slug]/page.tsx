@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { adminDb } from '@/lib/firebase-admin'
 import { notFound } from 'next/navigation'
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
 import { StatCards } from '@/components/dashboard/StatCards'
@@ -10,18 +10,31 @@ import { AccountStructure } from '@/components/dashboard/AccountStructure'
 import { formatCurrency, formatNumber, formatPercent } from '@/utils/formatters'
 
 async function getClientData(slug: string) {
-  const supabase = await createClient()
-  const { data: client, error } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('slug', slug)
-    .single()
+  try {
+    const snapshot = await adminDb
+      .collection('clients')
+      .where('slug', '==', slug)
+      .limit(1)
+      .get()
 
-  if (error || !client || client.status === false) {
+    if (snapshot.empty) {
+      return null
+    }
+
+    const doc = snapshot.docs[0]
+    const client = { id: doc.id, ...doc.data() } as any
+
+    if (client.status === false || client.active === false) {
+      return null
+    }
+
+    return client
+  } catch (error) {
+    console.error('Error fetching client by slug from Firestore:', error)
     return null
   }
-  return client
 }
+
 
 async function fetchMetaInsights(
   accountId: string, 
@@ -51,6 +64,21 @@ async function fetchMetaInsights(
   }
 }
 
+async function fetchMetaCampaigns(accountId: string) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/meta/campaigns?account_id=${accountId}`, {
+      next: { revalidate: 300 } // Cache for 5 mins
+    })
+    const result = await res.json()
+    if (!res.ok) throw new Error(result.error)
+    return result
+  } catch (error) {
+    console.error('Error fetching meta campaigns:', error)
+    return null
+  }
+}
+
 export default async function ClientDashboardPage({ 
   params, 
   searchParams 
@@ -68,20 +96,38 @@ export default async function ClientDashboardPage({
   const client = await getClientData(slug)
   if (!client) notFound()
 
-  const data = await fetchMetaInsights(client.meta_account_id, datePreset, campaignId, adsetId, adId)
+  let data = null
+  let campaignsData = null
+  let errorMsg = null
+
+  const [insightsRes, campaignsRes] = await Promise.all([
+    fetchMetaInsights(client.meta_account_id, datePreset, campaignId, adsetId, adId),
+    fetchMetaCampaigns(client.meta_account_id)
+  ])
+  data = insightsRes
+  campaignsData = campaignsRes
 
   if (!data || data.error) {
+    errorMsg = data?.error || 'Erro ao carregar dados'
+  } else if (!campaignsData || campaignsData.error) {
+    errorMsg = campaignsData?.error || 'Erro ao carregar dados das campanhas'
+  }
+
+  if (errorMsg) {
     return (
       <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in p-8">
         <h2 className="text-3xl font-bold text-white tracking-tight">Relatório Meta Ads | {client.name}</h2>
         <div className="bg-red-400/10 border border-red-400/20 rounded-md p-4 text-red-400">
-          Não foi possível carregar os dados desta conta no momento. {data?.error}
+          Não foi possível carregar os dados desta conta no momento. {errorMsg}
         </div>
       </div>
     )
   }
 
-  const { summary, counts, breakdowns, topAds, campaigns, adsets, ads, account } = data
+  const { summary, counts, breakdowns, topAds, account } = data
+  const campaigns = campaignsData.campaigns || []
+  const adsets = campaignsData.adsets || []
+  const ads = campaignsData.ads || []
 
   const stats = [
     { name: 'Investimento Total', value: formatCurrency(summary.spend), tooltip: 'Valor total gasto na Meta Ads no período selecionado.' },

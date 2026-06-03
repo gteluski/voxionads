@@ -1,0 +1,29 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // clients collection: Public reading, creation/modification only by authenticated users
+    match /clients/{clientId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // saved_accounts collection: Read/write only if the authenticated user owns the document
+    match /saved_accounts/{accountId} {
+      allow read, write: if isAuthenticated() && (
+        (resource == null || resource.data.user_id == request.auth.uid) &&
+        (request.resource == null || request.resource.data.user_id == request.auth.uid)
+      );
+    }
+
+    // settings collection: Restrict read and write access to the specific authenticated user
+    match /settings/{userId} {
+      allow read, write: if isAuthenticated() && userId == request.auth.uid;
+    }
+  }
+}
