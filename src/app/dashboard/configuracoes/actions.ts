@@ -28,11 +28,12 @@ export async function getSettings() {
       return { settings: null, user: userSummary }
     }
     
-    return { settings: { id: doc.id, ...doc.data() }, user: userSummary }
+    return { settings: { id: doc.id, ...doc.data() } as any, user: userSummary }
   } catch (error) {
     console.error('Error fetching settings from Firestore:', error)
     return { settings: null, user: user ? { id: user.uid, email: user.email } : null }
   }
+
 }
 
 export async function saveSettings(formData: FormData) {

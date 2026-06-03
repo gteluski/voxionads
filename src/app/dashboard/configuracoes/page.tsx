@@ -11,7 +11,8 @@ export default async function ConfiguracoesPage() {
         <p className="text-sm text-[var(--text-secondary)] mt-1">Gerencie a integração da API e os alertas de performance.</p>
       </div>
 
-      <SettingsForm initialSettings={data?.settings} user={data?.user} />
+      <SettingsForm initialSettings={data?.settings || null} user={data?.user || null} />
+
     </div>
   )
 }
