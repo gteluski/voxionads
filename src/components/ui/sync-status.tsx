@@ -1,7 +1,7 @@
 "use client"
 
-import { motion, AnimatePresence } from "framer-motion"
-import { Activity, AlertCircle, CheckCircle, Clock } from "lucide-react"
+import { motion } from "framer-motion"
+import { CheckCircle, AlertCircle, Activity, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface SyncStatusProps {
@@ -20,63 +20,80 @@ export function SyncStatus({
   className,
 }: SyncStatusProps) {
   const formatTime = (date: Date) => {
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
+    const diffMs = Date.now() - date.getTime()
     const diffMins = Math.floor(diffMs / 60000)
-    
     if (diffMins < 1) return "agora mesmo"
     if (diffMins < 60) return `${diffMins}min atrás`
-    
     const hours = Math.floor(diffMins / 60)
     if (hours < 24) return `${hours}h atrás`
-    
-    const days = Math.floor(hours / 24)
-    return `${days}d atrás`
+    return `${Math.floor(hours / 24)}d atrás`
   }
 
-  const statusConfig = {
+  const cfg = {
     success: {
       icon: CheckCircle,
-      color: "text-emerald-400",
-      bg: "bg-emerald-950/20 border-emerald-900/35",
+      color: "#4CAF50",
+      border: "rgba(76,175,80,0.35)",
+      bg: "rgba(76,175,80,0.08)",
       label: "Sucesso",
     },
     pending: {
       icon: Activity,
-      color: "text-indigo-400",
-      bg: "bg-indigo-950/20 border-indigo-900/35",
+      color: "#FF9800",
+      border: "rgba(255,152,0,0.35)",
+      bg: "rgba(255,152,0,0.08)",
       label: "Sincronizando...",
     },
     error: {
       icon: AlertCircle,
-      color: "text-rose-400",
-      bg: "bg-rose-950/20 border-rose-900/35",
+      color: "#F44336",
+      border: "rgba(244,67,54,0.35)",
+      bg: "rgba(244,67,54,0.08)",
       label: "Erro de Sync",
     },
-  }
+  }[status]
 
-  const config = statusConfig[status]
-  const Icon = config.icon
+  const Icon = cfg.icon
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -15 }}
+      initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
-      className={cn("flex items-center gap-4 flex-wrap", className)}
+      className={cn("flex items-center gap-3 flex-wrap", className)}
     >
-      {/* Status Badge */}
-      <div className={cn("px-4 py-2.5 rounded-xl border flex items-center gap-2.5 bg-slate-900/20 backdrop-blur-md", config.bg)}>
+      {/* Status Pill */}
+      <div
+        className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
+        style={{
+          background: cfg.bg,
+          border: `1px solid ${cfg.border}`,
+        }}
+      >
         <motion.div
-          animate={status === "pending" ? { rotate: 360 } : {}}
-          transition={status === "pending" ? { duration: 2, repeat: Infinity, ease: "linear" } : {}}
+          animate={status === "pending" ? { rotate: 360 } : { rotate: 0 }}
+          transition={status === "pending"
+            ? { duration: 1.5, repeat: Infinity, ease: "linear" }
+            : {}}
         >
-          <Icon className={cn("w-4 h-4", config.color)} />
+          <Icon size={15} style={{ color: cfg.color }} />
         </motion.div>
-        <div className="text-xs">
-          <p className={cn("font-bold", config.color)}>{config.label}</p>
-          <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
-            Última sincronização: {formatTime(lastSync)}
+        <div>
+          <p
+            className="font-bold leading-none"
+            style={{ fontSize: "var(--fs-small)", color: cfg.color, fontFamily: "var(--font-body)" }}
+          >
+            {cfg.label}
+          </p>
+          <p
+            className="mt-0.5"
+            style={{
+              fontSize: "var(--fs-tiny)",
+              fontFamily: "var(--font-mono)",
+              color: "var(--color-accent-dim)",
+            }}
+          >
+            Última sync: {formatTime(lastSync)}
           </p>
         </div>
       </div>
@@ -87,26 +104,31 @@ export function SyncStatus({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.15 }}
-          className="flex items-center gap-1.5 text-xs font-semibold text-slate-400"
+          className="flex items-center gap-1.5"
+          style={{ fontSize: "var(--fs-tiny)", fontFamily: "var(--font-mono)", color: "var(--color-accent-dim)" }}
         >
-          <Clock className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Próximo: {formatTime(nextSync)}</span>
+          <Clock size={12} style={{ color: "var(--color-primary)" }} />
+          Próxima: {formatTime(nextSync)}
         </motion.div>
       )}
 
       {/* Error Message */}
-      <AnimatePresence>
-        {errorMessage && status === "error" && (
-          <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 10 }}
-            className="text-xs text-rose-400 px-3 py-2 bg-rose-950/20 rounded-xl border border-rose-900/35"
-          >
-            {errorMessage}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {errorMessage && status === "error" && (
+        <motion.div
+          initial={{ opacity: 0, x: 8 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="px-3 py-2 rounded-lg"
+          style={{
+            background: "rgba(244,67,54,0.08)",
+            border: "1px solid rgba(244,67,54,0.3)",
+            fontSize: "var(--fs-tiny)",
+            fontFamily: "var(--font-mono)",
+            color: "#F44336",
+          }}
+        >
+          {errorMessage}
+        </motion.div>
+      )}
     </motion.div>
   )
 }

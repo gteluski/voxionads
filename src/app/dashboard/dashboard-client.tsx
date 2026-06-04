@@ -2,32 +2,21 @@
 
 import { useState } from 'react';
 import { Session } from 'next-auth';
-import { signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { MetricCard } from '@/components/ui/metric-card';
+import { ReportCard } from '@/components/ui/report-card';
+import { SyncStatus } from '@/components/ui/sync-status';
+import { Sidebar } from '@/components/layout/sidebar';
+import { PageHeader } from '@/components/layout/page-header';
+import { AppFooter } from '@/components/layout/app-footer';
 import {
-  TrendingUp,
-  Users,
-  Layers,
-  FileText,
-  RefreshCw,
-  LogOut,
-  ShieldCheck,
-  CheckCircle,
-  AlertTriangle,
-  Database,
-  Calendar,
-  DollarSign,
-  MousePointer,
-  Eye,
-  Percent,
-  KeyRound,
-  FileSpreadsheet,
-  Settings
+  TrendingUp, Layers, FileText, KeyRound,
+  DollarSign, Eye, MousePointer, Percent,
+  CheckCircle, Calendar, ArrowRight,
+  Activity, Zap,
 } from 'lucide-react';
-
 
 interface DashboardClientProps {
   session: Session;
@@ -44,652 +33,496 @@ export function DashboardClient({
   initialCampaigns,
   initialMetaTokens,
   initialSyncLogs,
-  initialAuditLogs
+  initialAuditLogs,
 }: DashboardClientProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'tokens' | 'logs'>('overview');
   const [isSyncing, setIsSyncing] = useState(false);
   const [isDbConnected] = useState(initialDbConnected);
-  
-  // Client-side state that defaults to initial queries or falls back to mock data if empty
+
   const [campaigns, setCampaigns] = useState<any[]>(
     initialCampaigns.length > 0 ? initialCampaigns : [
-      { id: 'c1', name: 'Campanha Conversão - Black Friday 2026', meta_campaign_id: 'act_12093849102-c1', status: 'ACTIVE', objective: 'CONVERSIONS', daily_budget: 500.00, lifetime_budget: null, created_at: '2026-06-01T10:00:00Z' },
-      { id: 'c2', name: 'Lookalike Leads Premium - Whitelist', meta_campaign_id: 'act_12093849102-c2', status: 'ACTIVE', objective: 'LEAD_GENERATION', daily_budget: 250.00, lifetime_budget: null, created_at: '2026-06-02T12:00:00Z' },
-      { id: 'c3', name: 'Retargeting Carrinho Abandonado 7D', meta_campaign_id: 'act_12093849102-c3', status: 'PAUSED', objective: 'CONVERSIONS', daily_budget: 100.00, lifetime_budget: null, created_at: '2026-06-03T08:30:00Z' },
-      { id: 'c4', name: 'Branding & Tráfego Frio - Reels Video', meta_campaign_id: 'act_12093849102-c4', status: 'ACTIVE', objective: 'OUTDOOR / VIDEO_VIEWS', daily_budget: 150.00, lifetime_budget: null, created_at: '2026-06-04T09:15:00Z' }
+      { id: 'c1', name: 'Campanha Conversão - Black Friday 2026', meta_campaign_id: 'act_12093849102-c1', status: 'ACTIVE', objective: 'CONVERSIONS', daily_budget: 500.00, created_at: '2026-06-01T10:00:00Z' },
+      { id: 'c2', name: 'Lookalike Leads Premium - Whitelist', meta_campaign_id: 'act_12093849102-c2', status: 'ACTIVE', objective: 'LEAD_GENERATION', daily_budget: 250.00, created_at: '2026-06-02T12:00:00Z' },
+      { id: 'c3', name: 'Retargeting Carrinho Abandonado 7D', meta_campaign_id: 'act_12093849102-c3', status: 'PAUSED', objective: 'CONVERSIONS', daily_budget: 100.00, created_at: '2026-06-03T08:30:00Z' },
+      { id: 'c4', name: 'Branding & Tráfego Frio - Reels Video', meta_campaign_id: 'act_12093849102-c4', status: 'ACTIVE', objective: 'VIDEO_VIEWS', daily_budget: 150.00, created_at: '2026-06-04T09:15:00Z' },
     ]
   );
 
-  const [metaTokens, setMetaTokens] = useState<any[]>(
+  const [metaTokens] = useState<any[]>(
     initialMetaTokens.length > 0 ? initialMetaTokens : [
-      { id: 't1', account_name: 'Voxion Ads BM Account', account_id: 'act_12093849102', business_manager_id: 'bm_98471029384', access_token: 'EAAOz18uXpd8BA...', token_expires_at: '2026-08-04T10:00:00Z', created_at: '2026-06-04T10:00:00Z' }
+      { id: 't1', account_name: 'Voxion Ads BM Account', account_id: 'act_12093849102', business_manager_id: 'bm_98471029384', access_token: 'EAAOz18uXpd8BA...', token_expires_at: '2026-08-04T10:00:00Z', created_at: '2026-06-04T10:00:00Z' },
     ]
   );
 
   const [syncLogs, setSyncLogs] = useState<any[]>(
     initialSyncLogs.length > 0 ? initialSyncLogs : [
       { id: 's1', status: 'SUCCESS', message: 'Sincronização concluída: 4 campanhas importadas.', synced_at: '2026-06-04T10:15:00Z', duration_ms: 1820 },
-      { id: 's2', status: 'SUCCESS', message: 'Sincronização periódica automatizada.', synced_at: '2026-06-04T09:00:00Z', duration_ms: 1540 }
+      { id: 's2', status: 'SUCCESS', message: 'Sincronização periódica automatizada.', synced_at: '2026-06-04T09:00:00Z', duration_ms: 1540 },
     ]
   );
 
   const [auditLogs, setAuditLogs] = useState<any[]>(
     initialAuditLogs.length > 0 ? initialAuditLogs : [
-      { id: 'a1', action: 'LOGIN', details: `Usuário ${session.user?.email} realizou login com sucesso.`, created_at: new Date().toISOString() },
-      { id: 'a2', action: 'TOKEN_REFRESH', details: 'Meta Graph API token validado com sucesso.', created_at: '2026-06-04T10:00:00Z' }
+      { id: 'a1', action: 'LOGIN', details: `Usuário ${session.user?.email} realizou login.`, created_at: new Date().toISOString() },
+      { id: 'a2', action: 'TOKEN_REFRESH', details: 'Meta Graph API token validado.', created_at: '2026-06-04T10:00:00Z' },
     ]
   );
 
   const [adSets] = useState<any[]>([
-    { id: 'as1', campaign_id: 'c1', name: 'Adset - Público Quente 30D (Lookalike)', status: 'ACTIVE', daily_budget: 300.00, optimization_goal: 'PURCHASE' },
+    { id: 'as1', campaign_id: 'c1', name: 'Adset - Público Quente 30D', status: 'ACTIVE', daily_budget: 300.00, optimization_goal: 'PURCHASE' },
     { id: 'as2', campaign_id: 'c1', name: 'Adset - Interesses E-commerce', status: 'ACTIVE', daily_budget: 200.00, optimization_goal: 'PURCHASE' },
-    { id: 'as3', campaign_id: 'c2', name: 'Adset - Empresários e Lojistas Brasil', status: 'ACTIVE', daily_budget: 250.00, optimization_goal: 'LEAD' }
+    { id: 'as3', campaign_id: 'c2', name: 'Adset - Empresários Brasil', status: 'ACTIVE', daily_budget: 250.00, optimization_goal: 'LEAD' },
   ]);
 
   const [ads] = useState<any[]>([
-    { id: 'ad1', adset_id: 'as1', campaign_id: 'c1', name: 'Criativo 01 - Vídeo de Depoimentos', status: 'ACTIVE' },
-    { id: 'ad2', adset_id: 'as1', campaign_id: 'c1', name: 'Criativo 02 - Carrossel Benefícios', status: 'ACTIVE' },
-    { id: 'ad3', adset_id: 'as2', campaign_id: 'c1', name: 'Criativo 03 - Foto Oferta Frete Grátis', status: 'ACTIVE' }
+    { id: 'ad1', adset_id: 'as1', name: 'Criativo 01 - Vídeo Depoimentos', status: 'ACTIVE' },
+    { id: 'ad2', adset_id: 'as1', name: 'Criativo 02 - Carrossel Benefícios', status: 'ACTIVE' },
+    { id: 'ad3', adset_id: 'as2', name: 'Criativo 03 - Foto Oferta Frete Grátis', status: 'ACTIVE' },
   ]);
 
-  // Handle Sync simulation
   const handleSync = async () => {
     setIsSyncing(true);
-    
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const timestamp = new Date().toISOString();
-    const newSyncLog = {
-      id: `s_new_${Date.now()}`,
-      status: 'SUCCESS',
-      message: 'Sincronização manual acionada. 4 campanhas e 3 conjuntos de anúncios sincronizados.',
-      synced_at: timestamp,
-      duration_ms: 2240
-    };
-
-    const newAuditLog = {
-      id: `a_new_${Date.now()}`,
-      action: 'SYNC_TRIGGERED',
-      details: `Sincronização das campanhas da Meta iniciada pelo admin: ${session.user?.name}`,
-      created_at: timestamp
-    };
-
-    setSyncLogs(prev => [newSyncLog, ...prev]);
-    setAuditLogs(prev => [newAuditLog, ...prev]);
+    await new Promise(r => setTimeout(r, 2000));
+    const ts = new Date().toISOString();
+    setSyncLogs(prev => [{
+      id: `s_${Date.now()}`, status: 'SUCCESS',
+      message: 'Sincronização manual: 4 campanhas e 3 conjuntos atualizados.',
+      synced_at: ts, duration_ms: 2240,
+    }, ...prev]);
+    setAuditLogs(prev => [{
+      id: `a_${Date.now()}`, action: 'SYNC_TRIGGERED',
+      details: `Sync iniciado por ${session.user?.name}`, created_at: ts,
+    }, ...prev]);
     setIsSyncing(false);
-
-    // If connected to a real DB, we could trigger a fetch request to /api/sync
     if (isDbConnected) {
-      try {
-        await fetch('/api/dashboard/sync', { method: 'POST' });
-      } catch (err) {
-        console.warn('Silent db sync failed', err);
-      }
+      fetch('/api/sync/manual', { method: 'POST' }).catch(() => {});
     }
   };
 
+  const tabs: { key: typeof activeTab; label: string; icon: React.ReactNode }[] = [
+    { key: 'overview',  label: 'Visão Geral',            icon: <TrendingUp size={14} /> },
+    { key: 'campaigns', label: 'Campanhas / Ad Sets',     icon: <Layers size={14} /> },
+    { key: 'tokens',    label: 'Tokens Meta',             icon: <KeyRound size={14} /> },
+    { key: 'logs',      label: 'Logs do Sistema',         icon: <FileText size={14} /> },
+  ];
+
+  // ── styles ──
+  const cardStyle = {
+    background: 'var(--color-bg-dark)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-lg)',
+    padding: 'var(--space-5)',
+  };
+  const sectionTitle = {
+    fontSize: 'var(--fs-body)',
+    fontWeight: 700,
+    color: 'var(--color-accent)',
+    fontFamily: 'var(--font-heading)',
+    marginBottom: 'var(--space-1)',
+  };
+  const sectionDesc = {
+    fontSize: 'var(--fs-small)',
+    color: 'var(--color-accent-dim)',
+    marginBottom: 'var(--space-4)',
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden">
-      {/* Background gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
-      
-      {/* Top Navbar */}
-      <nav className="border-b border-slate-800 bg-slate-900/40 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-500 to-emerald-500 text-white font-black text-lg shadow-md shadow-indigo-500/10">
-                V
-              </div>
-              <span className="font-bold text-lg bg-gradient-to-r from-slate-100 to-slate-400 bg-clip-text text-transparent">
-                Voxion Ads
-              </span>
-              
-              {/* Database status indicator */}
-              <div className="flex items-center gap-1.5 ml-4 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-900 border border-slate-800">
-                <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-                {isDbConnected ? (
-                  <span className="text-slate-300">Supabase SQL Ativo</span>
-                ) : (
-                  <span className="text-amber-400">Ambiente Demo</span>
-                )}
-              </div>
-            </div>
+    <div className="flex min-h-screen" style={{ background: 'var(--color-bg-darker)' }}>
+      {/* Sidebar */}
+      <Sidebar onSync={handleSync} isSyncing={isSyncing} />
 
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex flex-col text-right">
-                <span className="text-xs font-semibold text-slate-200">{session.user?.name}</span>
-                <span className="text-[10px] text-slate-400">{session.user?.email}</span>
-              </div>
-              
-              <Link href="/relatorios">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-xs flex items-center gap-1.5"
+      {/* Main content — offset by sidebar width */}
+      <div className="flex flex-col flex-1" style={{ marginLeft: 240 }}>
+        <main className="flex-1 px-8 py-7 space-y-6 max-w-[1200px] w-full mx-auto">
+
+          {/* Page Header */}
+          <PageHeader
+            title="Painel Geral"
+            breadcrumb="Dashboard"
+            description="Gerencie contas, monitore ROI e sincronize dados da API Meta."
+            actions={
+              <div className="flex items-center gap-3">
+                <SyncStatus
+                  lastSync={new Date(syncLogs[0]?.synced_at ?? Date.now())}
+                  nextSync={new Date(Date.now() + 25 * 60 * 1000)}
+                  status={isSyncing ? 'pending' : 'success'}
+                />
+                {/* DB indicator */}
+                <span
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                  style={{
+                    border: '1px solid var(--color-border)',
+                    fontSize: 'var(--fs-tiny)',
+                    fontFamily: 'var(--font-mono)',
+                    color: isDbConnected ? '#4CAF50' : '#FF9800',
+                    background: isDbConnected ? 'rgba(76,175,80,0.08)' : 'rgba(255,152,0,0.08)',
+                  }}
                 >
-                  <FileText className="h-3.5 w-3.5" />
-                  Relatórios
-                </Button>
-              </Link>
+                  <span
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ background: isDbConnected ? '#4CAF50' : '#FF9800', animation: isDbConnected ? 'vx-pulse-orange 2s infinite' : undefined }}
+                  />
+                  {isDbConnected ? 'Supabase Ativo' : 'Demo Mode'}
+                </span>
+              </div>
+            }
+          />
 
-              <Link href="/configuracoes">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-xs flex items-center gap-1.5"
-                >
-                  <Settings className="h-3.5 w-3.5" />
-                  Configurações
-                </Button>
-              </Link>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-xs flex items-center gap-1.5"
-                onClick={() => signOut({ callbackUrl: '/login' })}
+          {/* Tab Bar */}
+          <div className="flex gap-1" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 1 }}>
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="flex items-center gap-1.5 px-4 py-2.5 font-bold transition-all rounded-t-md"
+                style={{
+                  fontSize: 'var(--fs-small)',
+                  borderBottom: activeTab === tab.key ? '2px solid var(--color-primary)' : '2px solid transparent',
+                  color: activeTab === tab.key ? 'var(--color-primary)' : 'var(--color-accent-muted)',
+                  background: activeTab === tab.key ? 'rgba(241,133,53,0.05)' : 'transparent',
+                  fontFamily: 'var(--font-body)',
+                }}
               >
-                <LogOut className="h-3.5 w-3.5" />
-                Sair
-              </Button>
-            </div>
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
           </div>
-        </div>
-      </nav>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 space-y-6">
-        
-        {/* Welcome Section / Top Bar */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-slate-900">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-white">Painel Geral</h2>
-            <p className="text-xs text-slate-400">
-              Gerencie suas contas, verifique métricas de ROI e monitore logs de sincronização da API Meta.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              className="bg-gradient-to-r from-indigo-500 to-emerald-500 hover:opacity-90 text-white font-medium text-xs flex items-center gap-1.5 transition-all active:scale-[0.98]"
-              onClick={handleSync}
-              disabled={isSyncing}
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              {isSyncing ? 'Sincronizando...' : 'Sincronizar Meta Ads'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-900 gap-1 pb-px">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'overview'
-                ? 'border-indigo-500 text-indigo-400 bg-indigo-950/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <TrendingUp className="h-3.5 w-3.5" />
-            Visão Geral
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('campaigns')}
-            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'campaigns'
-                ? 'border-indigo-500 text-indigo-400 bg-indigo-950/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Layers className="h-3.5 w-3.5" />
-            Estrutura (Campanhas/Ad Sets/Ads)
-          </button>
-
-          <button
-            onClick={() => setActiveTab('tokens')}
-            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'tokens'
-                ? 'border-indigo-500 text-indigo-400 bg-indigo-950/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <KeyRound className="h-3.5 w-3.5" />
-            Tokens Meta
-          </button>
-
-          <button
-            onClick={() => setActiveTab('logs')}
-            className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'logs'
-                ? 'border-indigo-500 text-indigo-400 bg-indigo-950/10'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <FileText className="h-3.5 w-3.5" />
-            Logs do Sistema
-          </button>
-        </div>
-
-        {/* Tab Contents */}
-        <div className="space-y-6">
-          
-          {/* TAB 1: OVERVIEW */}
+          {/* ──────────── TAB: OVERVIEW ──────────── */}
           {activeTab === 'overview' && (
-            <div className="space-y-6">
-              {/* Stat Cards */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Metric Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="bg-glass border-slate-900 transition-all duration-300 hover:border-slate-800">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-medium text-slate-400">Total Investido</CardTitle>
-                    <DollarSign className="h-4 w-4 text-indigo-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold text-white">R$ 18.450,00</div>
-                    <p className="text-[10px] text-emerald-400 flex items-center gap-0.5 mt-1">
-                      +14.2% comparado ao mês anterior
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-glass border-slate-900 transition-all duration-300 hover:border-slate-800">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-medium text-slate-400">Impressões</CardTitle>
-                    <Eye className="h-4 w-4 text-emerald-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold text-white">842.190</div>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      Frequência média: 2.14
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-glass border-slate-900 transition-all duration-300 hover:border-slate-800">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-medium text-slate-400">Cliques (CTR)</CardTitle>
-                    <MousePointer className="h-4 w-4 text-sky-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold text-white">22.840 (2.71%)</div>
-                    <p className="text-[10px] text-emerald-400 mt-1">
-                      CPC Médio: R$ 0,81
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-glass border-slate-900 transition-all duration-300 hover:border-slate-800">
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-medium text-slate-400">Conversões (ROI)</CardTitle>
-                    <Percent className="h-4 w-4 text-purple-400" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold text-white">748 (3.42x)</div>
-                    <p className="text-[10px] text-emerald-400 mt-1">
-                      CPA Médio: R$ 24,66
-                    </p>
-                  </CardContent>
-                </Card>
+                <MetricCard icon={<DollarSign size={16} />} label="Total Investido" value="R$ 18.450" change={14.2} trend="up" color="orange" index={0} />
+                <MetricCard icon={<Eye size={16} />} label="Impressões" value="842.190" change={8.1} trend="up" color="info" index={1} />
+                <MetricCard icon={<MousePointer size={16} />} label="Cliques (CTR)" value="22.840" unit="2.71%" change={5.3} trend="up" color="muted" index={2} />
+                <MetricCard icon={<Percent size={16} />} label="Conversões (ROI)" value="748" unit="3.42x" change={3.2} trend="up" color="success" index={3} />
               </div>
 
-              {/* Performance Panel and Metrics */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Performance Health */}
-                <Card className="bg-glass border-slate-900 lg:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="text-sm font-bold text-slate-200">Visão de Saúde de Anúncios</CardTitle>
-                    <CardDescription className="text-xs">Recomendações geradas de forma automatizada baseada no schema de reports.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="p-4 rounded-lg bg-indigo-950/20 border border-indigo-900/30 flex gap-3">
-                      <ShieldCheck className="h-5 w-5 text-indigo-400 shrink-0 mt-0.5" />
-                      <div className="text-xs space-y-1">
-                        <span className="font-bold text-slate-200">Saúde Geral do Tráfego: Saudável (8.5/10)</span>
-                        <p className="text-slate-400 leading-relaxed">
-                          A estrutura do Business Manager está saudável. O pixel e as conversões personalizadas estão coletando dados corretamente. O ROI de 3.42x está acima do patamar de segurança da conta.
-                        </p>
+              {/* Health Panel + Share */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                {/* Health */}
+                <div className="lg:col-span-2" style={cardStyle}>
+                  <p style={sectionTitle}>Saúde de Desempenho</p>
+                  <p style={sectionDesc}>Recomendações geradas automaticamente pelo motor de análise.</p>
+                  <ReportCard
+                    title="Campanha Conversão — Black Friday 2026"
+                    overallHealth="warning"
+                    trend="stable"
+                    issues={[
+                      "Fadiga de criativo no Adset Público Quente 30D (CTR caiu 12% em 3 dias)",
+                      "Sobreposição de públicos de 14% entre Campanha Conversão e Lookalike Leads",
+                    ]}
+                    recommendations={[
+                      "Suba 2 novos vídeos de depoimento no Adset 01 para recuperar CTR",
+                      "Adicione exclusão mútua de compradores nos conjuntos de tráfego frio",
+                    ]}
+                    onViewReport={() => {}}
+                  />
+                </div>
+
+                {/* Share Panel */}
+                <div style={cardStyle} className="flex flex-col">
+                  <p style={sectionTitle}>Compartilhamento</p>
+                  <p style={sectionDesc}>Links públicos com proteção por senha para clientes.</p>
+
+                  <div className="space-y-3 flex-1">
+                    <div
+                      className="rounded-lg p-3"
+                      style={{ background: 'rgba(241,133,53,0.06)', border: '1px solid rgba(241,133,53,0.2)' }}
+                    >
+                      <p className="font-bold" style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent)' }}>
+                        Voxion Client — Relatório Mensal
+                      </p>
+                      <div className="flex gap-1 flex-wrap mt-1.5">
+                        {['Campanha Conversão', 'Lookalike Leads'].map(t => (
+                          <span key={t} className="vx-badge vx-badge-orange" style={{ fontSize: '10px' }}>{t}</span>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#4CAF50' }} />
+                        <span style={{ fontSize: 'var(--fs-tiny)', color: '#4CAF50', fontFamily: 'var(--font-mono)' }}>
+                          Link ativo
+                        </span>
                       </div>
                     </div>
-
-                    <div className="space-y-2">
-                      <span className="text-xs font-semibold text-slate-300">Problemas Principais Detectados</span>
-                      <ul className="list-disc pl-5 text-xs text-slate-400 space-y-1">
-                        <li>Fadiga de criativos detectada no conjunto &quot;Público Quente 30D&quot; (CTR caiu 12% nos últimos 3 dias).</li>
-                        <li>Sobreposição de públicos de 14% entre as campanhas &quot;Campanha Conversão&quot; e &quot;Lookalike Leads&quot;.</li>
-                      </ul>
-                    </div>
-
-                    <div className="space-y-2 pt-2">
-                      <span className="text-xs font-semibold text-slate-300">Recomendações de Otimização</span>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-                          <span className="font-semibold text-slate-200 block mb-1">Rotacionar Criativos</span>
-                          <span className="text-slate-400">Suba 2 novos vídeos de depoimento no conjunto Adset 01 para recuperar o CTR.</span>
-                        </div>
-                        <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-                          <span className="font-semibold text-slate-200 block mb-1">Excluir Públicos</span>
-                          <span className="text-slate-400">Adicione a exclusão mútua de compradores nos conjuntos de tráfego frio.</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Dashboard Share Panel */}
-                <Card className="bg-glass border-slate-900 flex flex-col justify-between">
-                  <div>
-                    <CardHeader>
-                      <CardTitle className="text-sm font-bold text-slate-200">Compartilhamento de Dashboard</CardTitle>
-                      <CardDescription className="text-xs">Crie links públicos protegidos por senha para clientes.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-semibold text-slate-400">Nome do Share</label>
-                        <Input
-                          placeholder="Ex: Voxion Client - Relatório Mensal"
-                          defaultValue="Voxion Client - Relatório Mensal"
-                          className="bg-slate-900/50 border-slate-800 text-xs h-8 text-slate-300"
-                          readOnly
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-semibold text-slate-400">Vínculo de Campanhas</label>
-                        <div className="flex gap-1.5 flex-wrap">
-                          <span className="text-[9px] font-medium bg-indigo-950/40 border border-indigo-900/30 text-indigo-400 px-2 py-0.5 rounded">Campanha Conversão</span>
-                          <span className="text-[9px] font-medium bg-indigo-950/40 border border-indigo-900/30 text-indigo-400 px-2 py-0.5 rounded">Lookalike Leads</span>
-                        </div>
-                      </div>
-                      <div className="space-y-1.5 flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                        <span className="text-xs text-slate-300 font-medium">Link de Compartilhamento Ativo</span>
-                      </div>
-                    </CardContent>
                   </div>
-                  
-                  <div className="p-6 pt-0 border-t border-slate-900/50 mt-4">
-                    <Button variant="outline" size="sm" className="w-full border-slate-800 bg-slate-900/50 text-slate-300 text-xs flex items-center gap-1.5 hover:bg-slate-800 hover:text-white">
-                      <FileSpreadsheet className="h-3.5 w-3.5 text-indigo-400" />
-                      Visualizar Link do Cliente
+
+                  <Link href="/configuracoes" className="mt-4">
+                    <Button variant="outline" size="sm" className="w-full gap-2">
+                      <ArrowRight size={13} />
+                      Gerenciar compartilhamentos
                     </Button>
-                  </div>
-                </Card>
+                  </Link>
+                </div>
               </div>
-            </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { label: 'Campanhas Ativas', value: campaigns.filter(c => c.status === 'ACTIVE').length, color: '#4CAF50', icon: <Activity size={16} /> },
+                  { label: 'Orçamento Total/Dia', value: `R$ ${campaigns.reduce((a, c) => a + (c.daily_budget ?? 0), 0).toFixed(0)}`, color: 'var(--color-primary)', icon: <DollarSign size={16} /> },
+                  { label: 'Última Sync', value: 'Há 5 min', color: 'var(--color-accent-muted)', icon: <Zap size={16} /> },
+                ].map((stat, i) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
+                    style={{
+                      ...cardStyle,
+                      display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-4)',
+                    }}
+                  >
+                    <div
+                      className="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0"
+                      style={{ background: `${stat.color}18`, border: `1px solid ${stat.color}40`, color: stat.color }}
+                    >
+                      {stat.icon}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: 'var(--fs-tiny)', color: 'var(--color-accent-dim)', fontFamily: 'var(--font-body)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {stat.label}
+                      </p>
+                      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: stat.color, fontFamily: 'var(--font-mono)', lineHeight: 1.2 }}>
+                        {stat.value}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           )}
 
-          {/* TAB 2: STRUCTURE (CAMPAIGNS/AD SETS/ADS) */}
+          {/* ──────────── TAB: CAMPAIGNS ──────────── */}
           {activeTab === 'campaigns' && (
-            <div className="space-y-6">
-              {/* Campaigns Table */}
-              <Card className="bg-glass border-slate-900">
-                <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+              className="space-y-5"
+            >
+              {/* Campaigns table */}
+              <div style={cardStyle}>
+                <div className="flex items-center justify-between mb-4">
                   <div>
-                    <CardTitle className="text-sm font-bold text-slate-200">Campanhas</CardTitle>
-                    <CardDescription className="text-xs">Lista de campanhas importadas e sincronizadas.</CardDescription>
+                    <p style={sectionTitle}>Campanhas</p>
+                    <p style={sectionDesc}>Campanhas importadas e sincronizadas da Meta.</p>
                   </div>
-                  <span className="text-[10px] bg-indigo-950 text-indigo-400 border border-indigo-900/40 font-medium px-2 py-0.5 rounded-full">
-                    {campaigns.length} total
-                  </span>
-                </CardHeader>
-                <CardContent className="p-0 overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
+                  <span className="vx-badge vx-badge-orange">{campaigns.length} total</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-900 bg-slate-900/20 text-slate-400">
-                        <th className="p-3 font-semibold">Nome</th>
-                        <th className="p-3 font-semibold">Meta Campaign ID</th>
-                        <th className="p-3 font-semibold">Objetivo</th>
-                        <th className="p-3 font-semibold">Orçamento Diário</th>
-                        <th className="p-3 font-semibold">Status</th>
-                        <th className="p-3 font-semibold">Data Criação</th>
+                      <tr className="vx-table-header">
+                        <th className="px-4 py-3">Nome</th>
+                        <th className="px-4 py-3">Objetivo</th>
+                        <th className="px-4 py-3 text-right">Orçamento/dia</th>
+                        <th className="px-4 py-3">Status</th>
+                        <th className="px-4 py-3">Criado em</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-900">
-                      {campaigns.map((camp) => (
-                        <tr key={camp.id} className="hover:bg-slate-900/30 transition-colors">
-                          <td className="p-3 font-semibold text-slate-200">{camp.name}</td>
-                          <td className="p-3 font-mono text-[10px] text-slate-400">{camp.meta_campaign_id}</td>
-                          <td className="p-3 text-slate-300">{camp.objective}</td>
-                          <td className="p-3 text-slate-300">
-                            {camp.daily_budget ? `R$ ${camp.daily_budget.toFixed(2)}` : 'N/A'}
+                    <tbody>
+                      {campaigns.map((camp, i) => (
+                        <motion.tr
+                          key={camp.id}
+                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
+                          className="vx-table-row"
+                        >
+                          <td className="px-4 py-0 font-bold" style={{ color: 'var(--color-accent)' }}>{camp.name}</td>
+                          <td className="px-4 py-0" style={{ color: 'var(--color-accent-muted)', fontSize: 'var(--fs-small)' }}>{camp.objective}</td>
+                          <td className="px-4 py-0 text-right" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-small)', color: 'var(--color-primary)' }}>
+                            R$ {camp.daily_budget?.toFixed(2) ?? '—'}
                           </td>
-                          <td className="p-3">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[9px] font-medium border ${
-                              camp.status === 'ACTIVE'
-                                ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-400'
-                                : 'bg-slate-900 border-slate-800 text-slate-400'
-                            }`}>
-                              {camp.status}
+                          <td className="px-4 py-0">
+                            <span
+                              className="vx-badge"
+                              style={camp.status === 'ACTIVE'
+                                ? { background: 'rgba(76,175,80,0.1)', borderColor: 'rgba(76,175,80,0.4)', color: '#4CAF50' }
+                                : { background: 'rgba(255,152,0,0.1)', borderColor: 'rgba(255,152,0,0.4)', color: '#FF9800' }}
+                            >
+                              {camp.status === 'ACTIVE' ? 'Ativo' : 'Pausado'}
                             </span>
                           </td>
-                          <td className="p-3 text-slate-400 text-[10px]">
-                            {new Date(camp.created_at).toLocaleDateString('pt-BR')}
-                          </td>
-                        </tr>
+                          <td className="px-4 py-0 vx-mono">{new Date(camp.created_at).toLocaleDateString('pt-BR')}</td>
+                        </motion.tr>
                       ))}
                     </tbody>
                   </table>
-                </CardContent>
-              </Card>
-
-              {/* Ad Sets & Ads Side-by-side */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Ad Sets List */}
-                <Card className="bg-glass border-slate-900">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-bold text-slate-200">Conjuntos de Anúncios (Ad Sets)</CardTitle>
-                    <CardDescription className="text-xs">Orçamentos e objetivos de otimização em nível de conjunto.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="border-b border-slate-900 bg-slate-900/20 text-slate-400">
-                          <th className="p-3 font-semibold">Nome</th>
-                          <th className="p-3 font-semibold">Objetivo de Otimização</th>
-                          <th className="p-3 font-semibold">Orçamento</th>
-                          <th className="p-3 font-semibold">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-900">
-                        {adSets.map((as) => (
-                          <tr key={as.id} className="hover:bg-slate-900/30 transition-colors">
-                            <td className="p-3 font-semibold text-slate-200">{as.name}</td>
-                            <td className="p-3 text-slate-300">{as.optimization_goal}</td>
-                            <td className="p-3 text-slate-300">R$ {as.daily_budget.toFixed(2)}</td>
-                            <td className="p-3">
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-950/30 border border-emerald-900/40 text-emerald-400">
-                                {as.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </CardContent>
-                </Card>
-
-                {/* Ads List */}
-                <Card className="bg-glass border-slate-900">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-bold text-slate-200">Anúncios (Ads)</CardTitle>
-                    <CardDescription className="text-xs">Criativos vinculados aos conjuntos de anúncios.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="border-b border-slate-900 bg-slate-900/20 text-slate-400">
-                          <th className="p-3 font-semibold">Nome do Anúncio</th>
-                          <th className="p-3 font-semibold">ID do Conjunto</th>
-                          <th className="p-3 font-semibold">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-900">
-                        {ads.map((ad) => (
-                          <tr key={ad.id} className="hover:bg-slate-900/30 transition-colors">
-                            <td className="p-3 font-semibold text-slate-200">{ad.name}</td>
-                            <td className="p-3 text-slate-400 font-mono text-[10px]">{ad.adset_id}</td>
-                            <td className="p-3">
-                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-950/30 border border-emerald-900/40 text-emerald-400">
-                                {ad.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </CardContent>
-                </Card>
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* TAB 3: META TOKENS */}
-          {activeTab === 'tokens' && (
-            <div className="space-y-6">
-              <Card className="bg-glass border-slate-900">
-                <CardHeader>
-                  <CardTitle className="text-sm font-bold text-slate-200">Tokens da API Meta Graph</CardTitle>
-                  <CardDescription className="text-xs">
-                    Configure chaves e tokens de acesso para que o cron automatizado possa realizar o sync.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {metaTokens.map((token) => (
-                    <div
-                      key={token.id}
-                      className="p-4 rounded-lg bg-slate-900/50 border border-slate-800 space-y-4 hover:border-slate-700 transition-colors"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                        <div>
-                          <span className="text-xs font-bold text-slate-200 block">{token.account_name}</span>
-                          <span className="text-[10px] text-slate-400">Account ID: <span className="font-mono">{token.account_id}</span></span>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-950/30 border border-emerald-900/30 text-emerald-400">
-                          <CheckCircle className="h-3 w-3" />
-                          Token Ativo
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                        <div className="space-y-1">
-                          <span className="text-slate-400 block text-[10px]">Access Token (Meta Graph)</span>
-                          <div className="font-mono bg-slate-950 border border-slate-800 px-3 py-1.5 rounded text-[10px] text-slate-300 truncate">
-                            {token.access_token}
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <span className="text-slate-400 block text-[10px]">Business Manager ID</span>
-                          <div className="font-mono bg-slate-950 border border-slate-800 px-3 py-1.5 rounded text-[10px] text-slate-300">
-                            {token.business_manager_id || 'Não vinculado'}
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <span className="text-slate-400 block text-[10px]">Vencimento do Token</span>
-                          <div className="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded text-[10px] text-slate-300 flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-indigo-400" />
-                            {new Date(token.token_expires_at).toLocaleString('pt-BR')}
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <span className="text-slate-400 block text-[10px]">Última Modificação</span>
-                          <div className="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded text-[10px] text-slate-300 flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-indigo-400" />
-                            {new Date(token.created_at).toLocaleString('pt-BR')}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="p-4 border border-dashed border-slate-800 rounded-lg text-center space-y-2">
-                    <p className="text-xs text-slate-400">
-                      Você pode conectar contas da Meta adicionais configurando registros na tabela <span className="font-mono text-slate-300">meta_tokens</span>.
-                    </p>
+              {/* Ad Sets + Ads */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {[
+                  { label: 'Conjuntos de Anúncios', desc: 'Orçamentos e objetivos por conjunto.', rows: adSets, cols: ['Nome', 'Objetivo', 'Orçamento', 'Status'] },
+                  { label: 'Anúncios (Ads)', desc: 'Criativos vinculados aos conjuntos.', rows: ads, cols: ['Nome', 'Ad Set ID', 'Status'] },
+                ].map(section => (
+                  <div key={section.label} style={cardStyle}>
+                    <p style={sectionTitle}>{section.label}</p>
+                    <p style={sectionDesc}>{section.desc}</p>
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="vx-table-header">
+                          {section.cols.map(c => <th key={c} className="px-3 py-2">{c}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {section.rows.map((row: any) => (
+                          <tr key={row.id} className="vx-table-row">
+                            <td className="px-3 py-0 font-bold" style={{ color: 'var(--color-accent)', fontSize: 'var(--fs-small)' }}>{row.name}</td>
+                            <td className="px-3 py-0 vx-mono">{row.optimization_goal ?? row.adset_id}</td>
+                            {row.daily_budget !== undefined && (
+                              <td className="px-3 py-0" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-tiny)', color: 'var(--color-primary)' }}>
+                                R$ {row.daily_budget.toFixed(2)}
+                              </td>
+                            )}
+                            <td className="px-3 py-0">
+                              <span className="vx-badge vx-badge-success">{row.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                ))}
+              </div>
+            </motion.div>
           )}
 
-          {/* TAB 4: SYSTEM LOGS */}
-          {activeTab === 'logs' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Sync Logs */}
-              <Card className="bg-glass border-slate-900">
-                <CardHeader>
-                  <CardTitle className="text-sm font-bold text-slate-200">Logs de Sincronização (Sync Log)</CardTitle>
-                  <CardDescription className="text-xs">
-                    Histórico de execuções das sincronizações manuais e automatizadas via cron.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {syncLogs.map((log) => (
-                    <div
-                      key={log.id}
-                      className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 flex justify-between gap-3 text-xs"
+          {/* ──────────── TAB: TOKENS ──────────── */}
+          {activeTab === 'tokens' && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div style={cardStyle}>
+                <p style={sectionTitle}>Tokens da API Meta Graph</p>
+                <p style={sectionDesc}>Chaves de acesso para sincronização automatizada via cron.</p>
+
+                <div className="space-y-4">
+                  {metaTokens.map(token => (
+                    <div key={token.id} className="rounded-xl p-4 space-y-4"
+                      style={{ background: 'rgba(216,197,182,0.04)', border: '1px solid var(--color-border)' }}
                     >
-                      <div className="space-y-1">
-                        <p className="text-slate-300">{log.message}</p>
-                        <span className="text-[10px] text-slate-500 font-mono">
-                          Executado em: {new Date(log.synced_at).toLocaleString('pt-BR')}
+                      <div className="flex items-center justify-between flex-wrap gap-2 pb-3" style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                        <div>
+                          <p className="font-bold" style={{ color: 'var(--color-accent)' }}>{token.account_name}</p>
+                          <p style={{ fontSize: 'var(--fs-tiny)', fontFamily: 'var(--font-mono)', color: 'var(--color-accent-dim)' }}>
+                            Account ID: {token.account_id}
+                          </p>
+                        </div>
+                        <span className="vx-badge vx-badge-success flex items-center gap-1">
+                          <CheckCircle size={10} /> Token Ativo
                         </span>
                       </div>
-                      <div className="text-right shrink-0">
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-emerald-950/30 border border-emerald-900/40 text-emerald-400 mb-1">
-                          {log.status}
-                        </span>
-                        <span className="block text-[10px] text-slate-400">{log.duration_ms} ms</span>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {[
+                          { label: 'Access Token', value: token.access_token },
+                          { label: 'Business Manager ID', value: token.business_manager_id ?? 'Não vinculado' },
+                          { label: 'Vencimento', value: new Date(token.token_expires_at).toLocaleString('pt-BR'), icon: <Calendar size={12} /> },
+                          { label: 'Criado em', value: new Date(token.created_at).toLocaleString('pt-BR'), icon: <Calendar size={12} /> },
+                        ].map(field => (
+                          <div key={field.label}>
+                            <p className="mb-1 font-bold uppercase tracking-wider" style={{ fontSize: 'var(--fs-tiny)', color: 'var(--color-accent-dim)' }}>
+                              {field.label}
+                            </p>
+                            <div
+                              className="px-3 py-2 rounded-lg flex items-center gap-2"
+                              style={{
+                                background: 'var(--color-bg-darker)',
+                                border: '1px solid var(--color-border)',
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: 'var(--fs-tiny)',
+                                color: 'var(--color-accent)',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {field.icon && <span style={{ color: 'var(--color-primary)', flexShrink: 0 }}>{field.icon}</span>}
+                              {field.value}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ──────────── TAB: LOGS ──────────── */}
+          {activeTab === 'logs' && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-5"
+            >
+              {/* Sync Logs */}
+              <div style={cardStyle}>
+                <p style={sectionTitle}>Logs de Sincronização</p>
+                <p style={sectionDesc}>Histórico de execuções manuais e automáticas via cron.</p>
+                <div className="space-y-2">
+                  {syncLogs.map((log, i) => (
+                    <motion.div
+                      key={log.id}
+                      initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                      className="rounded-lg p-3 flex items-start justify-between gap-3"
+                      style={{ background: 'rgba(216,197,182,0.03)', border: '1px solid var(--color-border-light)' }}
+                    >
+                      <div className="min-w-0">
+                        <p style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent)' }}>{log.message}</p>
+                        <p className="vx-mono mt-1">{new Date(log.synced_at).toLocaleString('pt-BR')}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <span className="vx-badge vx-badge-success">{log.status}</span>
+                        <p className="vx-mono mt-1">{log.duration_ms}ms</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
 
               {/* Audit Logs */}
-              <Card className="bg-glass border-slate-900">
-                <CardHeader>
-                  <CardTitle className="text-sm font-bold text-slate-200">Logs de Segurança e Auditoria (Audit Logs)</CardTitle>
-                  <CardDescription className="text-xs">
-                    Registro de ações críticas executadas na plataforma administrativa.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {auditLogs.map((log) => (
-                    <div
+              <div style={cardStyle}>
+                <p style={sectionTitle}>Logs de Segurança</p>
+                <p style={sectionDesc}>Registro de ações críticas na plataforma.</p>
+                <div className="space-y-2">
+                  {auditLogs.map((log, i) => (
+                    <motion.div
                       key={log.id}
-                      className="p-3 rounded-lg bg-slate-900/50 border border-slate-800 space-y-1.5 text-xs hover:border-slate-800 transition-colors"
+                      initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                      className="rounded-lg p-3 space-y-1"
+                      style={{ background: 'rgba(216,197,182,0.03)', border: '1px solid var(--color-border-light)' }}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-indigo-400 font-mono text-[10px] uppercase">
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: 'var(--fs-tiny)',
+                            fontWeight: 700,
+                            color: 'var(--color-primary)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.08em',
+                          }}
+                        >
                           {log.action}
                         </span>
-                        <span className="text-[10px] text-slate-500 font-mono">
-                          {new Date(log.created_at).toLocaleString('pt-BR')}
-                        </span>
+                        <span className="vx-mono">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
                       </div>
-                      <p className="text-slate-300 text-xs">{log.details}</p>
-                    </div>
+                      <p style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent-muted)' }}>{log.details}</p>
+                    </motion.div>
                   ))}
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </div>
+            </motion.div>
           )}
+        </main>
 
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-slate-500 text-xs">
-        <div className="max-w-7xl mx-auto px-4">
-          <p>© 2026 Voxion Ads. Todos os direitos reservados.</p>
-        </div>
-      </footer>
+        <AppFooter />
+      </div>
     </div>
   );
 }

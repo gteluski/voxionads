@@ -2,16 +2,8 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { ChevronUp, ChevronDown } from "lucide-react"
+import { ChevronUp, ChevronDown, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface Campaign {
@@ -38,11 +30,24 @@ interface CampaignTableProps {
 type SortKey = keyof Campaign
 type SortDir = "asc" | "desc"
 
-export function CampaignTable({
-  campaigns,
-  onRowClick,
-  className,
-}: CampaignTableProps) {
+const statusCfg = {
+  active:  { label: "Ativo",    bg: "rgba(76,175,80,0.1)",  border: "rgba(76,175,80,0.35)",  color: "#4CAF50" },
+  paused:  { label: "Pausado",  bg: "rgba(255,152,0,0.1)",  border: "rgba(255,152,0,0.35)",  color: "#FF9800" },
+  removed: { label: "Removido", bg: "rgba(244,67,54,0.08)", border: "rgba(244,67,54,0.3)",   color: "#F44336" },
+}
+
+const columns: { key: SortKey; label: string; align?: "right" }[] = [
+  { key: "name",        label: "Campanha"     },
+  { key: "status",      label: "Status"       },
+  { key: "spend",       label: "Investimento", align: "right" },
+  { key: "reach",       label: "Alcance",      align: "right" },
+  { key: "impressions", label: "Impressões",   align: "right" },
+  { key: "cpm",         label: "CPM",          align: "right" },
+  { key: "cpa",         label: "CPA",          align: "right" },
+  { key: "roi",         label: "ROI",          align: "right" },
+]
+
+export function CampaignTable({ campaigns, onRowClick, className }: CampaignTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("name")
   const [sortDir, setSortDir] = useState<SortDir>("asc")
   const [currentPage, setCurrentPage] = useState(1)
@@ -51,14 +56,12 @@ export function CampaignTable({
   const sorted = [...campaigns].sort((a, b) => {
     const aVal = a[sortKey]
     const bVal = b[sortKey]
-    
     if (typeof aVal === "string") {
-      return sortDir === "asc" 
+      return sortDir === "asc"
         ? (aVal as string).localeCompare(bVal as string)
         : (bVal as string).localeCompare(aVal as string)
     }
-    
-    return sortDir === "asc" 
+    return sortDir === "asc"
       ? (aVal as number) - (bVal as number)
       : (bVal as number) - (aVal as number)
   })
@@ -70,19 +73,8 @@ export function CampaignTable({
   )
 
   const handleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc")
-    } else {
-      setSortKey(key)
-      setSortDir("asc")
-    }
-  }
-
-  const SortIcon = ({ active }: { active: boolean }) => {
-    if (!active) return null
-    return sortDir === "asc" ? 
-      <ChevronUp className="w-3.5 h-3.5 ml-1 text-indigo-400" /> : 
-      <ChevronDown className="w-3.5 h-3.5 ml-1 text-indigo-400" />
+    if (sortKey === key) setSortDir(sortDir === "asc" ? "desc" : "asc")
+    else { setSortKey(key); setSortDir("asc") }
   }
 
   return (
@@ -90,113 +82,129 @@ export function CampaignTable({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className={cn("space-y-4", className)}
+      className={cn("space-y-3", className)}
     >
-      <div className="border border-slate-900 rounded-xl overflow-hidden bg-slate-950/20 backdrop-blur-md">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-slate-900 hover:bg-transparent bg-slate-900/40">
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("name")}>
-                <div className="flex items-center">
-                  Campanha
-                  <SortIcon active={sortKey === "name"} />
-                </div>
-              </TableHead>
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("status")}>
-                <div className="flex items-center">
-                  Status
-                  <SortIcon active={sortKey === "status"} />
-                </div>
-              </TableHead>
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 text-right hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("spend")}>
-                <div className="flex items-center justify-end">
-                  Investimento
-                  <SortIcon active={sortKey === "spend"} />
-                </div>
-              </TableHead>
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 text-right hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("reach")}>
-                <div className="flex items-center justify-end">
-                  Alcance
-                  <SortIcon active={sortKey === "reach"} />
-                </div>
-              </TableHead>
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 text-right hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("impressions")}>
-                <div className="flex items-center justify-end">
-                  Impressões
-                  <SortIcon active={sortKey === "impressions"} />
-                </div>
-              </TableHead>
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 text-right hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("cpm")}>
-                <div className="flex items-center justify-end">
-                  CPM
-                  <SortIcon active={sortKey === "cpm"} />
-                </div>
-              </TableHead>
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 text-right hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("cpa")}>
-                <div className="flex items-center justify-end">
-                  CPA
-                  <SortIcon active={sortKey === "cpa"} />
-                </div>
-              </TableHead>
-              <TableHead className="cursor-pointer text-slate-300 font-semibold text-xs py-3 text-right hover:bg-slate-900/60 select-none transition-colors" onClick={() => handleSort("roi")}>
-                <div className="flex items-center justify-end">
-                  ROI
-                  <SortIcon active={sortKey === "roi"} />
-                </div>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-slate-900">
-            {paginatedData.length > 0 ? (
-              paginatedData.map((campaign, idx) => (
-                <motion.tr
-                  key={campaign.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04 }}
-                  onClick={() => onRowClick?.(campaign.id)}
-                  className="hover:bg-slate-900/40 cursor-pointer transition-colors border-slate-900"
+      <div
+        className="overflow-x-auto rounded-xl"
+        style={{ border: "1px solid var(--color-border)" }}
+      >
+        <table className="w-full border-collapse text-left">
+          {/* Header */}
+          <thead>
+            <tr className="vx-table-header">
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  onClick={() => handleSort(col.key)}
+                  className={cn("px-4 py-3 cursor-pointer select-none hover:opacity-80 transition-opacity whitespace-nowrap", col.align === "right" && "text-right")}
                 >
-                  <TableCell className="font-semibold text-slate-200 py-3">{campaign.name}</TableCell>
-                  <TableCell className="py-3">
-                    <span className={cn(
-                      "text-[10px] px-2 py-0.5 rounded-full font-bold border",
-                      campaign.status === "active" ? "bg-emerald-950/30 border-emerald-900/40 text-emerald-400" :
-                      campaign.status === "paused" ? "bg-amber-950/30 border-amber-900/40 text-amber-400" :
-                      "bg-slate-900 border-slate-800 text-slate-400"
-                    )}>
-                      {campaign.status === "active" ? "Ativo" : campaign.status === "paused" ? "Pausado" : "Removido"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right text-slate-300 py-3">R$ {campaign.spend.toFixed(2)}</TableCell>
-                  <TableCell className="text-right text-slate-300 py-3">{campaign.reach.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-slate-300 py-3">{campaign.impressions.toLocaleString()}</TableCell>
-                  <TableCell className="text-right text-slate-300 py-3">R$ {campaign.cpm.toFixed(2)}</TableCell>
-                  <TableCell className="text-right text-slate-300 py-3">R$ {campaign.cpa.toFixed(2)}</TableCell>
-                  <TableCell className="text-right text-slate-300 py-3 font-semibold">{campaign.roi.toFixed(0)}%</TableCell>
-                </motion.tr>
-              ))
+                  <div className={cn("flex items-center gap-1", col.align === "right" && "justify-end")}>
+                    {col.label}
+                    {sortKey === col.key && (
+                      <motion.span
+                        initial={{ rotate: 0 }}
+                        animate={{ rotate: sortDir === "asc" ? 0 : 180 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        {sortDir === "asc"
+                          ? <ChevronUp size={12} style={{ color: "var(--color-primary)" }} />
+                          : <ChevronDown size={12} style={{ color: "var(--color-primary)" }} />}
+                      </motion.span>
+                    )}
+                  </div>
+                </th>
+              ))}
+              <th className="px-4 py-3" />
+            </tr>
+          </thead>
+
+          {/* Body */}
+          <tbody>
+            {paginatedData.length > 0 ? (
+              paginatedData.map((c, idx) => {
+                const s = statusCfg[c.status]
+                return (
+                  <motion.tr
+                    key={c.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.04 }}
+                    className="vx-table-row cursor-pointer group"
+                    onClick={() => onRowClick?.(c.id)}
+                  >
+                    <td className="px-4 py-0 font-bold" style={{ color: "var(--color-accent)" }}>
+                      {c.name}
+                    </td>
+                    <td className="px-4 py-0">
+                      <span
+                        className="vx-badge"
+                        style={{ background: s.bg, borderColor: s.border, color: s.color }}
+                      >
+                        {s.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-0 text-right" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--fs-small)", color: "var(--color-accent)" }}>
+                      R$ {c.spend.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="px-4 py-0 text-right" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--fs-small)", color: "var(--color-accent-muted)" }}>
+                      {c.reach.toLocaleString("pt-BR")}
+                    </td>
+                    <td className="px-4 py-0 text-right" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--fs-small)", color: "var(--color-accent-muted)" }}>
+                      {c.impressions.toLocaleString("pt-BR")}
+                    </td>
+                    <td className="px-4 py-0 text-right" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--fs-small)", color: "var(--color-accent-muted)" }}>
+                      R$ {c.cpm.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-0 text-right" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--fs-small)", color: "var(--color-accent-muted)" }}>
+                      R$ {c.cpa.toFixed(2)}
+                    </td>
+                    <td
+                      className="px-4 py-0 text-right font-bold"
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "var(--fs-small)",
+                        color: c.roi > 0 ? "#4CAF50" : "#F44336",
+                      }}
+                    >
+                      {c.roi.toFixed(0)}%
+                    </td>
+                    <td className="px-4 py-0">
+                      <ArrowRight
+                        size={14}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ color: "var(--color-primary)" }}
+                      />
+                    </td>
+                  </motion.tr>
+                )
+              })
             ) : (
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={8} className="text-center py-8 text-slate-500 text-xs">
+              <tr>
+                <td
+                  colSpan={9}
+                  className="text-center py-10"
+                  style={{ color: "var(--color-accent-dim)", fontSize: "var(--fs-small)" }}
+                >
                   Nenhuma campanha encontrada.
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-        <span>Página {currentPage} de {totalPages}</span>
+      <div
+        className="flex items-center justify-between px-1"
+        style={{ fontSize: "var(--fs-tiny)", fontFamily: "var(--font-mono)", color: "var(--color-accent-dim)" }}
+      >
+        <span>Página {currentPage} de {totalPages} · {campaigns.length} campanhas</span>
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(currentPage - 1)}
-            className="border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-300 text-xs h-8"
           >
             Anterior
           </Button>
@@ -205,7 +213,6 @@ export function CampaignTable({
             size="sm"
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(currentPage + 1)}
-            className="border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-300 text-xs h-8"
           >
             Próxima
           </Button>

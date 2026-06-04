@@ -1,10 +1,10 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { RefreshCw, X } from "lucide-react"
+import { RefreshCw, X, SlidersHorizontal, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface FilterState {
@@ -26,53 +26,45 @@ interface AdvancedFilterBarProps {
   className?: string
 }
 
+const statusLabels: Record<FilterState["status"], string> = {
+  all: "Todos", active: "Ativos", paused: "Pausados", removed: "Removidos",
+}
+
 export function AdvancedFilterBar({
-  campaigns,
-  adsets,
-  ads,
-  onFilter,
-  onSync,
-  isLoading = false,
-  className,
+  campaigns, adsets, ads,
+  onFilter, onSync, isLoading = false, className,
 }: AdvancedFilterBarProps) {
   const [filters, setFilters] = useState<FilterState>({
-    dateStart: "",
-    dateEnd: "",
-    selectedCampaigns: [],
-    selectedAdsets: [],
-    selectedAds: [],
+    dateStart: "", dateEnd: "",
+    selectedCampaigns: [], selectedAdsets: [], selectedAds: [],
     status: "all",
   })
-
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
-    const newFilters = { ...filters, [key]: value }
-    setFilters(newFilters)
-    onFilter(newFilters)
+    const updated = { ...filters, [key]: value }
+    setFilters(updated)
+    onFilter(updated)
   }
 
-  const handleToggleCampaign = (id: string) => {
-    const newSelected = filters.selectedCampaigns.includes(id)
+  const toggleCampaign = (id: string) => {
+    const next = filters.selectedCampaigns.includes(id)
       ? filters.selectedCampaigns.filter(c => c !== id)
       : [...filters.selectedCampaigns, id]
-    handleFilterChange("selectedCampaigns", newSelected)
+    handleFilterChange("selectedCampaigns", next)
   }
 
   const clearFilters = () => {
-    const cleared = {
-      dateStart: "",
-      dateEnd: "",
-      selectedCampaigns: [],
-      selectedAdsets: [],
-      selectedAds: [],
-      status: "all" as const,
+    const cleared: FilterState = {
+      dateStart: "", dateEnd: "",
+      selectedCampaigns: [], selectedAdsets: [], selectedAds: [],
+      status: "all",
     }
     setFilters(cleared)
     onFilter(cleared)
   }
 
-  const activeFilterCount = [
+  const activeCount = [
     filters.dateStart ? 1 : 0,
     filters.dateEnd ? 1 : 0,
     filters.selectedCampaigns.length,
@@ -81,136 +73,177 @@ export function AdvancedFilterBar({
     filters.status !== "all" ? 1 : 0,
   ].reduce((a, b) => a + b, 0)
 
+  const inputStyle = {
+    height: "36px",
+    fontSize: "var(--fs-small)",
+  }
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={cn("space-y-3 p-4 rounded-xl border border-slate-900 bg-slate-900/10 backdrop-blur-md", className)}
+      className={cn("rounded-xl space-y-3", className)}
+      style={{
+        background: "var(--color-bg-dark)",
+        border: "1px solid var(--color-border)",
+        padding: "var(--space-4)",
+      }}
     >
       {/* Top Row */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Date range */}
+        <div className="flex items-center gap-2">
           <Input
             type="date"
             value={filters.dateStart}
-            onChange={(e) => handleFilterChange("dateStart", e.target.value)}
-            placeholder="Data inicial"
-            className="w-40 bg-slate-900/50 border-slate-800 focus-visible:ring-indigo-500 text-xs h-9 text-slate-200"
+            onChange={e => handleFilterChange("dateStart", e.target.value)}
+            className="w-38"
+            style={inputStyle}
           />
-          <span className="text-xs text-slate-500 font-medium">até</span>
+          <span style={{ fontSize: "var(--fs-small)", color: "var(--color-accent-dim)" }}>até</span>
           <Input
             type="date"
             value={filters.dateEnd}
-            onChange={(e) => handleFilterChange("dateEnd", e.target.value)}
-            placeholder="Data final"
-            className="w-40 bg-slate-900/50 border-slate-800 focus-visible:ring-indigo-500 text-xs h-9 text-slate-200"
+            onChange={e => handleFilterChange("dateEnd", e.target.value)}
+            className="w-38"
+            style={inputStyle}
           />
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
+        {/* Advanced toggle */}
+        <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={cn(
-            "border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white text-xs h-9",
-            isExpanded && "border-indigo-500 text-indigo-400 bg-indigo-950/20"
-          )}
+          className="flex items-center gap-1.5 px-3 rounded-lg font-bold transition-all"
+          style={{
+            height: "36px",
+            fontSize: "var(--fs-small)",
+            border: `1px solid ${isExpanded ? "rgba(241,133,53,0.5)" : "var(--color-border-medium)"}`,
+            background: isExpanded ? "rgba(241,133,53,0.08)" : "transparent",
+            color: isExpanded ? "var(--color-primary)" : "var(--color-accent-muted)",
+            transition: "all var(--transition-fast)",
+          }}
         >
+          <SlidersHorizontal size={13} />
           Filtros avançados
-          {activeFilterCount > 0 && (
-            <span className="ml-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500 text-white text-[10px] font-bold">
-              {activeFilterCount}
+          {activeCount > 0 && (
+            <span
+              style={{
+                background: "var(--color-primary)",
+                color: "var(--color-text-dark)",
+                fontSize: "var(--fs-tiny)",
+                fontWeight: 700,
+                borderRadius: "var(--radius-full)",
+                padding: "1px 7px",
+              }}
+            >
+              {activeCount}
             </span>
           )}
-        </Button>
+          <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+            <ChevronDown size={12} />
+          </motion.div>
+        </button>
 
+        {/* Sync */}
         {onSync && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onSync}
-            disabled={isLoading}
-            className="border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white text-xs h-9 gap-1.5"
-          >
-            <RefreshCw className={cn("w-3.5 h-3.5", isLoading && "animate-spin")} />
-            Sincronizar agora
+          <Button variant="outline" size="sm" onClick={onSync} disabled={isLoading} className="gap-1.5">
+            <RefreshCw size={13} className={isLoading ? "vx-spin" : ""} />
+            Sincronizar
           </Button>
         )}
 
-        {activeFilterCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="gap-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 text-xs h-9"
-          >
-            <X className="w-3.5 h-3.5" />
+        {/* Clear */}
+        {activeCount > 0 && (
+          <Button variant="destructive" size="sm" onClick={clearFilters} className="gap-1.5">
+            <X size={13} />
             Limpar
           </Button>
         )}
       </div>
 
-      {/* Expanded Filters */}
-      {isExpanded && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className="p-4 border border-slate-900 rounded-lg space-y-4 bg-slate-900/30 overflow-hidden"
-        >
-          {/* Status Filter */}
-          <div>
-            <label className="text-xs font-semibold text-slate-400 mb-2 block">Status</label>
-            <div className="flex gap-2 flex-wrap">
-              {["all", "active", "paused", "removed"].map((status) => (
-                <Button
-                  key={status}
-                  variant={filters.status === status ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleFilterChange("status", status)}
-                  className={cn(
-                    "text-xs h-8",
-                    filters.status === status 
-                      ? "bg-indigo-500 text-white hover:bg-indigo-600" 
-                      : "border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-300"
-                  )}
+      {/* Expanded Panel */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <div
+              className="space-y-4 rounded-lg"
+              style={{
+                background: "rgba(216,197,182,0.03)",
+                border: "1px solid var(--color-border-light)",
+                padding: "var(--space-4)",
+              }}
+            >
+              {/* Status filter */}
+              <div>
+                <label
+                  className="block font-bold uppercase tracking-wider mb-2"
+                  style={{ fontSize: "var(--fs-tiny)", color: "var(--color-accent-dim)" }}
                 >
-                  {status === "all" ? "Todos" : status === "active" ? "Ativos" : status === "paused" ? "Pausados" : "Removidos"}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Campaign Filter */}
-          {campaigns.length > 0 && (
-            <div>
-              <label className="text-xs font-semibold text-slate-400 mb-2 block">Campanhas</label>
-              <div className="flex gap-2 flex-wrap max-h-24 overflow-y-auto pr-1">
-                {campaigns.map((campaign) => {
-                  const isSelected = filters.selectedCampaigns.includes(campaign.id);
-                  return (
-                    <Button
-                      key={campaign.id}
-                      variant={isSelected ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleToggleCampaign(campaign.id)}
-                      className={cn(
-                        "text-xs h-8",
-                        isSelected 
-                          ? "bg-emerald-500 text-white hover:bg-emerald-600" 
-                          : "border-slate-800 bg-slate-900/50 hover:bg-slate-800 text-slate-300"
-                      )}
+                  Status
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  {(["all", "active", "paused", "removed"] as FilterState["status"][]).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => handleFilterChange("status", s)}
+                      className="px-3 py-1 rounded-lg font-bold transition-all"
+                      style={{
+                        fontSize: "var(--fs-small)",
+                        border: `1px solid ${filters.status === s ? "rgba(241,133,53,0.5)" : "var(--color-border-medium)"}`,
+                        background: filters.status === s ? "rgba(241,133,53,0.12)" : "transparent",
+                        color: filters.status === s ? "var(--color-primary)" : "var(--color-accent-muted)",
+                        transition: "all var(--transition-fast)",
+                      }}
                     >
-                      {campaign.name}
-                    </Button>
-                  );
-                })}
+                      {statusLabels[s]}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Campaigns */}
+              {campaigns.length > 0 && (
+                <div>
+                  <label
+                    className="block font-bold uppercase tracking-wider mb-2"
+                    style={{ fontSize: "var(--fs-tiny)", color: "var(--color-accent-dim)" }}
+                  >
+                    Campanhas
+                  </label>
+                  <div className="flex gap-2 flex-wrap max-h-24 overflow-y-auto pr-1">
+                    {campaigns.map((camp) => {
+                      const sel = filters.selectedCampaigns.includes(camp.id)
+                      return (
+                        <button
+                          key={camp.id}
+                          onClick={() => toggleCampaign(camp.id)}
+                          className="px-3 py-1 rounded-lg font-bold transition-all"
+                          style={{
+                            fontSize: "var(--fs-small)",
+                            border: `1px solid ${sel ? "rgba(241,133,53,0.5)" : "var(--color-border-medium)"}`,
+                            background: sel ? "rgba(241,133,53,0.12)" : "transparent",
+                            color: sel ? "var(--color-primary)" : "var(--color-accent-muted)",
+                            transition: "all var(--transition-fast)",
+                          }}
+                        >
+                          {camp.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

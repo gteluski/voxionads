@@ -260,14 +260,14 @@ export function ViewClient({ shareId }: ViewClientProps) {
                   label="Total Investido"
                   value={`R$ ${totalSpend.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   trend="neutral"
-                  color="blue"
+                  color="info"
                 />
                 <MetricCard
                   icon={<Eye className="w-4 h-4 text-emerald-400" />}
                   label="Impressões"
                   value={totalImpressions.toLocaleString('pt-BR')}
                   trend="neutral"
-                  color="green"
+                  color="success"
                 />
                 <MetricCard
                   icon={<MousePointer className="w-4 h-4 text-sky-400" />}
@@ -281,7 +281,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
                   label="Retorno ROI"
                   value={`${roi.toFixed(0)}%`}
                   trend="neutral"
-                  color="purple"
+                  color="warning"
                 />
               </div>
 

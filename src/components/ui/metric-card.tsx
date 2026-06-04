@@ -11,22 +11,29 @@ interface MetricCardProps {
   unit?: string
   change?: number
   trend?: "up" | "down" | "neutral"
-  color?: "blue" | "green" | "orange" | "purple" | "red"
+  /** accent color variant for the card */
+  color?: "orange" | "success" | "warning" | "info" | "muted"
   className?: string
+  /** stagger index for entrance animation */
+  index?: number
 }
 
-const colorMap = {
-  blue: "from-blue-500/20 to-blue-400/10 border-blue-900/30 text-blue-400",
-  green: "from-green-500/20 to-green-400/10 border-green-900/30 text-green-400",
-  orange: "from-orange-500/20 to-orange-400/10 border-orange-900/30 text-orange-400",
-  purple: "from-purple-500/20 to-purple-400/10 border-purple-900/30 text-purple-400",
-  red: "from-red-500/20 to-red-400/10 border-red-900/30 text-red-400",
+const colorMap: Record<NonNullable<MetricCardProps["color"]>, {
+  iconBg: string;
+  valueColor: string;
+  borderHover: string;
+}> = {
+  orange:  { iconBg: "rgba(241,133,53,0.12)",  valueColor: "#f18535",  borderHover: "rgba(241,133,53,0.5)"  },
+  success: { iconBg: "rgba(76,175,80,0.12)",   valueColor: "#4CAF50",  borderHover: "rgba(76,175,80,0.5)"   },
+  warning: { iconBg: "rgba(255,152,0,0.12)",   valueColor: "#FF9800",  borderHover: "rgba(255,152,0,0.5)"   },
+  info:    { iconBg: "rgba(33,150,243,0.12)",  valueColor: "#2196F3",  borderHover: "rgba(33,150,243,0.5)"  },
+  muted:   { iconBg: "rgba(216,197,182,0.08)", valueColor: "#d8c5b6",  borderHover: "rgba(216,197,182,0.3)" },
 }
 
-const trendColorMap = {
-  up: "text-emerald-500",
-  down: "text-rose-500",
-  neutral: "text-slate-500",
+const trendConfig = {
+  up:      { icon: TrendingUp,   color: "#4CAF50",  label: "alta" },
+  down:    { icon: TrendingDown, color: "#F44336",  label: "queda" },
+  neutral: { icon: Minus,        color: "#FF9800",  label: "estável" },
 }
 
 export function MetricCard({
@@ -36,57 +43,98 @@ export function MetricCard({
   unit = "",
   change = 0,
   trend = "neutral",
-  color = "blue",
+  color = "orange",
   className,
+  index = 0,
 }: MetricCardProps) {
+  const c = colorMap[color]
+  const TrendIcon = trendConfig[trend].icon
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={cn(
-        "flex flex-col p-4 rounded-xl border bg-gradient-to-br bg-slate-900/40 backdrop-blur-md transition-all duration-300 hover:border-slate-700/50 hover:bg-slate-900/60",
-        colorMap[color],
-        className
-      )}
+      initial={{ opacity: 0, scale: 0.93, y: 12 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.06, ease: [0, 0, 0.2, 1] }}
+      whileHover={{ scale: 1.015 }}
+      className={cn("vx-card cursor-default select-none", className)}
+      style={{ padding: "var(--space-5)" }}
     >
-      {/* Header with icon and label */}
-      <div className="flex items-center justify-between mb-3">
+      {/* Header: icon + label */}
+      <div className="flex items-center justify-between mb-4">
         {icon && (
-          <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-            {icon}
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0"
+            style={{ background: c.iconBg, border: `1px solid ${c.borderHover}` }}
+          >
+            <span style={{ color: c.valueColor }}>{icon}</span>
           </div>
         )}
-        <span className="text-xs text-slate-400 font-semibold">{label}</span>
+        <span
+          className="font-bold tracking-wide uppercase text-right"
+          style={{
+            fontSize: "var(--fs-tiny)",
+            letterSpacing: "0.07em",
+            color: "var(--color-accent-muted)",
+            fontFamily: "var(--font-body)",
+            marginLeft: icon ? "auto" : 0,
+          }}
+        >
+          {label}
+        </span>
       </div>
 
       {/* Main value */}
-      <div className="flex items-baseline gap-1 mb-2">
-        <motion.span
-          className="text-2xl sm:text-3xl font-extrabold text-white"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15 }}
+      <motion.div
+        className="flex items-baseline gap-1 mb-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: index * 0.06 + 0.15 }}
+      >
+        <span
+          className="font-black leading-none"
+          style={{
+            fontSize: "1.75rem",
+            color: c.valueColor,
+            fontFamily: "var(--font-mono)",
+          }}
         >
           {value}
-        </motion.span>
+        </span>
         {unit && (
-          <span className="text-xs font-semibold text-slate-400">{unit}</span>
+          <span
+            className="font-bold"
+            style={{ fontSize: "var(--fs-small)", color: "var(--color-accent-muted)" }}
+          >
+            {unit}
+          </span>
         )}
-      </div>
+      </motion.div>
 
-      {/* Change % with trend */}
+      {/* Trend badge */}
       {change !== 0 && (
         <motion.div
-          className={cn("flex items-center gap-1 text-[11px] font-bold", trendColorMap[trend])}
-          initial={{ opacity: 0, x: -5 }}
+          className="flex items-center gap-1"
+          initial={{ opacity: 0, x: -6 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.25 }}
+          transition={{ delay: index * 0.06 + 0.25 }}
         >
-          {trend === "up" && <TrendingUp className="w-3.5 h-3.5" />}
-          {trend === "down" && <TrendingDown className="w-3.5 h-3.5" />}
-          {trend === "neutral" && <Minus className="w-3.5 h-3.5" />}
-          <span>{Math.abs(change)}%</span>
+          <TrendIcon
+            size={12}
+            style={{ color: trendConfig[trend].color, flexShrink: 0 }}
+          />
+          <span
+            style={{
+              fontSize: "var(--fs-tiny)",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 600,
+              color: trendConfig[trend].color,
+            }}
+          >
+            {trend === "up" ? "+" : trend === "down" ? "-" : ""}{Math.abs(change)}%
+          </span>
+          <span style={{ fontSize: "var(--fs-tiny)", color: "var(--color-accent-dim)" }}>
+            vs. mês anterior
+          </span>
         </motion.div>
       )}
     </motion.div>

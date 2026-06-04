@@ -193,14 +193,14 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
             label="Investimento"
             value={`R$ ${totalSpend.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             trend="neutral"
-            color="blue"
+            color="info"
           />
           <MetricCard
             icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
             label="Conversões"
             value={totalConversions}
             trend="neutral"
-            color="green"
+            color="success"
           />
           <MetricCard
             icon={<MessageSquare className="w-4 h-4 text-orange-400" />}
@@ -214,7 +214,7 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
             label="ROI do Anúncio"
             value={`${roi.toFixed(0)}%`}
             trend="neutral"
-            color="purple"
+            color="warning"
           />
         </div>
 
