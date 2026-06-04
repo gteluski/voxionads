@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VoxionAdsDatabaseSchema",
+  "description": "PostgreSQL database schema definition for Voxion Ads dashboard application",
+  "version": "1.0.0",
+  "tables": {
+    "admin_users": {
+      "description": "Administrator users with dashboard credentials and status info",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "email": { "type": "VARCHAR(255)", "unique": true, "nullable": false },
+        "password_hash": { "type": "VARCHAR(255)", "nullable": false },
+        "name": { "type": "VARCHAR(255)", "nullable": false },
+        "is_active": { "type": "BOOLEAN", "default": true, "nullable": false },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "updated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      },
+      "triggers": ["update_admin_users_modtime"]
+    },
+    "meta_tokens": {
+      "description": "Meta Graph API tokens connected to admin users",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "access_token": { "type": "TEXT", "nullable": false },
+        "refresh_token": { "type": "TEXT", "nullable": true },
+        "token_expires_at": { "type": "TIMESTAMPTZ", "nullable": true },
+        "account_id": { "type": "VARCHAR(255)", "nullable": true },
+        "account_name": { "type": "VARCHAR(255)", "nullable": true },
+        "business_manager_id": { "type": "VARCHAR(255)", "nullable": true },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "updated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      },
+      "triggers": ["update_meta_tokens_modtime"]
+    },
+    "campaigns": {
+      "description": "Meta campaign metadata synced for admin users",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "meta_campaign_id": { "type": "VARCHAR(255)", "unique": true, "nullable": false },
+        "name": { "type": "VARCHAR(255)", "nullable": false },
+        "status": { "type": "VARCHAR(50)", "nullable": false },
+        "objective": { "type": "VARCHAR(100)", "nullable": true },
+        "daily_budget": { "type": "NUMERIC(15,2)", "nullable": true },
+        "lifetime_budget": { "type": "NUMERIC(15,2)", "nullable": true },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "updated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      },
+      "triggers": ["update_campaigns_modtime"]
+    },
+    "ad_sets": {
+      "description": "Ad sets belonging to campaigns",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "campaign_id": { "type": "UUID", "foreignKey": { "references": "campaigns(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "meta_adset_id": { "type": "VARCHAR(255)", "unique": true, "nullable": false },
+        "name": { "type": "VARCHAR(255)", "nullable": false },
+        "status": { "type": "VARCHAR(50)", "nullable": false },
+        "daily_budget": { "type": "NUMERIC(15,2)", "nullable": true },
+        "optimization_goal": { "type": "VARCHAR(100)", "nullable": true },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "updated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      },
+      "triggers": ["update_ad_sets_modtime"]
+    },
+    "ads": {
+      "description": "Individual ads belonging to ad sets and campaigns",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "adset_id": { "type": "UUID", "foreignKey": { "references": "ad_sets(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "campaign_id": { "type": "UUID", "foreignKey": { "references": "campaigns(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "meta_ad_id": { "type": "VARCHAR(255)", "unique": true, "nullable": false },
+        "name": { "type": "VARCHAR(255)", "nullable": false },
+        "status": { "type": "VARCHAR(50)", "nullable": false },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "updated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      },
+      "triggers": ["update_ads_modtime"]
+    },
+    "ads_metrics": {
+      "description": "Performance metrics for ads, broken down by date",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "campaign_id": { "type": "UUID", "foreignKey": { "references": "campaigns(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "adset_id": { "type": "UUID", "foreignKey": { "references": "ad_sets(id)", "onDelete": "CASCADE" }, "nullable": true },
+        "ad_id": { "type": "UUID", "foreignKey": { "references": "ads(id)", "onDelete": "CASCADE" }, "nullable": true },
+        "date": { "type": "DATE", "nullable": false },
+        "spend": { "type": "NUMERIC(15,2)", "default": 0.00, "nullable": false },
+        "impressions": { "type": "INTEGER", "default": 0, "nullable": false },
+        "clicks": { "type": "INTEGER", "default": 0, "nullable": false },
+        "link_clicks": { "type": "INTEGER", "default": 0, "nullable": false },
+        "reach": { "type": "INTEGER", "default": 0, "nullable": false },
+        "frequency": { "type": "NUMERIC(5,2)", "default": 0.00, "nullable": false },
+        "conversions": { "type": "INTEGER", "default": 0, "nullable": false },
+        "messages": { "type": "INTEGER", "default": 0, "nullable": false },
+        "cpc": { "type": "NUMERIC(10,2)", "default": 0.00, "nullable": false },
+        "cpc_link": { "type": "NUMERIC(10,2)", "default": 0.00, "nullable": false },
+        "cpm": { "type": "NUMERIC(10,2)", "default": 0.00, "nullable": false },
+        "cpm_impression": { "type": "NUMERIC(10,2)", "default": 0.00, "nullable": false },
+        "cpa": { "type": "NUMERIC(10,2)", "default": 0.00, "nullable": false },
+        "cpm_message": { "type": "NUMERIC(10,2)", "default": 0.00, "nullable": false },
+        "ctr": { "type": "NUMERIC(5,2)", "default": 0.00, "nullable": false },
+        "roi": { "type": "NUMERIC(10,2)", "default": 0.00, "nullable": false },
+        "sync_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      }
+    },
+    "shared_dashboards": {
+      "description": "Dashboard shares for external clients",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "business_manager_id": { "type": "VARCHAR(255)", "nullable": true },
+        "share_name": { "type": "VARCHAR(255)", "nullable": false },
+        "password_hash": { "type": "VARCHAR(255)", "nullable": true },
+        "has_password": { "type": "BOOLEAN", "default": false, "nullable": false },
+        "campaign_ids": { "type": "TEXT[]", "default": "{}", "nullable": false },
+        "expires_at": { "type": "TIMESTAMPTZ", "nullable": true },
+        "is_active": { "type": "BOOLEAN", "default": true, "nullable": false },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "updated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      },
+      "triggers": ["update_shared_dashboards_modtime"]
+    },
+    "reports": {
+      "description": "Generated health and recommendation reports",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "campaign_id": { "type": "UUID", "foreignKey": { "references": "campaigns(id)", "onDelete": "SET NULL" }, "nullable": true },
+        "adset_id": { "type": "UUID", "foreignKey": { "references": "ad_sets(id)", "onDelete": "SET NULL" }, "nullable": true },
+        "ad_id": { "type": "UUID", "foreignKey": { "references": "ads(id)", "onDelete": "SET NULL" }, "nullable": true },
+        "overall_health": { "type": "VARCHAR(100)", "nullable": true },
+        "main_issues": { "type": "TEXT[]", "default": "{}", "nullable": false },
+        "recommendations": { "type": "TEXT[]", "default": "{}", "nullable": false },
+        "performance_trend": { "type": "VARCHAR(100)", "nullable": true },
+        "date_range_start": { "type": "DATE", "nullable": true },
+        "date_range_end": { "type": "DATE", "nullable": true },
+        "generated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      }
+    },
+    "sync_log": {
+      "description": "Logs detailing cron background API synchronization status",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" }, "nullable": false },
+        "status": { "type": "VARCHAR(50)", "nullable": false },
+        "message": { "type": "TEXT", "nullable": true },
+        "synced_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "duration_ms": { "type": "INTEGER", "nullable": false }
+      }
+    },
+    "audit_logs": {
+      "description": "Security audit trails monitoring administrative actions",
+      "columns": {
+        "id": { "type": "UUID", "primaryKey": true, "default": "gen_random_uuid()" },
+        "admin_id": { "type": "UUID", "foreignKey": { "references": "admin_users(id)", "onDelete": "SET NULL" }, "nullable": true },
+        "action": { "type": "VARCHAR(255)", "nullable": false },
+        "details": { "type": "TEXT", "nullable": true },
+        "ip_address": { "type": "VARCHAR(45)", "nullable": true },
+        "user_agent": { "type": "TEXT", "nullable": true },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      }
+    },
+    "admin_settings": {
+      "description": "Administrator settings for synchronizations and data retention",
+      "columns": {
+        "admin_id": { "type": "UUID", "primaryKey": true, "foreignKey": { "references": "admin_users(id)", "onDelete": "CASCADE" } },
+        "sync_frequency": { "type": "VARCHAR(50)", "default": "30min", "nullable": false },
+        "auto_sync": { "type": "BOOLEAN", "default": true, "nullable": false },
+        "data_retention_period": { "type": "VARCHAR(50)", "default": "ilimitado", "nullable": false },
+        "created_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false },
+        "updated_at": { "type": "TIMESTAMPTZ", "default": "NOW()", "nullable": false }
+      },
+      "triggers": ["update_admin_settings_modtime"]
+    }
+  },
+  "indexes": [
+    { "table": "campaigns", "columns": ["admin_id"], "unique": false },
+    { "table": "ad_sets", "columns": ["campaign_id"], "unique": false },
+    { "table": "ads", "columns": ["adset_id"], "unique": false },
+    { "table": "ads_metrics", "columns": ["admin_id", "date DESC", "campaign_id", "adset_id", "ad_id"], "unique": false },
+    { "table": "shared_dashboards", "columns": ["admin_id", "id"], "unique": false },
+    { "table": "reports", "columns": ["admin_id"], "unique": false },
+    { "table": "sync_log", "columns": ["admin_id"], "unique": false }
+  ]
+}
