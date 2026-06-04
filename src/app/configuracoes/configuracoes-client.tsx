@@ -543,7 +543,7 @@ export function ConfiguracoesClient({
             <Card className="bg-glass glow-indigo border-slate-900 hover:border-slate-800 transition-all duration-300">
               <CardHeader className="pb-4">
                 <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                  <Shield className="h-4.5 w-4.5 text-indigo-400" />
+                  <img src="/meta-logo.svg" alt="Meta" className="h-5 w-5" />
                   1. Conta Meta Ads
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">

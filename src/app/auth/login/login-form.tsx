@@ -98,21 +98,7 @@ export function LoginForm() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div
-            className="flex h-14 w-14 items-center justify-center rounded-2xl mb-4"
-            style={{
-              background: 'rgba(241,133,53,0.12)',
-              border: '2px solid rgba(241,133,53,0.4)',
-              boxShadow: 'var(--glow-orange-sm)',
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8">
-              <path d="M4 4L9 18L12 11L15 18L20 4" stroke="#f18535" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <h1 className="font-black text-2xl" style={{ color: 'var(--color-accent-light)', fontFamily: 'var(--font-heading)' }}>
-            Voxion Ads
-          </h1>
+          <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-12 w-auto mb-2" />
           <p style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent-dim)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
             Área administrativa
           </p>

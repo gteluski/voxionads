@@ -38,32 +38,8 @@ export function Sidebar({ onSync, isSyncing }: SidebarProps) {
   return (
     <aside className="vx-sidebar">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b" style={{ borderColor: 'var(--color-border)' }}>
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-lg flex-shrink-0"
-          style={{
-            background: 'rgba(241,133,53,0.15)',
-            border: '1.5px solid rgba(241,133,53,0.4)',
-          }}
-        >
-          <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
-            <path
-              d="M4 4L8.5 15L10 10.5L11.5 15L16 4"
-              stroke="#f18535"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <div>
-          <p className="font-black text-base leading-none" style={{ color: 'var(--color-accent-light)', fontFamily: 'var(--font-heading)' }}>
-            Voxion
-          </p>
-          <p className="text-[11px] font-semibold" style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-mono)' }}>
-            Ads Studio
-          </p>
-        </div>
+      <div className="flex items-center px-5 py-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
+        <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-8 w-auto" />
       </div>
 
       {/* Navigation */}
