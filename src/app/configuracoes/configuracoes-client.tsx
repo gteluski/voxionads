@@ -459,20 +459,20 @@ export function ConfiguracoesClient({
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden pb-16">
+    <div className="min-h-screen bg-[#31251f] text-[#d8c5b6] flex flex-col relative overflow-hidden pb-16">
       {/* Background gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#f18535]/10 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
 
       {/* Top Toast notification */}
       {toast && (
         <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-300 border ${
-          toast.type === 'success' ? 'bg-emerald-950/90 border-emerald-500 text-emerald-300' :
+          toast.type === 'success' ? 'bg-green-950/90 border-green-500 text-green-300' :
           toast.type === 'error' ? 'bg-red-950/90 border-red-500 text-red-300' :
-          'bg-indigo-950/90 border-indigo-500 text-indigo-300'
+          'bg-[#f18535]/90 border-[#f18535] text-[#f18535]'
         }`}>
           <span className={`h-2 w-2 rounded-full animate-pulse ${
-            toast.type === 'success' ? 'bg-emerald-400' :
+            toast.type === 'success' ? 'bg-green-400' :
             toast.type === 'error' ? 'bg-red-400' :
             'bg-indigo-400'
           }`} />
@@ -481,14 +481,14 @@ export function ConfiguracoesClient({
       )}
 
       {/* Navigation top bar */}
-      <nav className="border-b border-slate-900 bg-slate-900/40 backdrop-blur-md sticky top-0 z-40">
+      <nav className="border-b border-[rgba(216,197,182,0.2)] bg-[#1f1915]/40 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-slate-400 hover:text-white px-2 flex items-center gap-1.5"
+                className="text-[#d8c5b6]/70 hover:text-[#d8c5b6] px-2 flex items-center gap-1.5"
                 onClick={() => router.push('/dashboard')}
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -498,19 +498,19 @@ export function ConfiguracoesClient({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-slate-400 hover:text-white px-2"
+                className="text-[#d8c5b6]/70 hover:text-[#d8c5b6] px-2"
                 onClick={() => router.push('/relatorios')}
               >
                 Relatórios
               </Button>
               <span className="text-slate-800">|</span>
-              <span className="font-bold text-xs text-slate-300 uppercase tracking-wider">Painel Administrativo</span>
+              <span className="font-bold text-xs text-[#d8c5b6] uppercase tracking-wider">Painel Administrativo</span>
             </div>
             
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-900 border border-slate-800">
+            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#1f1915] border border-[rgba(216,197,182,0.3)]">
               <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
               {isDbConnected ? (
-                <span className="text-slate-300">Base Ativa</span>
+                <span className="text-[#d8c5b6]">Base Ativa</span>
               ) : (
                 <span className="text-amber-400">Ambiente Demo</span>
               )}
@@ -523,12 +523,12 @@ export function ConfiguracoesClient({
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10">
         
         {/* Page Header */}
-        <div className="pb-4 border-b border-slate-900">
-          <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2.5">
-            <Settings className="h-7 w-7 text-indigo-400" />
+        <div className="pb-4 border-b border-[rgba(216,197,182,0.2)]">
+          <h2 className="text-2xl font-black tracking-tight text-[#d8c5b6] flex items-center gap-2.5">
+            <Settings className="h-7 w-7 text-[#f18535]" />
             Configurações Gerais
           </h2>
-          <p className="text-xs text-slate-400 mt-1.5 max-w-2xl">
+          <p className="text-xs text-[#d8c5b6]/70 mt-1.5 max-w-2xl">
             Gerencie integrações com a API do Meta Graph, configure a sincronização automática de métricas, crie links de compartilhamento protegidos para clientes e administre a retenção de dados históricos.
           </p>
         </div>
@@ -540,32 +540,32 @@ export function ConfiguracoesClient({
           <div className="lg:col-span-1 space-y-8">
             
             {/* 1. Meta Account Section */}
-            <Card className="bg-glass glow-indigo border-slate-900 hover:border-slate-800 transition-all duration-300">
+            <Card className="bg-glass glow-orange border-[rgba(216,197,182,0.2)] hover:border-[rgba(216,197,182,0.3)] transition-all duration-300">
               <CardHeader className="pb-4">
-                <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
+                <CardTitle className="text-sm font-bold text-[#d8c5b6] flex items-center gap-2">
                   <img src="/meta-logo.svg" alt="Meta" className="h-5 w-5" />
                   1. Conta Meta Ads
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
+                <CardDescription className="text-xs text-[#d8c5b6]/70">
                   Dados da conta vinculada para carregamento de anúncios.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {isMetaConnected ? (
                   <>
-                    <div className="space-y-3 p-3 rounded-lg bg-slate-950/40 border border-slate-900/60">
+                    <div className="space-y-3 p-3 rounded-lg bg-[#31251f]/40 border border-[rgba(216,197,182,0.2)]/60">
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[9px] font-bold text-slate-500 uppercase">Nome da Conta</span>
-                        <span className="text-xs font-semibold text-slate-200">{metaAccountName}</span>
+                        <span className="text-[9px] font-bold text-[#d8c5b6]/50 uppercase">Nome da Conta</span>
+                        <span className="text-xs font-semibold text-[#d8c5b6]">{metaAccountName}</span>
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[9px] font-bold text-slate-500 uppercase">ID da Conta de Anúncios</span>
-                        <span className="text-xs font-mono text-slate-350">{metaAccountId}</span>
+                        <span className="text-[9px] font-bold text-[#d8c5b6]/50 uppercase">ID da Conta de Anúncios</span>
+                        <span className="text-xs font-mono text-[#d8c5b6]/90">{metaAccountId}</span>
                       </div>
                       {metaBmId && (
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[9px] font-bold text-slate-500 uppercase">Business Manager ID</span>
-                          <span className="text-xs font-mono text-slate-350">{metaBmId}</span>
+                          <span className="text-[9px] font-bold text-[#d8c5b6]/50 uppercase">Business Manager ID</span>
+                          <span className="text-xs font-mono text-[#d8c5b6]/90">{metaBmId}</span>
                         </div>
                       )}
                     </div>
@@ -588,7 +588,7 @@ export function ConfiguracoesClient({
                       </p>
                     </div>
                     <Link href="/api/meta/auth/redirect" className="block">
-                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-emerald-500 text-white text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center">
+                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-emerald-500 text-[#d8c5b6] text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center">
                         <Globe className="h-3.5 w-3.5" />
                         Conectar Conta Meta Ads
                       </Button>
@@ -599,27 +599,27 @@ export function ConfiguracoesClient({
             </Card>
 
             {/* 2. Token Meta Section */}
-            <Card className="bg-glass glow-indigo border-slate-900 hover:border-slate-800 transition-all duration-300">
+            <Card className="bg-glass glow-orange border-[rgba(216,197,182,0.2)] hover:border-[rgba(216,197,182,0.3)] transition-all duration-300">
               <CardHeader className="pb-4">
-                <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                  <Lock className="h-4.5 w-4.5 text-indigo-400" />
+                <CardTitle className="text-sm font-bold text-[#d8c5b6] flex items-center gap-2">
+                  <Lock className="h-4.5 w-4.5 text-[#f18535]" />
                   2. Token de Acesso Meta
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
+                <CardDescription className="text-xs text-[#d8c5b6]/70">
                   Credencial de autenticação criptografada com chaves AES.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[9px] font-bold text-slate-500 uppercase">Meta API Token</span>
-                    <div className="bg-slate-950 border border-slate-900 rounded-lg p-2.5 font-mono text-[10px] text-slate-500 tracking-widest text-center">
+                    <span className="text-[9px] font-bold text-[#d8c5b6]/50 uppercase">Meta API Token</span>
+                    <div className="bg-[#31251f] border border-[rgba(216,197,182,0.2)] rounded-lg p-2.5 font-mono text-[10px] text-[#d8c5b6]/50 tracking-widest text-center">
                       ••••••••••••••••••••••••••••
                     </div>
                   </div>
-                  <div className="flex justify-between text-[10px] text-slate-400 bg-slate-950/30 p-2 rounded border border-slate-900/40 font-medium">
+                  <div className="flex justify-between text-[10px] text-[#d8c5b6]/70 bg-[#31251f]/30 p-2 rounded border border-[rgba(216,197,182,0.2)]/40 font-medium">
                     <span>Última Rotação:</span>
-                    <span className="font-mono text-slate-300">
+                    <span className="font-mono text-[#d8c5b6]">
                       {new Date(lastRotationDate).toLocaleString('pt-BR')}
                     </span>
                   </div>
@@ -630,7 +630,7 @@ export function ConfiguracoesClient({
                     variant="outline"
                     disabled={isRotating || !isMetaConnected}
                     onClick={handleRotateToken}
-                    className="border-slate-800 bg-slate-900/20 hover:bg-slate-800 text-slate-300 text-[10px] font-semibold h-7 flex items-center gap-1 justify-center transition-all"
+                    className="border-[rgba(216,197,182,0.3)] bg-[#1f1915]/20 hover:bg-[#1f1915] text-[#d8c5b6] text-[10px] font-semibold h-7 flex items-center gap-1 justify-center transition-all"
                   >
                     <RefreshCw className={`h-3 w-3 ${isRotating ? 'animate-spin' : ''}`} />
                     {isRotating ? 'Rotacionando...' : 'Rotacionar Token'}
@@ -641,7 +641,7 @@ export function ConfiguracoesClient({
                       variant="outline"
                       type="button"
                       disabled={!isMetaConnected}
-                      className="w-full border-slate-800 bg-slate-900/20 hover:bg-slate-800 text-slate-350 text-[10px] font-semibold h-7 flex items-center gap-1 justify-center"
+                      className="w-full border-[rgba(216,197,182,0.3)] bg-[#1f1915]/20 hover:bg-[#1f1915] text-[#d8c5b6]/90 text-[10px] font-semibold h-7 flex items-center gap-1 justify-center"
                     >
                       <Globe className="h-3 w-3" />
                       Reconectar OAuth
@@ -657,35 +657,35 @@ export function ConfiguracoesClient({
           <div className="lg:col-span-2 space-y-8">
             
             {/* 3. Sincronização Section */}
-            <Card className="bg-glass glow-indigo border-slate-900">
+            <Card className="bg-glass glow-orange border-[rgba(216,197,182,0.2)]">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                    <Clock className="h-4.5 w-4.5 text-indigo-400" />
+                  <CardTitle className="text-sm font-bold text-[#d8c5b6] flex items-center gap-2">
+                    <Clock className="h-4.5 w-4.5 text-[#f18535]" />
                     3. Sincronização e Logs
                   </CardTitle>
                   <Button
                     size="sm"
                     disabled={isSyncing || !isMetaConnected}
                     onClick={handleSyncNow}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] px-3.5 h-7 transition-all flex items-center gap-1"
+                    className="bg-[#f18535] hover:bg-[#f5a35f] text-[#31251f] font-bold text-[10px] px-3.5 h-7 transition-all flex items-center gap-1"
                   >
                     <RefreshCw className={`h-3 w-3 ${isSyncing ? 'animate-spin' : ''}`} />
                     {isSyncing ? 'Sincronizando...' : 'Sincronizar agora'}
                   </Button>
                 </div>
-                <CardDescription className="text-xs text-slate-400">
+                <CardDescription className="text-xs text-[#d8c5b6]/70">
                   Agende a coleta de dados e acompanhe o histórico das últimas execuções.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 
                 {/* Inputs Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-slate-950/35 border border-slate-900/60">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg bg-[#31251f]/35 border border-[rgba(216,197,182,0.2)]/60">
                   
                   {/* Frequency select */}
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-slate-400 uppercase">Frequência da Sync</label>
+                    <label className="text-[9px] font-bold text-[#d8c5b6]/70 uppercase">Frequência da Sync</label>
                     <select
                       value={syncFrequency}
                       disabled={!autoSync}
@@ -693,7 +693,7 @@ export function ConfiguracoesClient({
                         setSyncFrequency(e.target.value);
                         saveSettings(e.target.value, autoSync, retentionPeriod);
                       }}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 h-8 disabled:opacity-50"
+                      className="w-full bg-[#1f1915] border border-[rgba(216,197,182,0.3)] rounded-md px-3 py-1.5 text-xs text-[#d8c5b6] focus:outline-none focus:border-[#f18535] h-8 disabled:opacity-50"
                     >
                       <option value="5min">A cada 5 minutos</option>
                       <option value="30min">A cada 30 minutos (Recomendado)</option>
@@ -702,10 +702,10 @@ export function ConfiguracoesClient({
                   </div>
 
                   {/* Auto Sync Toggle */}
-                  <div className="flex items-center justify-between border-l border-slate-900/80 pl-0 md:pl-4">
+                  <div className="flex items-center justify-between border-l border-[rgba(216,197,182,0.2)]/80 pl-0 md:pl-4">
                     <div className="space-y-0.5">
-                      <span className="text-[9px] font-bold text-slate-350 uppercase block">Sincronização Automática</span>
-                      <span className="text-[9px] text-slate-500">Executar via Vercel Crons</span>
+                      <span className="text-[9px] font-bold text-[#d8c5b6]/90 uppercase block">Sincronização Automática</span>
+                      <span className="text-[9px] text-[#d8c5b6]/50">Executar via Vercel Crons</span>
                     </div>
                     <button
                       type="button"
@@ -714,12 +714,12 @@ export function ConfiguracoesClient({
                         setAutoSync(newAuto);
                         saveSettings(syncFrequency, newAuto, retentionPeriod);
                       }}
-                      className="text-slate-400 hover:text-white"
+                      className="text-[#d8c5b6]/70 hover:text-[#d8c5b6]"
                     >
                       {autoSync ? (
-                        <ToggleRight className="h-6.5 w-6.5 text-indigo-400" />
+                        <ToggleRight className="h-6.5 w-6.5 text-[#f18535]" />
                       ) : (
-                        <ToggleLeft className="h-6.5 w-6.5 text-slate-650" />
+                        <ToggleLeft className="h-6.5 w-6.5 text-[#d8c5b6]/40" />
                       )}
                     </button>
                   </div>
@@ -728,15 +728,15 @@ export function ConfiguracoesClient({
 
                 {/* History table */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    <History className="h-3.5 w-3.5 text-slate-500" />
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#d8c5b6]/70 uppercase tracking-wider">
+                    <History className="h-3.5 w-3.5 text-[#d8c5b6]/50" />
                     Histórico Últimas 10 Sincronizações
                   </div>
                   
-                  <div className="border border-slate-900 rounded-lg overflow-hidden bg-slate-950/20 max-h-48 overflow-y-auto">
+                  <div className="border border-[rgba(216,197,182,0.2)] rounded-lg overflow-hidden bg-[#31251f]/20 max-h-48 overflow-y-auto">
                     <table className="w-full text-[11px] text-left">
                       <thead>
-                        <tr className="border-b border-slate-900 bg-slate-900/30 text-slate-500">
+                        <tr className="border-b border-[rgba(216,197,182,0.2)] bg-[#1f1915]/30 text-[#d8c5b6]/50">
                           <th className="p-2 font-semibold">Data/Hora</th>
                           <th className="p-2 font-semibold">Status</th>
                           <th className="p-2 font-semibold">Duração</th>
@@ -745,13 +745,13 @@ export function ConfiguracoesClient({
                       </thead>
                       <tbody className="divide-y divide-slate-900/50">
                         {syncLogs.map((log, idx) => (
-                          <tr key={log.id || idx} className="hover:bg-slate-900/10 transition-colors">
-                            <td className="p-2 font-mono text-[10px] text-slate-400">
+                          <tr key={log.id || idx} className="hover:bg-[#1f1915]/10 transition-colors">
+                            <td className="p-2 font-mono text-[10px] text-[#d8c5b6]/70">
                               {new Date(log.synced_at).toLocaleString('pt-BR')}
                             </td>
                             <td className="p-2">
                               {log.status === 'SUCCESS' ? (
-                                <span className="inline-flex items-center gap-1 text-emerald-400 font-bold bg-emerald-950/10 border border-emerald-900/20 px-1.5 py-0.5 rounded text-[9px]">
+                                <span className="inline-flex items-center gap-1 text-green-400 font-bold bg-green-950/10 border border-emerald-900/20 px-1.5 py-0.5 rounded text-[9px]">
                                   Sucesso
                                 </span>
                               ) : (
@@ -760,10 +760,10 @@ export function ConfiguracoesClient({
                                 </span>
                               )}
                             </td>
-                            <td className="p-2 font-mono text-slate-350">
+                            <td className="p-2 font-mono text-[#d8c5b6]/90">
                               {log.duration_ms ? `${(log.duration_ms / 1000).toFixed(2)}s` : '-'}
                             </td>
-                            <td className="p-2 text-slate-400 truncate max-w-xs" title={log.message}>
+                            <td className="p-2 text-[#d8c5b6]/70 truncate max-w-xs" title={log.message}>
                               {log.message || 'Sem detalhes.'}
                             </td>
                           </tr>
@@ -777,31 +777,31 @@ export function ConfiguracoesClient({
             </Card>
 
             {/* 4. Compartilhamentos Section */}
-            <Card className="bg-glass glow-indigo border-slate-900">
+            <Card className="bg-glass glow-orange border-[rgba(216,197,182,0.2)]">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                    <Share2 className="h-4.5 w-4.5 text-indigo-400" />
+                  <CardTitle className="text-sm font-bold text-[#d8c5b6] flex items-center gap-2">
+                    <Share2 className="h-4.5 w-4.5 text-[#f18535]" />
                     4. Compartilhamentos Criados
                   </CardTitle>
                   <Button
                     onClick={handleOpenCreateModal}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-3.5 h-7 transition-all flex items-center gap-1"
+                    className="bg-[#f18535] hover:bg-[#f5a35f] text-[#31251f] text-[10px] font-bold px-3.5 h-7 transition-all flex items-center gap-1"
                   >
                     <Plus className="h-3.5 w-3.5" />
                     Novo Compartilhamento
                   </Button>
                 </div>
-                <CardDescription className="text-xs text-slate-400">
+                <CardDescription className="text-xs text-[#d8c5b6]/70">
                   Gerencie painéis externos read-only criados para visualização de clientes.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {shares.length > 0 ? (
-                  <div className="border border-slate-900 rounded-lg overflow-hidden bg-slate-950/20">
+                  <div className="border border-[rgba(216,197,182,0.2)] rounded-lg overflow-hidden bg-[#31251f]/20">
                     <table className="w-full text-xs text-left">
                       <thead>
-                        <tr className="border-b border-slate-900 bg-slate-900/30 text-slate-400">
+                        <tr className="border-b border-[rgba(216,197,182,0.2)] bg-[#1f1915]/30 text-[#d8c5b6]/70">
                           <th className="p-3 font-semibold">Nome</th>
                           <th className="p-3 font-semibold">Vencimento</th>
                           <th className="p-3 font-semibold">Segurança</th>
@@ -813,22 +813,22 @@ export function ConfiguracoesClient({
                         {shares.map((share) => {
                           const isExpired = share.expires_at && new Date(share.expires_at) < new Date();
                           return (
-                            <tr key={share.id} className="hover:bg-slate-900/10 transition-colors">
-                              <td className="p-3 font-bold text-slate-200 flex flex-col gap-0.5">
+                            <tr key={share.id} className="hover:bg-[#1f1915]/10 transition-colors">
+                              <td className="p-3 font-bold text-[#d8c5b6] flex flex-col gap-0.5">
                                 <span>{share.share_name}</span>
-                                <span className="text-[9px] text-slate-500 font-mono">BM ID: {share.business_manager_id}</span>
+                                <span className="text-[9px] text-[#d8c5b6]/50 font-mono">BM ID: {share.business_manager_id}</span>
                               </td>
-                              <td className="p-3 text-slate-400 font-mono text-[11px]">
+                              <td className="p-3 text-[#d8c5b6]/70 font-mono text-[11px]">
                                 {share.expires_at ? new Date(share.expires_at).toLocaleDateString('pt-BR') : 'Sem limite'}
                               </td>
                               <td className="p-3">
                                 {share.has_password ? (
-                                  <span className="inline-flex items-center gap-1 text-emerald-400 text-[9px] font-bold bg-emerald-950/15 border border-emerald-900/20 px-1.5 py-0.5 rounded">
+                                  <span className="inline-flex items-center gap-1 text-green-400 text-[9px] font-bold bg-green-950/15 border border-emerald-900/20 px-1.5 py-0.5 rounded">
                                     <Lock className="h-3 w-3" />
                                     Senha
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 text-slate-500 text-[9px] bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded font-bold">
+                                  <span className="inline-flex items-center gap-1 text-[#d8c5b6]/50 text-[9px] bg-[#1f1915] border border-[rgba(216,197,182,0.3)] px-1.5 py-0.5 rounded font-bold">
                                     <Unlock className="h-3 w-3" />
                                     Aberto
                                   </span>
@@ -840,11 +840,11 @@ export function ConfiguracoesClient({
                                     Expirado
                                   </span>
                                 ) : share.is_active ? (
-                                  <span className="text-[9px] bg-emerald-950/20 border border-emerald-900/25 text-emerald-400 px-2 py-0.5 rounded font-black">
+                                  <span className="text-[9px] bg-green-950/20 border border-emerald-900/25 text-green-400 px-2 py-0.5 rounded font-black">
                                     Ativo
                                   </span>
                                 ) : (
-                                  <span className="text-[9px] bg-slate-900 border border-slate-850 text-slate-400 px-2 py-0.5 rounded">
+                                  <span className="text-[9px] bg-[#1f1915] border border-[rgba(216,197,182,0.4)] text-[#d8c5b6]/70 px-2 py-0.5 rounded">
                                     Inativo
                                   </span>
                                 )}
@@ -854,13 +854,13 @@ export function ConfiguracoesClient({
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleToggleActive(share)}
-                                  className="text-slate-400 hover:text-white px-1.5 h-7"
+                                  className="text-[#d8c5b6]/70 hover:text-[#d8c5b6] px-1.5 h-7"
                                   title={share.is_active ? 'Desativar link' : 'Ativar link'}
                                 >
                                   {share.is_active ? (
-                                    <ToggleRight className="h-5 w-5 text-indigo-400" />
+                                    <ToggleRight className="h-5 w-5 text-[#f18535]" />
                                   ) : (
-                                    <ToggleLeft className="h-5 w-5 text-slate-650" />
+                                    <ToggleLeft className="h-5 w-5 text-[#d8c5b6]/40" />
                                   )}
                                 </Button>
 
@@ -868,7 +868,7 @@ export function ConfiguracoesClient({
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleOpenEditModal(share)}
-                                  className="text-indigo-400 hover:text-indigo-300 px-1.5 h-7"
+                                  className="text-[#f18535] hover:text-[#f18535] px-1.5 h-7"
                                   title="Editar"
                                 >
                                   <Edit className="h-3.5 w-3.5" />
@@ -878,11 +878,11 @@ export function ConfiguracoesClient({
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleCopyLink(share.id)}
-                                  className="text-indigo-400 hover:text-indigo-300 px-1.5 h-7"
+                                  className="text-[#f18535] hover:text-[#f18535] px-1.5 h-7"
                                   title="Copiar link"
                                 >
                                   {copiedId === share.id ? (
-                                    <Check className="h-3.5 w-3.5 text-emerald-450" />
+                                    <Check className="h-3.5 w-3.5 text-green-450" />
                                   ) : (
                                     <Copy className="h-3.5 w-3.5" />
                                   )}
@@ -905,7 +905,7 @@ export function ConfiguracoesClient({
                     </table>
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-slate-500 text-xs border border-dashed border-slate-900 rounded-lg bg-slate-950/5">
+                  <div className="p-6 text-center text-[#d8c5b6]/50 text-xs border border-dashed border-[rgba(216,197,182,0.2)] rounded-lg bg-[#31251f]/5">
                     Nenhum link de compartilhamento gerado.
                   </div>
                 )}
@@ -913,22 +913,22 @@ export function ConfiguracoesClient({
             </Card>
 
             {/* 5. Retenção de Dados Section */}
-            <Card className="bg-glass glow-indigo border-slate-900">
+            <Card className="bg-glass glow-orange border-[rgba(216,197,182,0.2)]">
               <CardHeader className="pb-4">
-                <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                  <Database className="h-4.5 w-4.5 text-indigo-400" />
+                <CardTitle className="text-sm font-bold text-[#d8c5b6] flex items-center gap-2">
+                  <Database className="h-4.5 w-4.5 text-[#f18535]" />
                   5. Retenção de Dados de Métricas
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
+                <CardDescription className="text-xs text-[#d8c5b6]/70">
                   Defina o limite de armazenamento das tabelas de estatísticas diárias no banco.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-slate-950/30 border border-slate-900/50">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-[#31251f]/30 border border-[rgba(216,197,182,0.2)]/50">
                   <div className="space-y-1 flex-1">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase block">Período de Armazenamento</span>
-                    <span className="text-[10px] text-slate-500 block">
+                    <span className="text-[9px] font-bold text-[#d8c5b6]/70 uppercase block">Período de Armazenamento</span>
+                    <span className="text-[10px] text-[#d8c5b6]/50 block">
                       Dados antigos são automaticamente deletados para otimizar espaço de banco.
                     </span>
                     <select
@@ -937,7 +937,7 @@ export function ConfiguracoesClient({
                         setRetentionPeriod(e.target.value);
                         saveSettings(syncFrequency, autoSync, e.target.value);
                       }}
-                      className="mt-1 bg-slate-900 border border-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 h-8 w-44"
+                      className="mt-1 bg-[#1f1915] border border-[rgba(216,197,182,0.3)] rounded-md px-3 py-1.5 text-xs text-[#d8c5b6] focus:outline-none focus:border-[#f18535] h-8 w-44"
                     >
                       <option value="30d">30 Dias</option>
                       <option value="90d">90 Dias</option>
@@ -951,7 +951,7 @@ export function ConfiguracoesClient({
                       variant="outline"
                       disabled={isCleaning || retentionPeriod === 'ilimitado'}
                       onClick={handleDeleteOldData}
-                      className="border-slate-800 bg-red-950/15 hover:bg-red-950/30 text-red-450 text-xs font-bold px-4 py-2 h-9 flex items-center gap-1.5 transition-all"
+                      className="border-[rgba(216,197,182,0.3)] bg-red-950/15 hover:bg-red-950/30 text-red-450 text-xs font-bold px-4 py-2 h-9 flex items-center gap-1.5 transition-all"
                     >
                       <Trash2 className="h-4 w-4" />
                       {isCleaning ? 'Limpando...' : 'Deletar dados antigos agora'}
@@ -970,18 +970,18 @@ export function ConfiguracoesClient({
 
       {/* CREATE & EDIT DIALOG MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-          <div className="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-6 overflow-y-auto max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#31251f]/70 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="relative w-full max-w-xl bg-[#1f1915] border border-[rgba(216,197,182,0.3)] rounded-xl shadow-2xl p-6 overflow-y-auto max-h-[90vh]">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-              <h3 className="text-md font-bold text-white flex items-center gap-2">
-                <Share2 className="h-5 w-5 text-indigo-400" />
+            <div className="flex items-center justify-between pb-4 border-b border-[rgba(216,197,182,0.3)] mb-6">
+              <h3 className="text-md font-bold text-[#d8c5b6] flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-[#f18535]" />
                 {editingShareId ? 'Editar Compartilhamento' : 'Novo Compartilhamento de Dashboard'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-[#d8c5b6]/70 hover:text-[#d8c5b6] p-1"
               >
                 <X className="h-4.5 w-4.5" />
               </button>
@@ -996,9 +996,9 @@ export function ConfiguracoesClient({
 
             {/* Success link panel (Only shown in create mode on successful generation) */}
             {generatedLink ? (
-              <div className="bg-indigo-950/30 border border-indigo-900/40 rounded-lg p-4 space-y-4 mb-6 animate-in zoom-in-95 duration-200">
-                <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold">
-                  <Check className="h-4.5 w-4.5 text-emerald-455" />
+              <div className="bg-[#f18535]/30 border border-[#f18535]/40 rounded-lg p-4 space-y-4 mb-6 animate-in zoom-in-95 duration-200">
+                <div className="flex items-center gap-2 text-[#f18535] text-xs font-bold">
+                  <Check className="h-4.5 w-4.5 text-green-455" />
                   Link gerado com sucesso!
                 </div>
                 <div className="flex gap-2">
@@ -1006,7 +1006,7 @@ export function ConfiguracoesClient({
                     type="text"
                     readOnly
                     value={generatedLink}
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded px-3 py-1.5 font-mono text-[10px] text-slate-350 focus:outline-none"
+                    className="flex-1 bg-[#31251f] border border-[rgba(216,197,182,0.3)] rounded px-3 py-1.5 font-mono text-[10px] text-[#d8c5b6]/90 focus:outline-none"
                   />
                   <Button
                     onClick={() => {
@@ -1014,11 +1014,11 @@ export function ConfiguracoesClient({
                       setCopiedId('modal-link');
                       setTimeout(() => setCopiedId(null), 2000);
                     }}
-                    className="bg-indigo-600 hover:bg-indigo-700 h-8 text-xs font-bold px-3.5 flex items-center gap-1"
+                    className="bg-[#f18535] hover:bg-[#f5a35f] h-8 text-xs font-bold px-3.5 flex items-center gap-1"
                   >
                     {copiedId === 'modal-link' ? (
                       <>
-                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                        <Check className="h-3.5 w-3.5 text-green-400" />
                         Copiado
                       </>
                     ) : (
@@ -1029,15 +1029,15 @@ export function ConfiguracoesClient({
                     )}
                   </Button>
                 </div>
-                <p className="text-[10px] text-slate-500 leading-normal">
+                <p className="text-[10px] text-[#d8c5b6]/50 leading-normal">
                   Compartilhe este link com seu cliente. Se você ativou a proteção por senha, não esqueça de informá-la separadamente.
                 </p>
-                <div className="pt-2 border-t border-slate-900 flex justify-end">
+                <div className="pt-2 border-t border-[rgba(216,197,182,0.2)] flex justify-end">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => setIsModalOpen(false)}
-                    className="border-slate-800 text-xs font-bold h-7"
+                    className="border-[rgba(216,197,182,0.3)] text-xs font-bold h-7"
                   >
                     Fechar
                   </Button>
@@ -1049,34 +1049,34 @@ export function ConfiguracoesClient({
                 
                 {/* Share Name */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Nome do Compartilhamento</label>
+                  <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">Nome do Compartilhamento</label>
                   <Input
                     type="text"
                     placeholder="Ex: Dashboard Cliente Voxion"
                     value={shareName}
                     onChange={(e) => setShareName(e.target.value)}
                     required
-                    className="bg-slate-950 border-slate-800 text-xs h-9 focus:border-indigo-500"
+                    className="bg-[#31251f] border-[rgba(216,197,182,0.3)] text-xs h-9 focus:border-[#f18535]"
                   />
                 </div>
 
                 {/* Account / BM selector (Read-only if editing) */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Business Manager Conectada</label>
+                  <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">Business Manager Conectada</label>
                   {editingShareId ? (
                     <Input
                       type="text"
                       readOnly
                       disabled
                       value={`${metaAccountName} (${bmId})`}
-                      className="bg-slate-950/50 border-slate-800/80 text-slate-400 text-xs h-9"
+                      className="bg-[#31251f]/50 border-[rgba(216,197,182,0.3)]/80 text-[#d8c5b6]/70 text-xs h-9"
                     />
                   ) : (
                     <select
                       value={bmId}
                       onChange={(e) => setBmId(e.target.value)}
                       required
-                      className="w-full bg-slate-950 border border-slate-800 rounded-md px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 h-9"
+                      className="w-full bg-[#31251f] border border-[rgba(216,197,182,0.3)] rounded-md px-3 py-2 text-xs text-[#d8c5b6] focus:outline-none focus:border-[#f18535] focus:ring-1 focus:ring-[#f18535] h-9"
                     >
                       {initialMetaTokens.map((token) => (
                         <option key={token.id} value={token.business_manager_id}>
@@ -1089,8 +1089,8 @@ export function ConfiguracoesClient({
 
                 {/* Restricted Campaigns */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase block">Restringir a Campanhas (Vazio = Todas)</label>
-                  <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg max-h-36 overflow-y-auto space-y-2">
+                  <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase block">Restringir a Campanhas (Vazio = Todas)</label>
+                  <div className="p-3 bg-[#31251f] border border-[rgba(216,197,182,0.3)] rounded-lg max-h-36 overflow-y-auto space-y-2">
                     {campaigns.map((camp) => {
                       const isSelected = selectedCampaigns.includes(camp.id);
                       return (
@@ -1099,12 +1099,12 @@ export function ConfiguracoesClient({
                           onClick={() => handleToggleCampaign(camp.id)}
                           className={`flex items-center gap-2.5 p-2 rounded cursor-pointer transition-colors border ${
                             isSelected
-                              ? 'bg-indigo-950/20 border-indigo-900/40 text-indigo-300'
-                              : 'border-transparent hover:bg-slate-900 text-slate-400 hover:text-slate-350'
+                              ? 'bg-[#f18535]/20 border-[#f18535]/40 text-[#f18535]'
+                              : 'border-transparent hover:bg-[#1f1915] text-[#d8c5b6]/70 hover:text-[#d8c5b6]/90'
                           }`}
                         >
                           <div className={`h-3.5 w-3.5 rounded border flex items-center justify-center shrink-0 ${
-                            isSelected ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-800'
+                            isSelected ? 'bg-[#f18535] border-[#f18535] text-[#d8c5b6]' : 'border-[rgba(216,197,182,0.3)]'
                           }`}>
                             {isSelected && <Check className="h-2.5 w-2.5" />}
                           </div>
@@ -1117,7 +1117,7 @@ export function ConfiguracoesClient({
 
                 {/* Expiration Date picker */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+                  <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" />
                     Data de Expiração (Opcional)
                   </label>
@@ -1125,25 +1125,25 @@ export function ConfiguracoesClient({
                     type="date"
                     value={expiresAt}
                     onChange={(e) => setExpiresAt(e.target.value)}
-                    className="bg-slate-950 border-slate-800 text-xs h-9 focus:border-indigo-500"
+                    className="bg-[#31251f] border-[rgba(216,197,182,0.3)] text-xs h-9 focus:border-[#f18535]"
                   />
                 </div>
 
                 {/* Password Lock Toggle */}
-                <div className="flex items-center justify-between p-3 rounded-lg border border-slate-800 bg-slate-950/30">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-[rgba(216,197,182,0.3)] bg-[#31251f]/30">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] font-bold text-slate-300 uppercase block">Proteger com Senha</span>
-                    <span className="text-[9px] text-slate-500">Exigir senha para acessar o link compartilhado</span>
+                    <span className="text-[10px] font-bold text-[#d8c5b6] uppercase block">Proteger com Senha</span>
+                    <span className="text-[9px] text-[#d8c5b6]/50">Exigir senha para acessar o link compartilhado</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setPasswordProtected(!passwordProtected)}
-                    className="text-slate-400 hover:text-white"
+                    className="text-[#d8c5b6]/70 hover:text-[#d8c5b6]"
                   >
                     {passwordProtected ? (
-                      <ToggleRight className="h-6.5 w-6.5 text-indigo-400" />
+                      <ToggleRight className="h-6.5 w-6.5 text-[#f18535]" />
                     ) : (
-                      <ToggleLeft className="h-6.5 w-6.5 text-slate-650" />
+                      <ToggleLeft className="h-6.5 w-6.5 text-[#d8c5b6]/40" />
                     )}
                   </button>
                 </div>
@@ -1151,56 +1151,56 @@ export function ConfiguracoesClient({
                 {/* Password field - only if toggled */}
                 {passwordProtected && (
                   <div className="space-y-1 animate-in slide-in-from-top-2 duration-200">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">
+                    <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">
                       {editingShareId ? 'Redefinir Senha do Link (Opcional)' : 'Definir Senha do Link'}
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+                      <Lock className="absolute left-3 top-2.5 h-4 w-4 text-[#d8c5b6]/50" />
                       <Input
                         type="password"
                         placeholder={editingShareId ? 'Deixe em branco para manter a senha atual' : 'Senha de acesso para o cliente'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required={passwordProtected && !editingShareId}
-                        className="bg-slate-950 border-slate-800 pl-9 text-xs h-9 focus:border-indigo-500"
+                        className="bg-[#31251f] border-[rgba(216,197,182,0.3)] pl-9 text-xs h-9 focus:border-[#f18535]"
                       />
                     </div>
                   </div>
                 )}
 
                 {/* Active Toggle */}
-                <div className="flex items-center justify-between p-3 rounded-lg border border-slate-800 bg-slate-950/30">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-[rgba(216,197,182,0.3)] bg-[#31251f]/30">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] font-bold text-slate-300 uppercase block">Link Ativo</span>
-                    <span className="text-[9px] text-slate-500">Ativa ou desativa temporariamente o compartilhamento</span>
+                    <span className="text-[10px] font-bold text-[#d8c5b6] uppercase block">Link Ativo</span>
+                    <span className="text-[9px] text-[#d8c5b6]/50">Ativa ou desativa temporariamente o compartilhamento</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsActive(!isActive)}
-                    className="text-slate-400 hover:text-white"
+                    className="text-[#d8c5b6]/70 hover:text-[#d8c5b6]"
                   >
                     {isActive ? (
-                      <ToggleRight className="h-6.5 w-6.5 text-indigo-400" />
+                      <ToggleRight className="h-6.5 w-6.5 text-[#f18535]" />
                     ) : (
-                      <ToggleLeft className="h-6.5 w-6.5 text-slate-650" />
+                      <ToggleLeft className="h-6.5 w-6.5 text-[#d8c5b6]/40" />
                     )}
                   </button>
                 </div>
 
                 {/* Footer Buttons */}
-                <div className="flex gap-2 pt-4 border-t border-slate-800 justify-end">
+                <div className="flex gap-2 pt-4 border-t border-[rgba(216,197,182,0.3)] justify-end">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsModalOpen(false)}
-                    className="border-slate-800 text-xs font-bold h-8"
+                    className="border-[rgba(216,197,182,0.3)] text-xs font-bold h-8"
                   >
                     Cancelar
                   </Button>
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold h-8 px-4"
+                    className="bg-[#f18535] hover:bg-[#f5a35f] text-[#31251f] text-xs font-bold h-8 px-4"
                   >
                     {isSubmitting ? 'Salvando...' : editingShareId ? 'Salvar Alterações' : 'Gerar Link'}
                   </Button>

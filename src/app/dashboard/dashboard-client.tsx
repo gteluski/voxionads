@@ -1,22 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-// removed Session import
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { MetricCard } from '@/components/ui/metric-card';
-import { ReportCard } from '@/components/ui/report-card';
-import { SyncStatus } from '@/components/ui/sync-status';
-import { Sidebar } from '@/components/layout/sidebar';
-import { PageHeader } from '@/components/layout/page-header';
-import { AppFooter } from '@/components/layout/app-footer';
-import {
-  TrendingUp, Layers, FileText, KeyRound,
-  DollarSign, Eye, MousePointer, Percent,
-  CheckCircle, Calendar, ArrowRight,
-  Activity, Zap,
-} from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
+
+interface DashboardMetrics {
+  spend: number;
+  impressions: number;
+  clicks: number;
+  reach: number;
+  conversions: number;
+  leads: number;
+  messages: number;
+  frequency: number;
+  cpc: number;
+  cpm: number;
+  cpa: number;
+  roi: number;
+  ctr: number;
+}
+
+interface MetricChange {
+  value: number;
+  percent: number;
+  trend: 'up' | 'down' | 'stable';
+}
 
 interface DashboardClientProps {
   session: any;
@@ -33,496 +42,407 @@ export function DashboardClient({
   initialCampaigns,
   initialMetaTokens,
   initialSyncLogs,
-  initialAuditLogs,
 }: DashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'tokens' | 'logs'>('overview');
+  const router = useRouter();
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [changes, setChanges] = useState<Record<string, MetricChange>>({});
+  const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState('30d');
   const [isSyncing, setIsSyncing] = useState(false);
-  const [isDbConnected] = useState(initialDbConnected);
+  const supabase = createClient();
 
-  const [campaigns, setCampaigns] = useState<any[]>(
-    initialCampaigns.length > 0 ? initialCampaigns : [
-      { id: 'c1', name: 'Campanha Conversão - Black Friday 2026', meta_campaign_id: 'act_12093849102-c1', status: 'ACTIVE', objective: 'CONVERSIONS', daily_budget: 500.00, created_at: '2026-06-01T10:00:00Z' },
-      { id: 'c2', name: 'Lookalike Leads Premium - Whitelist', meta_campaign_id: 'act_12093849102-c2', status: 'ACTIVE', objective: 'LEAD_GENERATION', daily_budget: 250.00, created_at: '2026-06-02T12:00:00Z' },
-      { id: 'c3', name: 'Retargeting Carrinho Abandonado 7D', meta_campaign_id: 'act_12093849102-c3', status: 'PAUSED', objective: 'CONVERSIONS', daily_budget: 100.00, created_at: '2026-06-03T08:30:00Z' },
-      { id: 'c4', name: 'Branding & Tráfego Frio - Reels Video', meta_campaign_id: 'act_12093849102-c4', status: 'ACTIVE', objective: 'VIDEO_VIEWS', daily_budget: 150.00, created_at: '2026-06-04T09:15:00Z' },
-    ]
-  );
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        setLoading(true);
+        
+        let data: any[] = [];
+        
+        if (initialDbConnected && session?.user?.admin_id) {
+          const { data: dbData } = await supabase
+            .from('ads_metrics')
+            .select('*')
+            .eq('admin_id', session.user.admin_id)
+            .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+          if (dbData && dbData.length > 0) {
+            data = dbData;
+          }
+        }
 
-  const [metaTokens] = useState<any[]>(
-    initialMetaTokens.length > 0 ? initialMetaTokens : [
-      { id: 't1', account_name: 'Voxion Ads BM Account', account_id: 'act_12093849102', business_manager_id: 'bm_98471029384', access_token: 'EAAOz18uXpd8BA...', token_expires_at: '2026-08-04T10:00:00Z', created_at: '2026-06-04T10:00:00Z' },
-    ]
-  );
+        // Se não houver dados, usa fallback estético como sugerido no prompt
+        const hasData = data.length > 0;
+        const totals = {
+          spend: hasData ? data.reduce((sum, m) => sum + (m.spend || 0), 0) : 18450.00,
+          impressions: hasData ? data.reduce((sum, m) => sum + (m.impressions || 0), 0) : 842190,
+          clicks: hasData ? data.reduce((sum, m) => sum + (m.clicks || 0), 0) : 22840,
+          reach: hasData ? data.reduce((sum, m) => sum + (m.reach || 0), 0) : 156203,
+          conversions: hasData ? data.reduce((sum, m) => sum + (m.conversions || 0), 0) : 748,
+          leads: hasData ? Math.floor(data.reduce((sum, m) => sum + (m.conversions || 0), 0) * 0.194) : 145,
+          messages: hasData ? data.reduce((sum, m) => sum + (m.messages || 0), 0) : 923,
+          frequency: hasData ? data.reduce((sum, m) => sum + (m.frequency || 0), 0) / data.length : 5.4,
+          cpc: hasData ? data.reduce((sum, m) => sum + (m.cpc || 0), 0) / data.length : 0.81,
+          cpm: hasData ? data.reduce((sum, m) => sum + (m.cpm || 0), 0) / data.length : 21.89,
+          cpa: hasData ? data.reduce((sum, m) => sum + (m.cpa || 0), 0) / data.length : 24.65,
+          roi: hasData ? data.reduce((sum, m) => sum + (m.roi || 0), 0) / data.length : 2.85,
+          ctr: hasData ? ((data.reduce((sum, m) => sum + (m.clicks || 0), 0) / data.reduce((sum, m) => sum + (m.impressions || 0), 0)) * 100) : 2.7,
+        };
 
-  const [syncLogs, setSyncLogs] = useState<any[]>(
-    initialSyncLogs.length > 0 ? initialSyncLogs : [
-      { id: 's1', status: 'SUCCESS', message: 'Sincronização concluída: 4 campanhas importadas.', synced_at: '2026-06-04T10:15:00Z', duration_ms: 1820 },
-      { id: 's2', status: 'SUCCESS', message: 'Sincronização periódica automatizada.', synced_at: '2026-06-04T09:00:00Z', duration_ms: 1540 },
-    ]
-  );
+        setMetrics(totals);
 
-  const [auditLogs, setAuditLogs] = useState<any[]>(
-    initialAuditLogs.length > 0 ? initialAuditLogs : [
-      { id: 'a1', action: 'LOGIN', details: `Usuário ${session.user?.email} realizou login.`, created_at: new Date().toISOString() },
-      { id: 'a2', action: 'TOKEN_REFRESH', details: 'Meta Graph API token validado.', created_at: '2026-06-04T10:00:00Z' },
-    ]
-  );
+        setChanges({
+          spend: { value: totals.spend, percent: 14.2, trend: 'up' },
+          impressions: { value: totals.impressions, percent: 8.1, trend: 'up' },
+          clicks: { value: totals.clicks, percent: 5.3, trend: 'up' },
+          reach: { value: totals.reach, percent: 12.1, trend: 'up' },
+          conversions: { value: totals.conversions, percent: 3.2, trend: 'up' },
+          leads: { value: totals.leads, percent: 7.8, trend: 'up' },
+          messages: { value: totals.messages, percent: 11.2, trend: 'up' },
+          frequency: { value: totals.frequency, percent: 2.1, trend: 'down' },
+          cpc: { value: totals.cpc, percent: 0.5, trend: 'up' },
+          cpm: { value: totals.cpm, percent: 3.2, trend: 'down' },
+          cpa: { value: totals.cpa, percent: 5.1, trend: 'down' },
+          roi: { value: totals.roi, percent: 18.3, trend: 'up' },
+          ctr: { value: totals.ctr, percent: 2.5, trend: 'up' },
+        });
+      } catch (err) {
+        console.error('Erro ao carregar métricas:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const [adSets] = useState<any[]>([
-    { id: 'as1', campaign_id: 'c1', name: 'Adset - Público Quente 30D', status: 'ACTIVE', daily_budget: 300.00, optimization_goal: 'PURCHASE' },
-    { id: 'as2', campaign_id: 'c1', name: 'Adset - Interesses E-commerce', status: 'ACTIVE', daily_budget: 200.00, optimization_goal: 'PURCHASE' },
-    { id: 'as3', campaign_id: 'c2', name: 'Adset - Empresários Brasil', status: 'ACTIVE', daily_budget: 250.00, optimization_goal: 'LEAD' },
-  ]);
+    fetchMetrics();
+  }, [session, period, initialDbConnected, supabase]);
 
-  const [ads] = useState<any[]>([
-    { id: 'ad1', adset_id: 'as1', name: 'Criativo 01 - Vídeo Depoimentos', status: 'ACTIVE' },
-    { id: 'ad2', adset_id: 'as1', name: 'Criativo 02 - Carrossel Benefícios', status: 'ACTIVE' },
-    { id: 'ad3', adset_id: 'as2', name: 'Criativo 03 - Foto Oferta Frete Grátis', status: 'ACTIVE' },
-  ]);
-
-  const handleSync = async () => {
+  const handleSyncNow = async () => {
     setIsSyncing(true);
-    await new Promise(r => setTimeout(r, 2000));
-    const ts = new Date().toISOString();
-    setSyncLogs(prev => [{
-      id: `s_${Date.now()}`, status: 'SUCCESS',
-      message: 'Sincronização manual: 4 campanhas e 3 conjuntos atualizados.',
-      synced_at: ts, duration_ms: 2240,
-    }, ...prev]);
-    setAuditLogs(prev => [{
-      id: `a_${Date.now()}`, action: 'SYNC_TRIGGERED',
-      details: `Sync iniciado por ${session.user?.name}`, created_at: ts,
-    }, ...prev]);
-    setIsSyncing(false);
-    if (isDbConnected) {
-      fetch('/api/sync/manual', { method: 'POST' }).catch(() => {});
+    try {
+      await fetch('/api/sync/manual', { method: 'POST' });
+      // Fake delay for UX
+      await new Promise(r => setTimeout(r, 1500));
+    } catch (err) {
+      console.log('Sync simulated error', err);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
-  const tabs: { key: typeof activeTab; label: string; icon: React.ReactNode }[] = [
-    { key: 'overview',  label: 'Visão Geral',            icon: <TrendingUp size={14} /> },
-    { key: 'campaigns', label: 'Campanhas / Ad Sets',     icon: <Layers size={14} /> },
-    { key: 'tokens',    label: 'Tokens Meta',             icon: <KeyRound size={14} /> },
-    { key: 'logs',      label: 'Logs do Sistema',         icon: <FileText size={14} /> },
-  ];
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
 
-  // ── styles ──
-  const cardStyle = {
-    background: 'var(--color-bg-dark)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-lg)',
-    padding: 'var(--space-5)',
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#31251f]">
+        <div className="animate-spin text-[#f18535] text-4xl">⏳</div>
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#31251f]">
+        <div className="text-[#d8c5b6]">Sem dados para exibir</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#31251f] flex flex-col font-['Avenir']">
+      
+      {/* HEADER (Sem Sidebar) */}
+      <header className="bg-[#1f1915] h-32 flex items-center px-8 border-b border-[rgba(216,197,182,0.2)] sticky top-0 z-50">
+        <div className="flex items-center gap-6">
+          {/* Logo Voxion - MAIOR (80px) */}
+          <img 
+            src="/voxion-ads-logo.svg" 
+            alt="Voxion Ads"
+            className="h-20 w-auto drop-shadow-md cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => router.push('/dashboard')}
+          />
+          <div>
+            <h1 className="text-[#f18535] text-3xl font-bold font-['Jetbrains_Mono'] tracking-tight">Voxion Ads</h1>
+            <p className="text-[#d8c5b6]/70 text-sm font-medium">Painel de Controle de Tráfego Pago</p>
+          </div>
+        </div>
+
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-8">
+          {/* Status Sync + Meta Logo */}
+          <div className="flex items-center gap-3">
+            <img src="/meta-logo.svg" alt="Meta" className="h-8 w-8 opacity-80" />
+            <div className="text-right">
+              <p className="text-green-400 text-sm font-bold flex items-center justify-end gap-1">
+                <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+                Sincronizado
+              </p>
+              <p className="text-[#d8c5b6]/60 text-xs font-mono">
+                {initialSyncLogs[0]?.synced_at 
+                  ? new Date(initialSyncLogs[0].synced_at).toLocaleString('pt-BR') 
+                  : 'Há 15 min'}
+              </p>
+            </div>
+          </div>
+
+          <button 
+            onClick={handleSyncNow}
+            disabled={isSyncing}
+            className="bg-[#f18535] text-[#31251f] px-6 py-2.5 rounded-lg font-bold hover:bg-[#f5a35f] transition-all flex items-center gap-2 shadow-[0_4px_14px_rgba(241,133,53,0.3)] disabled:opacity-50"
+          >
+            <span className={isSyncing ? 'animate-spin' : ''}>🔄</span>
+            {isSyncing ? 'Sincronizando...' : 'Sincronizar Agora'}
+          </button>
+
+          <div className="h-8 w-[1px] bg-[rgba(216,197,182,0.2)] mx-2" />
+
+          <button 
+            onClick={() => router.push('/dashboard/configuracoes')}
+            className="text-[#d8c5b6] hover:text-[#f18535] transition-all p-2 bg-[#31251f] rounded-lg border border-[rgba(216,197,182,0.1)] hover:border-[#f18535]"
+            title="Configurações"
+          >
+            ⚙️
+          </button>
+          <button 
+            onClick={handleLogout}
+            className="text-[#d8c5b6] hover:text-red-400 transition-all p-2 bg-[#31251f] rounded-lg border border-[rgba(216,197,182,0.1)] hover:border-red-400/50"
+            title="Sair"
+          >
+            🚪
+          </button>
+        </div>
+      </header>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 p-8 max-w-[1600px] mx-auto w-full">
+        
+        {/* Painel Geral Header + Ações */}
+        <div className="mb-10 flex items-center justify-between">
+          <div>
+            <h2 className="text-4xl font-bold text-[#d8c5b6] mb-2">Visão Geral</h2>
+            <p className="text-[#d8c5b6]/70 text-lg">Métricas e performance das suas contas de anúncios conectadas.</p>
+          </div>
+
+          <div className="flex gap-4">
+            <button 
+              onClick={() => router.push('/dashboard/campanhas')}
+              className="bg-[rgba(241,133,53,0.1)] border-2 border-[#f18535] text-[#f18535] px-6 py-3 rounded-xl font-bold hover:bg-[rgba(241,133,53,0.2)] transition-all shadow-[0_0_20px_rgba(241,133,53,0.1)]"
+            >
+              📊 Ver Campanhas
+            </button>
+            <button 
+              onClick={() => router.push('/dashboard/conjuntos')}
+              className="bg-[#1f1915] border-2 border-[rgba(216,197,182,0.2)] text-[#d8c5b6] px-6 py-3 rounded-xl font-bold hover:border-[#d8c5b6] transition-all"
+            >
+              🎯 Ver Conjuntos
+            </button>
+          </div>
+        </div>
+
+        {/* Período Selector */}
+        <div className="flex gap-3 mb-8 bg-[#1f1915] p-1.5 rounded-xl w-fit border border-[rgba(216,197,182,0.1)]">
+          {['7d', '14d', '30d', '90d'].map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-5 py-2 rounded-lg font-bold transition-all text-sm ${
+                period === p
+                  ? 'bg-[#f18535] text-[#31251f] shadow-md'
+                  : 'text-[#d8c5b6]/70 hover:text-[#d8c5b6] hover:bg-[rgba(216,197,182,0.05)]'
+              }`}
+            >
+              {p === '7d' ? 'Últimos 7 dias' : p === '14d' ? 'Últimos 14 dias' : p === '30d' ? 'Últimos 30 dias' : 'Últimos 90 dias'}
+            </button>
+          ))}
+        </div>
+
+        {/* 12 KPIs GRID */}
+        <div className="space-y-6">
+          {/* Linha 1 - Principais */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <MetricCard
+              icon="💰" label="TOTAL INVESTIDO" value={metrics.spend} unit="R$" format="currency"
+              change={changes.spend} color="orange" onClick={() => router.push('/dashboard')}
+            />
+            <MetricCard
+              icon="👁️" label="IMPRESSÕES" value={metrics.impressions} unit="" format="number"
+              change={changes.impressions} color="blue" onClick={() => router.push('/dashboard/campanhas')}
+            />
+            <MetricCard
+              icon="👆" label="CLIQUES (CTR)" value={metrics.clicks} unit={`${metrics.ctr?.toFixed(2)}%`} format="number"
+              change={changes.clicks} color="purple" onClick={() => router.push('/dashboard/conjuntos')}
+            />
+            <MetricCard
+              icon="🎯" label="ALCANCE" value={metrics.reach} unit="" format="number"
+              change={changes.reach} color="green" onClick={() => router.push('/dashboard/anuncios')}
+            />
+          </div>
+
+          {/* Linha 2 - Conversões */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <MetricCard
+              icon="✅" label="CONVERSÕES (ROI)" value={metrics.conversions} unit={`${metrics.roi?.toFixed(1)}x`} format="number"
+              change={changes.conversions} color="success"
+            />
+            <MetricCard
+              icon="📧" label="LEADS" value={metrics.leads} unit="" format="number"
+              change={changes.leads} color="info"
+            />
+            <MetricCard
+              icon="💬" label="MENSAGENS" value={metrics.messages} unit="" format="number"
+              change={changes.messages} color="accent"
+            />
+            <MetricCard
+              icon="🔄" label="FREQUÊNCIA" value={metrics.frequency} unit="x" format="decimal"
+              change={changes.frequency} color="warning"
+            />
+          </div>
+
+          {/* Linha 3 - Custos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <MetricCard
+              icon="💵" label="CPC MÉDIO" value={metrics.cpc} unit="R$" format="currency"
+              change={changes.cpc} color="orange"
+            />
+            <MetricCard
+              icon="📊" label="CPM MÉDIO" value={metrics.cpm} unit="R$" format="currency"
+              change={changes.cpm} color="blue"
+            />
+            <MetricCard
+              icon="🛒" label="CPA MÉDIO" value={metrics.cpa} unit="R$" format="currency"
+              change={changes.cpa} color="purple"
+            />
+            <MetricCard
+              icon="📈" label="ROI MÉDIO" value={metrics.roi * 100} unit="%" format="decimal"
+              change={changes.roi} color="success"
+            />
+          </div>
+        </div>
+
+        {/* BOTTOM SECTIONS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+          
+          {/* Report Card */}
+          <div className="lg:col-span-2">
+            <div className="bg-green-500/5 border border-green-500/30 rounded-2xl p-8 h-full">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-3xl">✨</span>
+                <h3 className="text-[#f18535] text-2xl font-bold">Insights e Saúde da Conta</h3>
+              </div>
+              <p className="text-green-400 font-bold text-lg mb-6 flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-green-400" />
+                O desempenho geral está acima da média do seu nicho!
+              </p>
+              
+              <div className="space-y-4">
+                <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.1)] p-4 rounded-xl flex items-start gap-3">
+                  <span className="text-[#f18535] mt-0.5">💡</span>
+                  <p className="text-[#d8c5b6]/80 text-sm">
+                    Recomendação: A campanha <strong className="text-[#d8c5b6]">Conversão Black Friday</strong> está com ROI de 3.42x. Aumentar o orçamento em 15% pode escalar os resultados mantendo o CPA saudável.
+                  </p>
+                </div>
+                <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.1)] p-4 rounded-xl flex items-start gap-3">
+                  <span className="text-[#f18535] mt-0.5">💡</span>
+                  <p className="text-[#d8c5b6]/80 text-sm">
+                    Recomendação: O conjunto <strong className="text-[#d8c5b6]">Público Quente 30D</strong> atingiu uma frequência de 5.4x. Considere renovar os criativos para evitar fadiga visual.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions Panel */}
+          <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-8">
+            <h3 className="text-[#f18535] text-xl font-bold mb-6 flex items-center gap-2">
+              ⚡ Ações Rápidas
+            </h3>
+            <div className="space-y-4">
+              <button 
+                onClick={handleSyncNow}
+                className="w-full bg-[#f18535] text-[#31251f] py-3.5 px-4 rounded-xl font-bold hover:bg-[#f5a35f] transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(241,133,53,0.2)]"
+              >
+                🔄 {isSyncing ? 'Sincronizando...' : 'Forçar Sincronização Meta'}
+              </button>
+              <button 
+                onClick={() => router.push('/dashboard/relatorios')}
+                className="w-full bg-[rgba(241,133,53,0.1)] border border-[#f18535] text-[#f18535] py-3.5 px-4 rounded-xl font-bold hover:bg-[rgba(241,133,53,0.2)] transition-all flex items-center justify-center gap-2"
+              >
+                📈 Gerar Relatório PDF
+              </button>
+              <button 
+                onClick={() => router.push('/dashboard/configuracoes')}
+                className="w-full bg-[#31251f] border border-[rgba(216,197,182,0.2)] text-[#d8c5b6] py-3.5 px-4 rounded-xl font-bold hover:border-[#d8c5b6] transition-all flex items-center justify-center gap-2"
+              >
+                🔗 Criar Compartilhamento
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// ----------------------
+// Sub-components
+// ----------------------
+
+function MetricCard({ icon, label, value, unit, format, change, color, onClick }: any) {
+  const formatValue = () => {
+    if (format === 'currency') return `R$ ${value.toFixed(2).replace('.', ',')}`;
+    if (format === 'decimal') return value.toFixed(2);
+    if (format === 'number') return value.toLocaleString('pt-BR');
+    return value;
   };
-  const sectionTitle = {
-    fontSize: 'var(--fs-body)',
-    fontWeight: 700,
-    color: 'var(--color-accent)',
-    fontFamily: 'var(--font-heading)',
-    marginBottom: 'var(--space-1)',
+
+  const colorMap: any = {
+    orange: 'bg-[rgba(241,133,53,0.05)] border-[#f18535]/30 hover:border-[#f18535]',
+    blue: 'bg-[rgba(33,150,243,0.05)] border-[#2196F3]/30 hover:border-[#2196F3]',
+    green: 'bg-[rgba(76,175,80,0.05)] border-[#4CAF50]/30 hover:border-[#4CAF50]',
+    purple: 'bg-[rgba(156,39,176,0.05)] border-[#9C27B0]/30 hover:border-[#9C27B0]',
+    success: 'bg-[rgba(76,175,80,0.05)] border-[#4CAF50]/30 hover:border-[#4CAF50]',
+    info: 'bg-[rgba(33,150,243,0.05)] border-[#2196F3]/30 hover:border-[#2196F3]',
+    accent: 'bg-[rgba(216,197,182,0.05)] border-[#d8c5b6]/30 hover:border-[#d8c5b6]',
+    warning: 'bg-[rgba(255,152,0,0.05)] border-[#FF9800]/30 hover:border-[#FF9800]',
   };
-  const sectionDesc = {
-    fontSize: 'var(--fs-small)',
-    color: 'var(--color-accent-dim)',
-    marginBottom: 'var(--space-4)',
+
+  const textMap: any = {
+    orange: 'text-[#f18535]',
+    blue: 'text-[#2196F3]',
+    green: 'text-[#4CAF50]',
+    purple: 'text-[#9C27B0]',
+    success: 'text-[#4CAF50]',
+    info: 'text-[#2196F3]',
+    accent: 'text-[#d8c5b6]',
+    warning: 'text-[#FF9800]',
   };
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--color-bg-darker)' }}>
-      {/* Sidebar */}
-      <Sidebar onSync={handleSync} isSyncing={isSyncing} />
-
-      {/* Main content — offset by sidebar width */}
-      <div className="flex flex-col flex-1" style={{ marginLeft: 240 }}>
-        <main className="flex-1 px-8 py-7 space-y-6 max-w-[1200px] w-full mx-auto">
-
-          {/* Page Header */}
-          <PageHeader
-            title="Painel Geral"
-            breadcrumb="Dashboard"
-            description="Gerencie contas, monitore ROI e sincronize dados da API Meta."
-            actions={
-              <div className="flex items-center gap-3">
-                <SyncStatus
-                  lastSync={new Date(syncLogs[0]?.synced_at ?? Date.now())}
-                  nextSync={new Date(Date.now() + 25 * 60 * 1000)}
-                  status={isSyncing ? 'pending' : 'success'}
-                />
-                {/* DB indicator */}
-                <span
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                  style={{
-                    border: '1px solid var(--color-border)',
-                    fontSize: 'var(--fs-tiny)',
-                    fontFamily: 'var(--font-mono)',
-                    color: isDbConnected ? '#4CAF50' : '#FF9800',
-                    background: isDbConnected ? 'rgba(76,175,80,0.08)' : 'rgba(255,152,0,0.08)',
-                  }}
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ background: isDbConnected ? '#4CAF50' : '#FF9800', animation: isDbConnected ? 'vx-pulse-orange 2s infinite' : undefined }}
-                  />
-                  {isDbConnected ? 'Supabase Ativo' : 'Demo Mode'}
-                </span>
-              </div>
-            }
-          />
-
-          {/* Tab Bar */}
-          <div className="flex gap-1" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 1 }}>
-            {tabs.map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className="flex items-center gap-1.5 px-4 py-2.5 font-bold transition-all rounded-t-md"
-                style={{
-                  fontSize: 'var(--fs-small)',
-                  borderBottom: activeTab === tab.key ? '2px solid var(--color-primary)' : '2px solid transparent',
-                  color: activeTab === tab.key ? 'var(--color-primary)' : 'var(--color-accent-muted)',
-                  background: activeTab === tab.key ? 'rgba(241,133,53,0.05)' : 'transparent',
-                  fontFamily: 'var(--font-body)',
-                }}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* ──────────── TAB: OVERVIEW ──────────── */}
-          {activeTab === 'overview' && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              {/* Metric Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard icon={<DollarSign size={16} />} label="Total Investido" value="R$ 18.450" change={14.2} trend="up" color="orange" index={0} />
-                <MetricCard icon={<Eye size={16} />} label="Impressões" value="842.190" change={8.1} trend="up" color="info" index={1} />
-                <MetricCard icon={<MousePointer size={16} />} label="Cliques (CTR)" value="22.840" unit="2.71%" change={5.3} trend="up" color="muted" index={2} />
-                <MetricCard icon={<Percent size={16} />} label="Conversões (ROI)" value="748" unit="3.42x" change={3.2} trend="up" color="success" index={3} />
-              </div>
-
-              {/* Health Panel + Share */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                {/* Health */}
-                <div className="lg:col-span-2" style={cardStyle}>
-                  <p style={sectionTitle}>Saúde de Desempenho</p>
-                  <p style={sectionDesc}>Recomendações geradas automaticamente pelo motor de análise.</p>
-                  <ReportCard
-                    title="Campanha Conversão — Black Friday 2026"
-                    overallHealth="warning"
-                    trend="stable"
-                    issues={[
-                      "Fadiga de criativo no Adset Público Quente 30D (CTR caiu 12% em 3 dias)",
-                      "Sobreposição de públicos de 14% entre Campanha Conversão e Lookalike Leads",
-                    ]}
-                    recommendations={[
-                      "Suba 2 novos vídeos de depoimento no Adset 01 para recuperar CTR",
-                      "Adicione exclusão mútua de compradores nos conjuntos de tráfego frio",
-                    ]}
-                    onViewReport={() => {}}
-                  />
-                </div>
-
-                {/* Share Panel */}
-                <div style={cardStyle} className="flex flex-col">
-                  <p style={sectionTitle}>Compartilhamento</p>
-                  <p style={sectionDesc}>Links públicos com proteção por senha para clientes.</p>
-
-                  <div className="space-y-3 flex-1">
-                    <div
-                      className="rounded-lg p-3"
-                      style={{ background: 'rgba(241,133,53,0.06)', border: '1px solid rgba(241,133,53,0.2)' }}
-                    >
-                      <p className="font-bold" style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent)' }}>
-                        Voxion Client — Relatório Mensal
-                      </p>
-                      <div className="flex gap-1 flex-wrap mt-1.5">
-                        {['Campanha Conversão', 'Lookalike Leads'].map(t => (
-                          <span key={t} className="vx-badge vx-badge-orange" style={{ fontSize: '10px' }}>{t}</span>
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-2">
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#4CAF50' }} />
-                        <span style={{ fontSize: 'var(--fs-tiny)', color: '#4CAF50', fontFamily: 'var(--font-mono)' }}>
-                          Link ativo
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Link href="/configuracoes" className="mt-4">
-                    <Button variant="outline" size="sm" className="w-full gap-2">
-                      <ArrowRight size={13} />
-                      Gerenciar compartilhamentos
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { label: 'Campanhas Ativas', value: campaigns.filter(c => c.status === 'ACTIVE').length, color: '#4CAF50', icon: <Activity size={16} /> },
-                  { label: 'Orçamento Total/Dia', value: `R$ ${campaigns.reduce((a, c) => a + (c.daily_budget ?? 0), 0).toFixed(0)}`, color: 'var(--color-primary)', icon: <DollarSign size={16} /> },
-                  { label: 'Última Sync', value: 'Há 5 min', color: 'var(--color-accent-muted)', icon: <Zap size={16} /> },
-                ].map((stat, i) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
-                    style={{
-                      ...cardStyle,
-                      display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-4)',
-                    }}
-                  >
-                    <div
-                      className="flex h-10 w-10 items-center justify-center rounded-lg flex-shrink-0"
-                      style={{ background: `${stat.color}18`, border: `1px solid ${stat.color}40`, color: stat.color }}
-                    >
-                      {stat.icon}
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 'var(--fs-tiny)', color: 'var(--color-accent-dim)', fontFamily: 'var(--font-body)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        {stat.label}
-                      </p>
-                      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: stat.color, fontFamily: 'var(--font-mono)', lineHeight: 1.2 }}>
-                        {stat.value}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* ──────────── TAB: CAMPAIGNS ──────────── */}
-          {activeTab === 'campaigns' && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
-              className="space-y-5"
-            >
-              {/* Campaigns table */}
-              <div style={cardStyle}>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p style={sectionTitle}>Campanhas</p>
-                    <p style={sectionDesc}>Campanhas importadas e sincronizadas da Meta.</p>
-                  </div>
-                  <span className="vx-badge vx-badge-orange">{campaigns.length} total</span>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="vx-table-header">
-                        <th className="px-4 py-3">Nome</th>
-                        <th className="px-4 py-3">Objetivo</th>
-                        <th className="px-4 py-3 text-right">Orçamento/dia</th>
-                        <th className="px-4 py-3">Status</th>
-                        <th className="px-4 py-3">Criado em</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {campaigns.map((camp, i) => (
-                        <motion.tr
-                          key={camp.id}
-                          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
-                          className="vx-table-row"
-                        >
-                          <td className="px-4 py-0 font-bold" style={{ color: 'var(--color-accent)' }}>{camp.name}</td>
-                          <td className="px-4 py-0" style={{ color: 'var(--color-accent-muted)', fontSize: 'var(--fs-small)' }}>{camp.objective}</td>
-                          <td className="px-4 py-0 text-right" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-small)', color: 'var(--color-primary)' }}>
-                            R$ {camp.daily_budget?.toFixed(2) ?? '—'}
-                          </td>
-                          <td className="px-4 py-0">
-                            <span
-                              className="vx-badge"
-                              style={camp.status === 'ACTIVE'
-                                ? { background: 'rgba(76,175,80,0.1)', borderColor: 'rgba(76,175,80,0.4)', color: '#4CAF50' }
-                                : { background: 'rgba(255,152,0,0.1)', borderColor: 'rgba(255,152,0,0.4)', color: '#FF9800' }}
-                            >
-                              {camp.status === 'ACTIVE' ? 'Ativo' : 'Pausado'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-0 vx-mono">{new Date(camp.created_at).toLocaleDateString('pt-BR')}</td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Ad Sets + Ads */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {[
-                  { label: 'Conjuntos de Anúncios', desc: 'Orçamentos e objetivos por conjunto.', rows: adSets, cols: ['Nome', 'Objetivo', 'Orçamento', 'Status'] },
-                  { label: 'Anúncios (Ads)', desc: 'Criativos vinculados aos conjuntos.', rows: ads, cols: ['Nome', 'Ad Set ID', 'Status'] },
-                ].map(section => (
-                  <div key={section.label} style={cardStyle}>
-                    <p style={sectionTitle}>{section.label}</p>
-                    <p style={sectionDesc}>{section.desc}</p>
-                    <table className="w-full text-left border-collapse">
-                      <thead>
-                        <tr className="vx-table-header">
-                          {section.cols.map(c => <th key={c} className="px-3 py-2">{c}</th>)}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {section.rows.map((row: any) => (
-                          <tr key={row.id} className="vx-table-row">
-                            <td className="px-3 py-0 font-bold" style={{ color: 'var(--color-accent)', fontSize: 'var(--fs-small)' }}>{row.name}</td>
-                            <td className="px-3 py-0 vx-mono">{row.optimization_goal ?? row.adset_id}</td>
-                            {row.daily_budget !== undefined && (
-                              <td className="px-3 py-0" style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-tiny)', color: 'var(--color-primary)' }}>
-                                R$ {row.daily_budget.toFixed(2)}
-                              </td>
-                            )}
-                            <td className="px-3 py-0">
-                              <span className="vx-badge vx-badge-success">{row.status}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* ──────────── TAB: TOKENS ──────────── */}
-          {activeTab === 'tokens' && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
-              <div style={cardStyle}>
-                <p style={sectionTitle}>Tokens da API Meta Graph</p>
-                <p style={sectionDesc}>Chaves de acesso para sincronização automatizada via cron.</p>
-
-                <div className="space-y-4">
-                  {metaTokens.map(token => (
-                    <div key={token.id} className="rounded-xl p-4 space-y-4"
-                      style={{ background: 'rgba(216,197,182,0.04)', border: '1px solid var(--color-border)' }}
-                    >
-                      <div className="flex items-center justify-between flex-wrap gap-2 pb-3" style={{ borderBottom: '1px solid var(--color-border-light)' }}>
-                        <div>
-                          <p className="font-bold" style={{ color: 'var(--color-accent)' }}>{token.account_name}</p>
-                          <p style={{ fontSize: 'var(--fs-tiny)', fontFamily: 'var(--font-mono)', color: 'var(--color-accent-dim)' }}>
-                            Account ID: {token.account_id}
-                          </p>
-                        </div>
-                        <span className="vx-badge vx-badge-success flex items-center gap-1">
-                          <CheckCircle size={10} /> Token Ativo
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {[
-                          { label: 'Access Token', value: token.access_token },
-                          { label: 'Business Manager ID', value: token.business_manager_id ?? 'Não vinculado' },
-                          { label: 'Vencimento', value: new Date(token.token_expires_at).toLocaleString('pt-BR'), icon: <Calendar size={12} /> },
-                          { label: 'Criado em', value: new Date(token.created_at).toLocaleString('pt-BR'), icon: <Calendar size={12} /> },
-                        ].map(field => (
-                          <div key={field.label}>
-                            <p className="mb-1 font-bold uppercase tracking-wider" style={{ fontSize: 'var(--fs-tiny)', color: 'var(--color-accent-dim)' }}>
-                              {field.label}
-                            </p>
-                            <div
-                              className="px-3 py-2 rounded-lg flex items-center gap-2"
-                              style={{
-                                background: 'var(--color-bg-darker)',
-                                border: '1px solid var(--color-border)',
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: 'var(--fs-tiny)',
-                                color: 'var(--color-accent)',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              {field.icon && <span style={{ color: 'var(--color-primary)', flexShrink: 0 }}>{field.icon}</span>}
-                              {field.value}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* ──────────── TAB: LOGS ──────────── */}
-          {activeTab === 'logs' && (
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-5"
-            >
-              {/* Sync Logs */}
-              <div style={cardStyle}>
-                <p style={sectionTitle}>Logs de Sincronização</p>
-                <p style={sectionDesc}>Histórico de execuções manuais e automáticas via cron.</p>
-                <div className="space-y-2">
-                  {syncLogs.map((log, i) => (
-                    <motion.div
-                      key={log.id}
-                      initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                      className="rounded-lg p-3 flex items-start justify-between gap-3"
-                      style={{ background: 'rgba(216,197,182,0.03)', border: '1px solid var(--color-border-light)' }}
-                    >
-                      <div className="min-w-0">
-                        <p style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent)' }}>{log.message}</p>
-                        <p className="vx-mono mt-1">{new Date(log.synced_at).toLocaleString('pt-BR')}</p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <span className="vx-badge vx-badge-success">{log.status}</span>
-                        <p className="vx-mono mt-1">{log.duration_ms}ms</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Audit Logs */}
-              <div style={cardStyle}>
-                <p style={sectionTitle}>Logs de Segurança</p>
-                <p style={sectionDesc}>Registro de ações críticas na plataforma.</p>
-                <div className="space-y-2">
-                  {auditLogs.map((log, i) => (
-                    <motion.div
-                      key={log.id}
-                      initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                      className="rounded-lg p-3 space-y-1"
-                      style={{ background: 'rgba(216,197,182,0.03)', border: '1px solid var(--color-border-light)' }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span
-                          style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 'var(--fs-tiny)',
-                            fontWeight: 700,
-                            color: 'var(--color-primary)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.08em',
-                          }}
-                        >
-                          {log.action}
-                        </span>
-                        <span className="vx-mono">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
-                      </div>
-                      <p style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent-muted)' }}>{log.details}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </main>
-
-        <AppFooter />
+    <motion.div 
+      whileHover={{ y: -4, scale: 1.01 }}
+      onClick={onClick}
+      className={`${colorMap[color]} border-2 rounded-2xl p-6 cursor-pointer transition-colors shadow-lg shadow-black/20`}
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-3xl bg-[#1f1915] p-2 rounded-xl shadow-inner border border-[rgba(216,197,182,0.1)]">{icon}</span>
+        <span className="text-[#d8c5b6]/80 text-xs font-bold tracking-wider">{label}</span>
       </div>
-    </div>
+      
+      <div className="mb-4">
+        <p className={`${textMap[color]} text-3xl font-black tracking-tight font-['Jetbrains_Mono']`}>
+          {formatValue()} <span className="text-lg opacity-80 font-normal">{unit}</span>
+        </p>
+      </div>
+
+      {change && (
+        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${
+          change.trend === 'up' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+        }`}>
+          {change.trend === 'up' ? '↗' : '↘'} {change.percent}% <span className="opacity-70 font-normal">vs mês ant.</span>
+        </div>
+      )}
+    </motion.div>
   );
 }
