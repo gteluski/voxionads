@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import { decrypt } from '@/utils/crypto';
 
 export async function GET(req: Request, { params }: { params: { shareId: string } }) {

@@ -1,7 +1,7 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import { ReportsClient } from './reports-client';
 
 export const metadata = {
@@ -10,7 +10,9 @@ export const metadata = {
 };
 
 export default async function RelatoriosPage() {
-  const session = await getServerSession(authOptions);
+  const supabase = createClient(cookies());
+  const { data: { user } } = await supabase.auth.getUser();
+  const session = user ? { user: { admin_id: user.id, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
 
   if (!session || !session.user) {
     redirect('/auth/login');

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import { performAdminSync } from '@/utils/sync-orchestrator';
 
 // Helper to wrap a promise with a timeout

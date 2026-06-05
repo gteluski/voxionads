@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,187 +10,282 @@ import { Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
 export function LoginForm() {
   const router = useRouter();
+  const { login, loading: authLoading, error: authError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const error = localError || authError;
+  const isLoading = authLoading;
 
   const validateEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    if (!email) { setError('Por favor, informe seu email.'); return; }
-    if (!validateEmail(email)) { setError('Formato de email inválido.'); return; }
-    if (!password) { setError('Por favor, informe sua senha.'); return; }
-    if (password.length < 6) { setError('A senha deve ter no mínimo 6 caracteres.'); return; }
+    setLocalError(null);
+    if (!email) { setLocalError('Por favor, informe seu email.'); return; }
+    if (!validateEmail(email)) { setLocalError('Formato de email inválido.'); return; }
+    if (!password) { setLocalError('Por favor, informe sua senha.'); return; }
+    if (password.length < 6) { setLocalError('A senha deve ter no mínimo 6 caracteres.'); return; }
 
-    setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Credenciais incorretas.');
-      } else {
-        setSuccess(true);
-        setTimeout(() => { router.push('/dashboard'); router.refresh(); }, 1200);
-      }
-    } catch {
-      setError('Erro de conexão ou falha no servidor.');
-    } finally {
-      setIsLoading(false);
+      await login(email, password);
+      setSuccess(true);
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : 'Credenciais incorretas.');
     }
   };
 
   return (
     <div
-      className="relative min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'var(--color-bg-darker)' }}
+      className="relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden"
+      style={{
+        background: 'linear-gradient(135deg, var(--color-bg-dark) 0%, var(--color-bg-darker) 100%)',
+      }}
     >
-      {/* Background glow */}
+      {/* Decorative Orbs */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute rounded-full z-0"
         style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(241,133,53,0.08) 0%, transparent 70%)',
+          width: '400px',
+          height: '400px',
+          top: '-100px',
+          left: '-100px',
+          filter: 'blur(80px)',
+          background: 'radial-gradient(circle, rgba(241, 133, 53, 0.15), transparent)',
+        }}
+      />
+      <div
+        className="pointer-events-none absolute rounded-full z-0"
+        style={{
+          width: '300px',
+          height: '300px',
+          bottom: '-50px',
+          right: '-50px',
+          filter: 'blur(60px)',
+          background: 'radial-gradient(circle, rgba(241, 133, 53, 0.15), transparent)',
         }}
       />
 
-      {/* Toast */}
-      <AnimatePresence>
-        {success && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="fixed top-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-xl"
-            style={{
-              background: 'rgba(76,175,80,0.12)',
-              border: '1px solid rgba(76,175,80,0.4)',
-              color: '#4CAF50',
-              fontFamily: 'var(--font-body)',
-              fontSize: 'var(--fs-small)',
-              fontWeight: 700,
-            }}
-          >
-            <CheckCircle size={14} />
-            Login efetuado! Redirecionando...
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0, 0, 0.2, 1] }}
-        className="w-full max-w-sm"
-        style={{
-          background: 'var(--color-bg-dark)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-8)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.4), var(--shadow-orange)',
-        }}
-      >
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-12 w-auto mb-2" />
-          <p style={{ fontSize: 'var(--fs-small)', color: 'var(--color-accent-dim)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
+      <div className="z-10 w-full flex flex-col items-center max-w-[400px]">
+        {/* Header Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex flex-col items-center mb-10"
+        >
+          <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-10 w-auto mb-2" />
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-accent)', opacity: 0.7 }}>
             Área administrativa
           </p>
-        </div>
+        </motion.div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Error */}
-          <AnimatePresence>
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5"
+        {/* Toast */}
+        <AnimatePresence>
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="fixed top-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-xl"
+              style={{
+                background: 'rgba(76,175,80,0.12)',
+                border: '1px solid rgba(76,175,80,0.4)',
+                color: '#4CAF50',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--fs-small)',
+                fontWeight: 700,
+              }}
+            >
+              <CheckCircle size={14} />
+              Login efetuado! Redirecionando...
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Login Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+          className="w-full relative group"
+          style={{
+            background: 'var(--color-bg-dark)',
+            border: '2px solid rgba(216, 197, 182, 0.2)',
+            borderRadius: '16px',
+            padding: '48px 40px',
+            boxShadow: '0 20px 25px rgba(0, 0, 0, 0.3), 0 0 40px rgba(241, 133, 53, 0.1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(216, 197, 182, 0.4)';
+            e.currentTarget.style.boxShadow = '0 30px 35px rgba(0, 0, 0, 0.4), 0 0 60px rgba(241, 133, 53, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(216, 197, 182, 0.2)';
+            e.currentTarget.style.boxShadow = '0 20px 25px rgba(0, 0, 0, 0.3), 0 0 40px rgba(241, 133, 53, 0.1)';
+          }}
+        >
+          {/* Internal Logo */}
+          <div className="flex flex-col items-center mb-6">
+            <img src="/v-voxion.svg" alt="V Logo" className="w-12 h-12 mb-6" />
+            <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '24px', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '8px' }}>
+              VOXIONads
+            </h1>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-accent)', opacity: 0.6, marginBottom: '8px' }}>
+              Painel administrativo
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Error Message */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="flex items-center gap-3 rounded-lg px-4 py-3"
+                  style={{
+                    background: 'rgba(244, 67, 54, 0.1)',
+                    border: '1px solid #F44336',
+                  }}
+                >
+                  <AlertCircle size={18} style={{ color: '#F44336', flexShrink: 0 }} />
+                  <span style={{ color: 'var(--color-accent)', fontSize: '13px', fontFamily: 'var(--font-heading)' }}>
+                    {error}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Email */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              className="space-y-2"
+            >
+              <label
+                htmlFor="email-input"
                 style={{
-                  background: 'rgba(244,67,54,0.08)',
-                  border: '1px solid rgba(244,67,54,0.3)',
-                  fontSize: 'var(--fs-small)',
-                  color: '#F44336',
+                  display: 'block',
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: 'var(--color-primary)',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
                 }}
               >
-                <AlertCircle size={14} style={{ flexShrink: 0 }} />
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+                Email
+              </label>
+              <Input
+                id="email-input"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                required
+                className="w-full bg-[#f5f5f5] text-[#31251f] border-[#d8c5b6] focus:border-[#f18535] focus:ring-4 focus:ring-[rgba(241,133,53,0.15)] focus-visible:ring-offset-0 focus-visible:ring-[rgba(241,133,53,0.15)] placeholder:text-[#31251f]/50 h-12 rounded-lg font-['Avenir'] text-[14px] transition-all duration-300"
+              />
+            </motion.div>
 
-          {/* Email */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="email-input"
-              className="flex items-center gap-1.5 font-bold"
-              style={{ fontSize: 'var(--fs-tiny)', color: 'var(--color-accent-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}
+            {/* Password */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              className="space-y-2 mb-8"
             >
-              <Mail size={11} style={{ color: 'var(--color-primary)' }} /> Email
-            </label>
-            <Input
-              id="email-input"
-              type="text"
-              placeholder="admin@voxion.ads"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              disabled={isLoading}
-              required
-            />
-          </div>
+              <label
+                htmlFor="password-input"
+                style={{
+                  display: 'block',
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: 'var(--color-primary)',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Senha
+              </label>
+              <Input
+                id="password-input"
+                type="password"
+                placeholder="••••••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                required
+                className="w-full bg-[#f5f5f5] text-[#31251f] border-[#d8c5b6] focus:border-[#f18535] focus:ring-4 focus:ring-[rgba(241,133,53,0.15)] focus-visible:ring-offset-0 focus-visible:ring-[rgba(241,133,53,0.15)] placeholder:text-[#31251f]/50 h-12 rounded-lg font-['Avenir'] text-[14px] transition-all duration-300"
+              />
+            </motion.div>
 
-          {/* Password */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="password-input"
-              className="flex items-center gap-1.5 font-bold"
-              style={{ fontSize: 'var(--fs-tiny)', color: 'var(--color-accent-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}
+            {/* Submit */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.6 }}
             >
-              <Lock size={11} style={{ color: 'var(--color-primary)' }} /> Senha
-            </label>
-            <Input
-              id="password-input"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              disabled={isLoading}
-              required
-            />
+              <Button
+                id="login-submit"
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-[52px] rounded-lg font-bold text-[14px] uppercase tracking-[0.5px] transition-all duration-300"
+                style={{
+                  background: 'var(--color-primary)',
+                  color: 'var(--color-text-dark)',
+                  fontFamily: 'var(--font-heading)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.background = 'var(--color-primary-light)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(241, 133, 53, 0.3)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.background = 'var(--color-primary)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }
+                }}
+              >
+                {isLoading ? (
+                  <span className="w-5 h-5 rounded-full border-2 border-current border-t-transparent vx-spin" />
+                ) : (
+                  'Acessar Sistema'
+                )}
+              </Button>
+            </motion.div>
+          </form>
+
+          {/* Demo Credentials */}
+          <div className="mt-6 text-center leading-relaxed" style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-accent)', opacity: 0.6 }}>
+            <div><strong style={{ color: 'var(--color-primary)', fontWeight: 600 }}>demo:</strong> admin@voxion.ads</div>
+            <div><strong style={{ color: 'var(--color-primary)', fontWeight: 600 }}>senha:</strong> adminpassword</div>
           </div>
+        </motion.div>
+      </div>
 
-          {/* Submit */}
-          <Button
-            id="login-submit"
-            type="submit"
-            className="w-full mt-2 gap-2"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent vx-spin" />
-                Conectando...
-              </>
-            ) : 'Acessar Sistema'}
-          </Button>
-        </form>
-
-        {/* Hint */}
-        <p
-          className="text-center mt-5"
-          style={{ fontSize: 'var(--fs-tiny)', fontFamily: 'var(--font-mono)', color: 'var(--color-accent-dim)' }}
-        >
-          demo: admin@voxion.ads / adminpassword
-        </p>
-      </motion.div>
+      {/* Footer */}
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
+        className="absolute bottom-6 w-full text-center"
+        style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-accent)', opacity: 0.5 }}
+      >
+        © 2025 Voxion Studio. Todos os direitos reservados.
+      </motion.footer>
     </div>
   );
 }

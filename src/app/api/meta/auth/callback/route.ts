@@ -1,14 +1,16 @@
+import { cookies } from 'next/headers';
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import { encrypt } from '@/utils/crypto';
 
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = createClient(cookies());
+  const { data: { user } } = await supabase.auth.getUser();
+  const session = user ? { user: { admin_id: user.id, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Não autorizado. Inicie sessão administrativamente.' },
@@ -158,7 +160,9 @@ export async function GET(req: Request) {
     
     // Log failures to sync_log/audit_logs
     try {
-      const session = await getServerSession(authOptions);
+      const supabase = createClient(cookies());
+  const { data: { user } } = await supabase.auth.getUser();
+  const session = user ? { user: { admin_id: user.id, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
       if (session?.user?.admin_id) {
         await supabase.from('sync_log').insert({
           admin_id: session.user.admin_id,

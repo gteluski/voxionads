@@ -1,9 +1,9 @@
+import { cookies } from 'next/headers';
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import bcrypt from 'bcryptjs';
 
 // GET /api/share/[shareId] - Retrieves public details of a shared dashboard link
@@ -67,7 +67,9 @@ export async function GET(req: Request, { params }: { params: { shareId: string 
 // DELETE /api/share/[shareId] - Deletes a shared dashboard link
 export async function DELETE(req: Request, { params }: { params: { shareId: string } }) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = createClient(cookies());
+  const { data: { user } } = await supabase.auth.getUser();
+  const session = user ? { user: { admin_id: user.id, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
     if (!session || !session.user || !session.user.admin_id) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
@@ -124,7 +126,9 @@ export async function DELETE(req: Request, { params }: { params: { shareId: stri
 // PATCH /api/share/[shareId] - Edits a shared dashboard link
 export async function PATCH(req: Request, { params }: { params: { shareId: string } }) {
   try {
-    const session = await getServerSession(authOptions);
+    const supabase = createClient(cookies());
+  const { data: { user } } = await supabase.auth.getUser();
+  const session = user ? { user: { admin_id: user.id, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
     if (!session || !session.user || !session.user.admin_id) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }

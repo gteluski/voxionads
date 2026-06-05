@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Session } from 'next-auth';
+// removed Session import
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 
 interface ReportsClientProps {
-  session: Session;
+  session: any;
   initialDbConnected: boolean;
   initialReports: any[];
   initialCampaigns: any[];

@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
+import Anthropic from '@anthropic-ai/sdk';
 
 export interface PerformanceAnalysisResult {
   campaignId: string;
@@ -76,7 +77,6 @@ export async function analyzePerformance(
 
   // 3. Fallback Mock Data generation in offline / demo environments
   if (fallbackToMock || !metricsCurrent) {
-    // Generate realistic comparisons
     campaignName = `Campanha Conversão - Black Friday (${campaignId.substring(0, 5)})`;
     metricsCurrent = {
       date: new Date().toISOString().split('T')[0],
@@ -139,7 +139,7 @@ export async function analyzePerformance(
     };
   }
 
-  // 4. Performance Analysis Formulas
+  // 4. Performance Analysis Formulas (Deterministic Baseline)
   const mainIssues: string[] = [];
   const recommendations: string[] = [];
   let overallHealth: 'good' | 'warning' | 'critical' = 'good';
@@ -156,67 +156,58 @@ export async function analyzePerformance(
   const cpaCurrent = conversionsCurrent > 0 ? spendCurrent / conversionsCurrent : 0;
   const convRateCurrent = clicksCurrent > 0 ? (conversionsCurrent / clicksCurrent) * 100 : 0;
 
-  // Compare CPA vs 7 days ago (> 20% increase)
+  // Compare CPA vs 7 days ago
   if (metrics7d) {
     const conversions7d = parseInt(metrics7d.conversions) || 0;
     const spend7d = parseFloat(metrics7d.spend) || 0;
     const cpa7d = conversions7d > 0 ? spend7d / conversions7d : 0;
-
     if (cpa7d > 0 && cpaCurrent > cpa7d * 1.2) {
       mainIssues.push(`CPA aumentou ${(cpaCurrent - cpa7d).toFixed(2)}% comparado a 7 dias atrás.`);
       recommendations.push('CPA alto - considere pausar anúncios com pior performance.');
     }
   }
 
-  // Compare CPA vs 30 days ago (> 20% increase)
+  // Compare CPA vs 30 days ago
   if (metrics30d) {
     const conversions30d = parseInt(metrics30d.conversions) || 0;
     const spend30d = parseFloat(metrics30d.spend) || 0;
     const cpa30d = conversions30d > 0 ? spend30d / conversions30d : 0;
-
     if (cpa30d > 0 && cpaCurrent > cpa30d * 1.2) {
       mainIssues.push(`CPA aumentou ${(cpaCurrent - cpa30d).toFixed(2)}% comparado a 30 dias atrás.`);
       recommendations.push('CPA alto - considere revisar criativos antigos para combater fadiga.');
     }
   }
 
-  // CTR check (< 1.4%)
   if (ctrCurrent < 1.4) {
     mainIssues.push(`Taxa de clique (CTR) de ${ctrCurrent.toFixed(2)}% está abaixo do esperado.`);
     recommendations.push('CTR baixa - revise creative/copy de anúncios para capturar atenção.');
   }
 
-  // ROI check (< 0)
   if (roiCurrent < 0) {
     mainIssues.push('O retorno sobre investimento (ROI) está negativo.');
     recommendations.push('ROI negativo - aumente budget ou optimize landing page para vendas.');
   }
 
-  // Impressions check (< 1000)
   if (impressionsCurrent < 1000) {
     mainIssues.push(`Volume de impressões muito baixo (${impressionsCurrent} impressões).`);
     recommendations.push('Pouco alcance - aumente budget ou expanda o tamanho do público.');
   }
 
-  // Reach caindo
   if (metrics7d && reachCurrent < (parseInt(metrics7d.reach) || 0)) {
     mainIssues.push('O alcance diário diminuiu comparado à semana anterior.');
     recommendations.push('Pouco alcance - teste público de interesse aberto.');
   }
 
-  // CPM check (> R$ 50.00)
   if (cpmCurrent > 50) {
     mainIssues.push(`CPM de R$ ${cpmCurrent.toFixed(2)} está acima do benchmark.`);
     recommendations.push('CPM alto - teste novo público ou placements adicionais no Meta.');
   }
 
-  // Conversion rate (< 1%)
   if (clicksCurrent > 0 && convRateCurrent < 1) {
     mainIssues.push(`Taxa de conversão de cliques em vendas de ${convRateCurrent.toFixed(2)}% está crítica.`);
     recommendations.push('Taxa de conversão baixa - optimize a página de destino (landing page).');
   }
 
-  // 5. Trend Calculation
   if (metrics7d) {
     const roi7d = parseFloat(metrics7d.roi) || 0;
     if (roiCurrent > roi7d) {
@@ -228,7 +219,6 @@ export async function analyzePerformance(
     }
   }
 
-  // 6. Overall Health
   if (roiCurrent < 0 || convRateCurrent < 1) {
     overallHealth = 'critical';
   } else if (ctrCurrent < 1.4 || impressionsCurrent < 1000 || cpmCurrent > 50) {
@@ -241,7 +231,68 @@ export async function analyzePerformance(
     recommendations.push('Campanha saudável. Escalar orçamento diário em 10%.');
   }
 
-  // 7. Save Report in Database
+  // 5. Inteligência Artificial (Anthropic Claude 3)
+  let aiOverallHealth = overallHealth;
+  let aiMainIssues = [...mainIssues];
+  let aiRecommendations = [...recommendations];
+
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      const promptData = {
+        campaignName,
+        currentMetrics: metricsCurrent,
+        sevenDaysAgo: metrics7d,
+        thirtyDaysAgo: metrics30d,
+        preDetectedIssues: mainIssues
+      };
+
+      const systemPrompt = `Você é um Especialista em Tráfego Pago (Facebook Ads/Meta Ads) de nível Sênior trabalhando para a Voxion Ads. 
+Aja como um analista crítico, humano e direto ao ponto. O usuário lhe fornecerá dados JSON com as métricas cruas e os problemas matemáticos detectados pelo sistema em uma campanha.
+Sua missão é devolver um relatório enriquecido formatado RIGOROSAMENTE como um objeto JSON válido.
+NÃO RESPONDA com marcações markdown fora do JSON (não use \`\`\`json). Devolva puramente o objeto JSON.
+Estrutura exigida do JSON:
+{
+  "overallHealth": "good" | "warning" | "critical",
+  "mainIssues": ["problema diagnosticado 1", "problema diagnosticado 2"],
+  "recommendations": ["sugestão prática acionável 1", "sugestão prática acionável 2"]
+}
+Seja analítico. Sugira pausar anúncios, revisar landing pages, combater fadiga de criativos, testar lookalike, alterar copy etc. Responda em português (PT-BR).`;
+
+      const response = await anthropic.messages.create({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: JSON.stringify(promptData) }
+        ],
+        temperature: 0.3
+      });
+
+      const contentBlock = response.content.find((c: any) => c.type === 'text');
+      if (contentBlock && (contentBlock as any).text) {
+        const responseText = (contentBlock as any).text;
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const aiJson = JSON.parse(jsonMatch[0]);
+          if (aiJson.overallHealth) aiOverallHealth = aiJson.overallHealth;
+          if (aiJson.mainIssues && Array.isArray(aiJson.mainIssues) && aiJson.mainIssues.length > 0) {
+            aiMainIssues = aiJson.mainIssues;
+          }
+          if (aiJson.recommendations && Array.isArray(aiJson.recommendations) && aiJson.recommendations.length > 0) {
+            aiRecommendations = aiJson.recommendations;
+          }
+        }
+      }
+    } catch (aiError) {
+      console.error('[Anthropic AI Error] Falha ao processar análise inteligente, usando fallback:', aiError);
+    }
+  }
+
+  // 6. Save Report in Database
   let dbReport: any = null;
   let saveToMock = false;
 
@@ -253,9 +304,9 @@ export async function analyzePerformance(
         campaign_id: campaignId,
         adset_id: null,
         ad_id: null,
-        overall_health: overallHealth,
-        main_issues: mainIssues,
-        recommendations: recommendations,
+        overall_health: aiOverallHealth,
+        main_issues: aiMainIssues,
+        recommendations: aiRecommendations,
         performance_trend: performanceTrend,
         date_range_start: metrics30d?.date || metrics7d?.date || metricsCurrent.date,
         date_range_end: metricsCurrent.date,
@@ -277,14 +328,14 @@ export async function analyzePerformance(
     const mockId = `rep_${Math.random().toString(36).substring(2, 10)}`;
     const newMockReport = {
       id: mockId,
-      campaign_name: campaignName, // include in mock for easier display
+      campaign_name: campaignName,
       admin_id: adminId,
       campaign_id: campaignId,
       adset_id: null,
       ad_id: null,
-      overall_health: overallHealth,
-      main_issues: mainIssues,
-      recommendations: recommendations,
+      overall_health: aiOverallHealth,
+      main_issues: aiMainIssues,
+      recommendations: aiRecommendations,
       performance_trend: performanceTrend,
       date_range_start: metrics30d?.date || metrics7d?.date || metricsCurrent.date,
       date_range_end: metricsCurrent.date,
@@ -300,7 +351,7 @@ export async function analyzePerformance(
 
   return {
     ...dbReport,
-    campaign_name: campaignName, // Attach campaign name to return payload
+    campaign_name: campaignName,
     metrics: {
       current: metricsCurrent,
       diff7d: metrics7d,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Session } from 'next-auth';
+// removed Session import
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 interface ConfiguracoesClientProps {
-  session: Session;
+  session: any;
   initialDbConnected: boolean;
   initialShares: any[];
   initialMetaTokens: any[];

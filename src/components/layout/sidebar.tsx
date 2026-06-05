@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -33,7 +33,7 @@ interface SidebarProps {
 
 export function Sidebar({ onSync, isSyncing }: SidebarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
 
   return (
     <aside className="vx-sidebar">
@@ -101,17 +101,17 @@ export function Sidebar({ onSync, isSyncing }: SidebarProps) {
             className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-black flex-shrink-0"
             style={{ background: 'var(--color-primary)', color: 'var(--color-text-dark)' }}
           >
-            {session?.user?.name?.charAt(0) ?? session?.user?.email?.charAt(0) ?? 'A'}
+            {user?.email?.charAt(0).toUpperCase() ?? 'A'}
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold truncate" style={{ color: 'var(--color-accent)' }}>
-              {session?.user?.name ?? 'Admin'}
+              {user?.user_metadata?.name ?? 'Admin'}
             </p>
-            <p className="vx-mono truncate">{session?.user?.email}</p>
+            <p className="vx-mono truncate">{user?.email}</p>
           </div>
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: '/auth/login' })}
+          onClick={() => logout()}
           className="vx-nav-item w-full text-red-400 hover:text-red-300"
           style={{ color: 'var(--color-danger)', borderColor: 'transparent' }}
         >

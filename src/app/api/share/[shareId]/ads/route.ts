@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { validateShareSession } from '@/utils/share-auth';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 
 export async function GET(req: Request, { params }: { params: { shareId: string } }) {
   try {

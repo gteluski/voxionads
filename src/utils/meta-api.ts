@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import { decrypt, encrypt } from '@/utils/crypto';
 
 // Retry helper using exponential backoff
