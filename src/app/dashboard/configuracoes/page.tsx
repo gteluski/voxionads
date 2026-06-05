@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import { ConfiguracoesClient } from './configuracoes-client';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Configurações - Voxion Ads',
   description: 'Compartilhamentos de dashboard e configurações gerais.',

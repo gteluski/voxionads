@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
 import { DashboardClient } from './dashboard-client';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Painel Voxion Ads',
   description: 'Gerenciamento de campanhas, tokens Meta e relatórios de métricas.',
