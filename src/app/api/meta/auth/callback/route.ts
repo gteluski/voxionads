@@ -168,7 +168,18 @@ export async function GET(req: Request) {
     });
 
     // Clear state cookie
-    const redirectResponse = NextResponse.redirect(new URL('/dashboard/configuracoes?connected=true', req.url));
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL;
+    let redirectUrl = appUrl 
+      ? new URL('/dashboard/configuracoes?connected=true', appUrl) 
+      : new URL('/dashboard/configuracoes?connected=true', req.url);
+
+    let redirectUrlStr = redirectUrl.toString();
+    // Prevent SSL protocol error on local dev hosts
+    if (redirectUrlStr.includes('://localhost') || redirectUrlStr.includes('://0.0.0.0') || redirectUrlStr.includes('://127.0.0.1')) {
+      redirectUrlStr = redirectUrlStr.replace(/^https:/, 'http:');
+    }
+
+    const redirectResponse = NextResponse.redirect(new URL(redirectUrlStr));
     redirectResponse.cookies.set('meta_oauth_state', '', { maxAge: 0 });
 
     return redirectResponse;
