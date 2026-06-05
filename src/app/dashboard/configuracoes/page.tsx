@@ -30,6 +30,7 @@ export default async function ConfiguracoesPage() {
   let settings: any = null;
   let syncLogs: any[] = [];
   let isDbConnected = false;
+  let dbErrorDetails: string | null = null;
 
   try {
     // Basic connectivity probe
@@ -38,7 +39,10 @@ export default async function ConfiguracoesPage() {
       .select('id')
       .limit(1);
 
-    if (!testError) {
+    if (testError) {
+      dbErrorDetails = `Probe: ${testError.message} (${testError.code})`;
+      console.error('SUPABASE DB CONNECTION PROBE ERROR:', testError);
+    } else {
       isDbConnected = true;
 
       const { data: dbShares } = await supabase
@@ -75,8 +79,9 @@ export default async function ConfiguracoesPage() {
         .limit(10);
       syncLogs = dbSyncLogs || [];
     }
-  } catch (err) {
-    console.warn('DB queries failed inside Settings Page. Falling back to mock states.');
+  } catch (err: any) {
+    dbErrorDetails = `Exception: ${err.message || String(err)}`;
+    console.warn('DB queries failed inside Settings Page. Falling back to mock states.', err);
   }
 
   // Seeding mock shares in demo mode to prevent 404 on updates
@@ -135,6 +140,7 @@ export default async function ConfiguracoesPage() {
       initialCampaigns={campaigns}
       initialSettings={settings}
       initialSyncLogs={syncLogs}
+      dbErrorDetails={dbErrorDetails}
     />
   );
 }

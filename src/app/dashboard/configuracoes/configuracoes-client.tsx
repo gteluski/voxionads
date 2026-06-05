@@ -41,6 +41,7 @@ interface ConfiguracoesClientProps {
   initialCampaigns: any[];
   initialSettings: any;
   initialSyncLogs: any[];
+  dbErrorDetails?: string | null;
 }
 
 export function ConfiguracoesClient({
@@ -50,7 +51,8 @@ export function ConfiguracoesClient({
   initialMetaTokens,
   initialCampaigns,
   initialSettings,
-  initialSyncLogs
+  initialSyncLogs,
+  dbErrorDetails
 }: ConfiguracoesClientProps) {
   const router = useRouter();
   const [isDbConnected] = useState(initialDbConnected);
@@ -521,12 +523,19 @@ export function ConfiguracoesClient({
               <span className="font-bold text-xs text-[#d8c5b6] uppercase tracking-wider">Painel Administrativo</span>
             </div>
             
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#1f1915] border border-[rgba(216,197,182,0.3)]">
-              <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
-              {isDbConnected ? (
-                <span className="text-[#d8c5b6]">Base Ativa</span>
-              ) : (
-                <span className="text-amber-400">Ambiente Demo</span>
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#1f1915] border border-[rgba(216,197,182,0.3)]">
+                <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
+                {isDbConnected ? (
+                  <span className="text-[#d8c5b6]">Base Ativa</span>
+                ) : (
+                  <span className="text-amber-400">Ambiente Demo</span>
+                )}
+              </div>
+              {dbErrorDetails && (
+                <span className="text-red-400 text-[9px] max-w-[200px] text-right font-mono block">
+                  {dbErrorDetails}
+                </span>
               )}
             </div>
           </div>
