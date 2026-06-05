@@ -43,9 +43,9 @@ export async function GET(req: Request) {
       );
     }
 
-    const clientId = process.env.META_CLIENT_ID || '';
-    const clientSecret = process.env.META_CLIENT_SECRET || '';
-    const redirectUri = process.env.META_REDIRECT_URI || '';
+    const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID || process.env.META_CLIENT_ID || process.env.META_APP_ID || '';
+    const clientSecret = process.env.META_CLIENT_SECRET || process.env.META_SECRET_KEY || process.env.META_APP_SECRET || '';
+    const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI || process.env.META_REDIRECT_URI || '';
 
     let accessToken = 'mock_access_token_' + Math.random().toString(36).substring(7);
     let refreshToken = 'mock_refresh_token_' + Math.random().toString(36).substring(7);
@@ -151,7 +151,7 @@ export async function GET(req: Request) {
     });
 
     // Clear state cookie
-    const redirectResponse = NextResponse.redirect(new URL('/dashboard', req.url));
+    const redirectResponse = NextResponse.redirect(new URL('/dashboard/configuracoes?connected=true', req.url));
     redirectResponse.cookies.set('meta_oauth_state', '', { maxAge: 0 });
 
     return redirectResponse;

@@ -61,8 +61,8 @@ export function LoginClient({ shareId, shareName }: LoginClientProps) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center relative overflow-hidden p-4">
       {/* Visual background accents */}
-      <div className="absolute top-[-20%] left-[-20%] w-[50%] h-[50%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-20%] w-[50%] h-[50%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[-20%] left-[-20%] w-[50%] h-[50%] rounded-full bg-orange-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[50%] h-[50%] rounded-full bg-green-900/10 blur-[150px] pointer-events-none" />
 
       <Card className="max-w-md w-full border-slate-900 bg-slate-900/20 backdrop-blur-md relative z-10 p-2">
         <CardHeader className="text-center space-y-2">
@@ -103,7 +103,7 @@ export function LoginClient({ shareId, shareName }: LoginClientProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading || (remainingAttempts === 0 && errorMsg.includes('bloqueado'))}
                   required
-                  className="bg-slate-950 border-slate-800 text-xs h-9 pl-9 pr-10 focus:border-indigo-500"
+                  className="bg-slate-950 border-slate-800 text-xs h-9 pl-9 pr-10 focus:border-orange-500"
                 />
                 <button
                   type="button"

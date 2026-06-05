@@ -73,7 +73,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
           <span className="text-xs text-slate-400 font-semibold">Carregando painel de controle...</span>
         </div>
       </div>
@@ -141,8 +141,8 @@ export function ViewClient({ shareId }: ViewClientProps) {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden">
       {/* Background visual accents */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-green-900/10 blur-[150px] pointer-events-none" />
 
       {/* Top Navbar */}
       <nav className="border-b border-slate-800 bg-slate-900/40 backdrop-blur-md sticky top-0 z-50">
@@ -156,8 +156,8 @@ export function ViewClient({ shareId }: ViewClientProps) {
                 Voxion Ads
               </span>
               
-              <div className="flex items-center gap-1.5 ml-4 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-900 border border-slate-800 text-indigo-400">
-                <CheckCircle className="h-3 w-3 text-emerald-400" />
+              <div className="flex items-center gap-1.5 ml-4 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-900 border border-slate-800 text-orange-400">
+                <CheckCircle className="h-3 w-3 text-green-400" />
                 Painel do Cliente (Leitura)
               </div>
             </div>
@@ -226,7 +226,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'overview'
-                ? 'border-indigo-500 text-indigo-400 bg-indigo-950/10'
+                ? 'border-orange-500 text-orange-400 bg-orange-950/10'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -238,7 +238,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
             onClick={() => setActiveTab('structure')}
             className={`px-4 py-2 text-xs font-semibold border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'structure'
-                ? 'border-indigo-500 text-indigo-400 bg-indigo-950/10'
+                ? 'border-orange-500 text-orange-400 bg-orange-950/10'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -256,14 +256,14 @@ export function ViewClient({ shareId }: ViewClientProps) {
               {/* Stat Cards Grid */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard
-                  icon={<DollarSign className="w-4 h-4 text-indigo-400" />}
+                  icon={<DollarSign className="w-4 h-4 text-orange-400" />}
                   label="Total Investido"
                   value={`R$ ${totalSpend.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   trend="neutral"
                   color="info"
                 />
                 <MetricCard
-                  icon={<Eye className="w-4 h-4 text-emerald-400" />}
+                  icon={<Eye className="w-4 h-4 text-green-400" />}
                   label="Impressões"
                   value={totalImpressions.toLocaleString('pt-BR')}
                   trend="neutral"
@@ -277,7 +277,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
                   color="orange"
                 />
                 <MetricCard
-                  icon={<Percent className="w-4 h-4 text-purple-400" />}
+                  icon={<Percent className="w-4 h-4 text-[#9C27B0]-400" />}
                   label="Retorno ROI"
                   value={`${roi.toFixed(0)}%`}
                   trend="neutral"
@@ -314,7 +314,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
               {/* Campaigns Table */}
               <div className="p-5 border border-slate-900 rounded-xl bg-slate-900/20 backdrop-blur-md space-y-4">
                 <div className="flex items-center gap-2">
-                  <Layers className="h-4.5 w-4.5 text-indigo-400" />
+                  <Layers className="h-4.5 w-4.5 text-orange-400" />
                   <h3 className="font-bold text-slate-200 text-sm">Campanhas Ativas</h3>
                 </div>
                 <div className="border border-slate-900 rounded-lg overflow-hidden bg-slate-950/20">
@@ -336,7 +336,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
                             {c.daily_budget ? `R$ ${c.daily_budget.toFixed(2)}` : 'N/A'}
                           </TableCell>
                           <TableCell className="text-right py-3">
-                            <span className="text-[9px] px-2 py-0.5 rounded border border-emerald-900/30 bg-emerald-950/20 text-emerald-400">
+                            <span className="text-[9px] px-2 py-0.5 rounded border border-green-900/30 bg-green-950/20 text-green-400">
                               {c.status}
                             </span>
                           </TableCell>
@@ -350,7 +350,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
               {/* Ad Sets Table */}
               <div className="p-5 border border-slate-900 rounded-xl bg-slate-900/20 backdrop-blur-md space-y-4">
                 <div className="flex items-center gap-2">
-                  <Layers3 className="h-4.5 w-4.5 text-indigo-400" />
+                  <Layers3 className="h-4.5 w-4.5 text-orange-400" />
                   <h3 className="font-bold text-slate-200 text-sm">Conjuntos de Anúncios (Ad Sets)</h3>
                 </div>
                 <div className="border border-slate-900 rounded-lg overflow-hidden bg-slate-950/20">
@@ -372,7 +372,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
                             {as.daily_budget ? `R$ ${as.daily_budget.toFixed(2)}` : 'N/A'}
                           </TableCell>
                           <TableCell className="text-right py-3">
-                            <span className="text-[9px] px-2 py-0.5 rounded border border-emerald-900/30 bg-emerald-950/20 text-emerald-400">
+                            <span className="text-[9px] px-2 py-0.5 rounded border border-green-900/30 bg-green-950/20 text-green-400">
                               {as.status}
                             </span>
                           </TableCell>
@@ -386,7 +386,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
               {/* Ads Table */}
               <div className="p-5 border border-slate-900 rounded-xl bg-slate-900/20 backdrop-blur-md space-y-4">
                 <div className="flex items-center gap-2">
-                  <LayoutGrid className="h-4.5 w-4.5 text-indigo-400" />
+                  <LayoutGrid className="h-4.5 w-4.5 text-orange-400" />
                   <h3 className="font-bold text-slate-200 text-sm">Anúncios (Ads)</h3>
                 </div>
                 <div className="border border-slate-900 rounded-lg overflow-hidden bg-slate-950/20">
@@ -402,7 +402,7 @@ export function ViewClient({ shareId }: ViewClientProps) {
                         <TableRow key={ad.id} className="hover:bg-slate-900/20 border-slate-900 transition-colors">
                           <TableCell className="font-bold text-slate-200 py-3">{ad.name}</TableCell>
                           <TableCell className="text-right py-3">
-                            <span className="text-[9px] px-2 py-0.5 rounded border border-emerald-900/30 bg-emerald-950/20 text-emerald-400">
+                            <span className="text-[9px] px-2 py-0.5 rounded border border-green-900/30 bg-green-950/20 text-green-400">
                               {ad.status}
                             </span>
                           </TableCell>

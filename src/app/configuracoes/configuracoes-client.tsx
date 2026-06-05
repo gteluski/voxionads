@@ -462,7 +462,7 @@ export function ConfiguracoesClient({
     <div className="min-h-screen bg-[#31251f] text-[#d8c5b6] flex flex-col relative overflow-hidden pb-16">
       {/* Background gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[#f18535]/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-green-900/10 blur-[150px] pointer-events-none" />
 
       {/* Top Toast notification */}
       {toast && (
@@ -474,7 +474,7 @@ export function ConfiguracoesClient({
           <span className={`h-2 w-2 rounded-full animate-pulse ${
             toast.type === 'success' ? 'bg-green-400' :
             toast.type === 'error' ? 'bg-red-400' :
-            'bg-indigo-400'
+            'bg-orange-400'
           }`} />
           <span className="text-xs font-semibold">{toast.message}</span>
         </div>
@@ -508,7 +508,7 @@ export function ConfiguracoesClient({
             </div>
             
             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#1f1915] border border-[rgba(216,197,182,0.3)]">
-              <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
               {isDbConnected ? (
                 <span className="text-[#d8c5b6]">Base Ativa</span>
               ) : (
@@ -751,7 +751,7 @@ export function ConfiguracoesClient({
                             </td>
                             <td className="p-2">
                               {log.status === 'SUCCESS' ? (
-                                <span className="inline-flex items-center gap-1 text-green-400 font-bold bg-green-950/10 border border-emerald-900/20 px-1.5 py-0.5 rounded text-[9px]">
+                                <span className="inline-flex items-center gap-1 text-green-400 font-bold bg-green-950/10 border border-green-900/20 px-1.5 py-0.5 rounded text-[9px]">
                                   Sucesso
                                 </span>
                               ) : (
@@ -823,7 +823,7 @@ export function ConfiguracoesClient({
                               </td>
                               <td className="p-3">
                                 {share.has_password ? (
-                                  <span className="inline-flex items-center gap-1 text-green-400 text-[9px] font-bold bg-green-950/15 border border-emerald-900/20 px-1.5 py-0.5 rounded">
+                                  <span className="inline-flex items-center gap-1 text-green-400 text-[9px] font-bold bg-green-950/15 border border-green-900/20 px-1.5 py-0.5 rounded">
                                     <Lock className="h-3 w-3" />
                                     Senha
                                   </span>
@@ -840,7 +840,7 @@ export function ConfiguracoesClient({
                                     Expirado
                                   </span>
                                 ) : share.is_active ? (
-                                  <span className="text-[9px] bg-green-950/20 border border-emerald-900/25 text-green-400 px-2 py-0.5 rounded font-black">
+                                  <span className="text-[9px] bg-green-950/20 border border-green-900/25 text-green-400 px-2 py-0.5 rounded font-black">
                                     Ativo
                                   </span>
                                 ) : (

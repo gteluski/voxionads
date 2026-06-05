@@ -192,8 +192,8 @@ export function ReportsClient({
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden pb-12">
       {/* Background gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-green-900/10 blur-[150px] pointer-events-none" />
 
       {/* Top Navbar */}
       <nav className="border-b border-slate-800 bg-slate-900/40 backdrop-blur-md sticky top-0 z-50">
@@ -224,7 +224,7 @@ export function ReportsClient({
             </div>
             
             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-900 border border-slate-800">
-              <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+              <span className={`h-1.5 w-1.5 rounded-full ${isDbConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'}`} />
               {isDbConnected ? (
                 <span className="text-slate-300">SQL Ativo</span>
               ) : (
@@ -242,7 +242,7 @@ export function ReportsClient({
         <div className="flex items-center justify-between pb-4 border-b border-slate-900 flex-wrap gap-4">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              <FileText className="h-6 w-6 text-indigo-400" />
+              <FileText className="h-6 w-6 text-orange-400" />
               Motor de Análise Automática
             </h2>
             <p className="text-xs text-slate-400 mt-1">
@@ -253,7 +253,7 @@ export function ReportsClient({
           <Button
             onClick={handleGenerateReports}
             disabled={isGenerating}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 py-1.5 h-8 transition-all"
+            className="bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold flex items-center gap-1.5 py-1.5 h-8 transition-all"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
             {isGenerating ? 'Reanalisando...' : 'Reanalisar Campanhas'}
@@ -346,14 +346,14 @@ export function ReportsClient({
                         <td className="p-3">
                           <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold border ${
                             report.overall_health === 'good'
-                              ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400'
+                              ? 'bg-green-950/20 border-green-900/30 text-green-400'
                               : report.overall_health === 'warning'
                               ? 'bg-amber-950/20 border-amber-900/30 text-amber-400'
                               : 'bg-red-950/20 border-red-900/30 text-red-400'
                           }`}>
                             <span className={`h-1.5 w-1.5 rounded-full ${
                               report.overall_health === 'good'
-                                ? 'bg-emerald-400'
+                                ? 'bg-green-400'
                                 : report.overall_health === 'warning'
                                 ? 'bg-amber-400'
                                 : 'bg-red-400'
@@ -378,7 +378,7 @@ export function ReportsClient({
                           {new Date(report.generated_at).toLocaleString('pt-BR')}
                         </td>
                         <td className="p-3 text-right">
-                          <ChevronRight className="h-4.5 w-4.5 text-indigo-400 inline" />
+                          <ChevronRight className="h-4.5 w-4.5 text-orange-400 inline" />
                         </td>
                       </tr>
                     ))}
@@ -406,7 +406,7 @@ export function ReportsClient({
                 <div>
                   <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold border ${
                     activeReport.overall_health === 'good'
-                      ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400'
+                      ? 'bg-green-950/20 border-green-900/30 text-green-400'
                       : activeReport.overall_health === 'warning'
                       ? 'bg-amber-950/20 border-amber-900/30 text-amber-400'
                       : 'bg-red-950/20 border-red-900/30 text-red-400'
@@ -425,7 +425,7 @@ export function ReportsClient({
 
               {loadingDetail ? (
                 <div className="py-20 flex flex-col items-center justify-center gap-2">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
                   <span className="text-xs text-slate-500 font-semibold">Carregando comparativo histórico...</span>
                 </div>
               ) : (
@@ -509,7 +509,7 @@ export function ReportsClient({
                         ))}
                       </ul>
                     ) : (
-                      <div className="text-xs p-3 rounded-lg border border-emerald-950/40 bg-emerald-950/10 text-emerald-300 flex items-center gap-2">
+                      <div className="text-xs p-3 rounded-lg border border-green-950/40 bg-green-950/10 text-green-300 flex items-center gap-2">
                         <CheckCircle className="h-4 w-4" />
                         <span>Nenhum problema encontrado. O desempenho desta campanha está ideal.</span>
                       </div>
@@ -526,7 +526,7 @@ export function ReportsClient({
                             key={idx}
                             className="text-xs p-3 rounded-lg border border-slate-800 bg-slate-900/50 text-slate-350 flex items-start gap-2.5"
                           >
-                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-950 text-indigo-400 font-bold shrink-0 text-[10px]">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-950 text-orange-400 font-bold shrink-0 text-[10px]">
                               {idx + 1}
                             </span>
                             <span>{rec}</span>

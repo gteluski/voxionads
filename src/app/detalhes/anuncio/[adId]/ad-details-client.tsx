@@ -51,7 +51,7 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
           <span className="text-xs text-slate-400 font-semibold">Carregando detalhes do anúncio...</span>
         </div>
       </div>
@@ -62,7 +62,7 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
         <p className="text-slate-400 text-sm mb-4">Anúncio não encontrado ou erro no carregamento.</p>
-        <Button onClick={() => router.push('/dashboard')} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+        <Button onClick={() => router.push('/dashboard')} size="sm" className="bg-orange-600 hover:bg-orange-700">
           Voltar ao Dashboard
         </Button>
       </div>
@@ -120,8 +120,8 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden pb-12">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-green-900/10 blur-[150px] pointer-events-none" />
 
       {/* Top Navbar */}
       <nav className="border-b border-slate-800 bg-slate-900/40 backdrop-blur-md sticky top-0 z-50">
@@ -157,7 +157,7 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
               <h2 className="text-xl font-extrabold text-white">{ad.name}</h2>
               <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                 ad.status === 'ACTIVE'
-                  ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-400 animate-pulse'
+                  ? 'bg-green-950/30 border-green-900/40 text-green-400 animate-pulse'
                   : 'bg-slate-900 border-slate-800 text-slate-400'
               }`}>
                 {ad.status}
@@ -189,14 +189,14 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
         {/* 4 Metric Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            icon={<DollarSign className="w-4 h-4 text-indigo-400" />}
+            icon={<DollarSign className="w-4 h-4 text-orange-400" />}
             label="Investimento"
             value={`R$ ${totalSpend.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             trend="neutral"
             color="info"
           />
           <MetricCard
-            icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
+            icon={<TrendingUp className="w-4 h-4 text-green-400" />}
             label="Conversões"
             value={totalConversions}
             trend="neutral"
@@ -210,7 +210,7 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
             color="orange"
           />
           <MetricCard
-            icon={<Percent className="w-4 h-4 text-purple-400" />}
+            icon={<Percent className="w-4 h-4 text-[#9C27B0]-400" />}
             label="ROI do Anúncio"
             value={`${roi.toFixed(0)}%`}
             trend="neutral"
@@ -231,20 +231,20 @@ export function AdDetailsClient({ adId }: AdDetailsClientProps) {
           </div>
           <div className="p-5 border border-slate-900 rounded-xl bg-slate-900/20 backdrop-blur-md flex flex-col justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold">
+              <div className="flex items-center gap-2 text-orange-400 text-xs font-bold">
                 <ShieldCheck className="h-4 w-4" />
                 Informações do Criativo
               </div>
               <div className="flex flex-col items-center justify-center p-6 border border-dashed border-slate-800 rounded-lg bg-slate-950/20 text-center gap-2">
                 {isVideoCreative ? (
                   <>
-                    <Video className="h-8 w-8 text-indigo-400" />
+                    <Video className="h-8 w-8 text-orange-400" />
                     <span className="text-xs font-bold text-slate-200">Tipo de Criativo: Vídeo</span>
                     <span className="text-[10px] text-slate-500">Formatos recomendados: 9:16 (Story/Reels) & 1:1 (Feed)</span>
                   </>
                 ) : (
                   <>
-                    <FileImage className="h-8 w-8 text-indigo-400" />
+                    <FileImage className="h-8 w-8 text-orange-400" />
                     <span className="text-xs font-bold text-slate-200">Tipo de Criativo: Imagem / Carrossel</span>
                     <span className="text-[10px] text-slate-500">Formatos recomendados: 1:1 Feed & 4:5 Feed</span>
                   </>

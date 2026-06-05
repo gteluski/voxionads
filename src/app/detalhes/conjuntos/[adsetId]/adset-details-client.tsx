@@ -60,7 +60,7 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
           <span className="text-xs text-slate-400 font-semibold">Carregando detalhes do conjunto...</span>
         </div>
       </div>
@@ -71,7 +71,7 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4">
         <p className="text-slate-400 text-sm mb-4">Conjunto de anúncios não encontrado ou erro no carregamento.</p>
-        <Button onClick={() => router.push('/dashboard')} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+        <Button onClick={() => router.push('/dashboard')} size="sm" className="bg-orange-600 hover:bg-orange-700">
           Voltar ao Dashboard
         </Button>
       </div>
@@ -127,8 +127,8 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden pb-12">
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-900/10 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-green-900/10 blur-[150px] pointer-events-none" />
 
       {/* Top Navbar */}
       <nav className="border-b border-slate-800 bg-slate-900/40 backdrop-blur-md sticky top-0 z-50">
@@ -164,7 +164,7 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
               <h2 className="text-xl font-extrabold text-white">{adset.name}</h2>
               <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                 adset.status === 'ACTIVE'
-                  ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-400 animate-pulse'
+                  ? 'bg-green-950/30 border-green-900/40 text-green-400 animate-pulse'
                   : 'bg-slate-900 border-slate-800 text-slate-400'
               }`}>
                 {adset.status}
@@ -196,14 +196,14 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
         {/* 4 Metric Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            icon={<DollarSign className="w-4 h-4 text-indigo-400" />}
+            icon={<DollarSign className="w-4 h-4 text-orange-400" />}
             label="Investimento"
             value={`R$ ${totalSpend.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             trend="neutral"
             color="info"
           />
           <MetricCard
-            icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
+            icon={<TrendingUp className="w-4 h-4 text-green-400" />}
             label="Conversões"
             value={totalConversions}
             trend="neutral"
@@ -217,7 +217,7 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
             color="orange"
           />
           <MetricCard
-            icon={<Percent className="w-4 h-4 text-purple-400" />}
+            icon={<Percent className="w-4 h-4 text-[#9C27B0]-400" />}
             label="ROI do Conjunto"
             value={`${roi.toFixed(0)}%`}
             trend="neutral"
@@ -238,7 +238,7 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
           </div>
           <div className="p-5 border border-slate-900 rounded-xl bg-slate-900/20 backdrop-blur-md flex flex-col justify-between">
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold">
+              <div className="flex items-center gap-2 text-orange-400 text-xs font-bold">
                 <ShieldCheck className="h-4 w-4" />
                 Configurações do Conjunto
               </div>
@@ -265,7 +265,7 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
         <div className="p-5 border border-slate-900 rounded-xl bg-slate-900/20 backdrop-blur-md space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <LayoutGrid className="h-4.5 w-4.5 text-indigo-400" />
+              <LayoutGrid className="h-4.5 w-4.5 text-orange-400" />
               <h3 className="font-bold text-slate-200 text-sm">Anúncios (Ads)</h3>
             </div>
             <span className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 font-bold px-2.5 py-0.5 rounded-full">
@@ -290,14 +290,14 @@ export function AdsetDetailsClient({ adsetId }: AdsetDetailsClientProps) {
                       <TableCell className="py-3">
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${
                           ad.status === 'ACTIVE'
-                            ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-400'
+                            ? 'bg-green-950/30 border-green-900/40 text-green-400'
                             : 'bg-slate-900 border-slate-800 text-slate-400'
                         }`}>
                           {ad.status === 'ACTIVE' ? 'Ativo' : 'Pausado'}
                         </span>
                       </TableCell>
                       <TableCell className="text-right py-3">
-                        <Link href={`/detalhes/anuncio/${ad.id}`} className="text-xs text-indigo-400 hover:text-indigo-300 hover:underline inline-flex items-center font-semibold">
+                        <Link href={`/detalhes/anuncio/${ad.id}`} className="text-xs text-orange-400 hover:text-orange-300 hover:underline inline-flex items-center font-semibold">
                           Métricas do Anúncio
                           <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
                         </Link>
