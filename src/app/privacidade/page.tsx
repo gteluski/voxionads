@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
         
         {/* Header */}
         <div className="flex flex-col items-center mb-12 text-center border-b border-[rgba(216,197,182,0.1)] pb-8">
-          // eslint-disable-next-line @next/next/no-img-element
+          
           <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-20 w-auto mb-6" />
           <h1 className="text-3xl md:text-5xl font-bold text-[#f18535] mb-4 font-['Jetbrains_Mono'] tracking-tight">
             Política de Privacidade

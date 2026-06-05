@@ -76,7 +76,7 @@ export function LoginForm() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="flex flex-col items-center mb-10"
         >
-          // eslint-disable-next-line @next/next/no-img-element
+          
           <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-32 w-auto mb-6 drop-shadow-xl" />
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '16px', color: 'var(--color-accent)', opacity: 0.9 }}>
             Painel Administrativo
@@ -131,7 +131,7 @@ export function LoginForm() {
         >
           {/* Internal Logo */}
           <div className="flex flex-col items-center mb-6">
-            // eslint-disable-next-line @next/next/no-img-element
+            
             <img src="/v-voxion.svg" alt="V Logo" className="w-12 h-12 mb-6" />
             <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '24px', fontWeight: 'bold', color: 'var(--color-primary)', marginBottom: '8px' }}>
               VOXIONads
