@@ -50,6 +50,7 @@ export function useMetrics(
     }
 
     fetchMetrics()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminId, campaignId, dateRange])
 
   return { metrics, loading, error }

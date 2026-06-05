@@ -45,6 +45,7 @@ export function useCampaigns(adminId?: string) {
     return () => {
       subscription.unsubscribe()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminId])
 
   return { campaigns, loading, error }

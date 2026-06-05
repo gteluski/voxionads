@@ -155,6 +155,7 @@ export function DashboardClient({
       <header className="bg-[#1f1915] h-32 flex items-center px-8 border-b border-[rgba(216,197,182,0.2)] sticky top-0 z-50">
         <div className="flex items-center gap-6">
           {/* Logo Voxion - MAIOR (80px) */}
+          // eslint-disable-next-line @next/next/no-img-element
           <img 
             src="/voxion-ads-logo.svg" 
             alt="Voxion Ads"
@@ -172,6 +173,7 @@ export function DashboardClient({
         <div className="flex items-center gap-8">
           {/* Status Sync + Meta Logo */}
           <div className="flex items-center gap-3">
+            // eslint-disable-next-line @next/next/no-img-element
             <img src="/meta-logo.svg" alt="Meta" className="h-8 w-8 opacity-80" />
             <div className="text-right">
               <p className="text-green-400 text-sm font-bold flex items-center justify-end gap-1">

@@ -30,8 +30,8 @@ export default function DataDeletion() {
             <ol className="list-decimal pl-5 space-y-3 text-[#d8c5b6]/90">
               <li>Faça login na plataforma Voxion Ads.</li>
               <li>Acesse o menu de <strong>Configurações</strong> localizado no canto superior direito do Dashboard.</li>
-              <li>Vá até a sessão "Conexão Meta Ads" e clique no botão <strong>"Desconectar Meta"</strong>. Isso revogará o Access Token imediatamente no nosso banco de dados.</li>
-              <li>Em seguida, vá até "Zona de Perigo" no final da página e clique em <strong>"Excluir Minha Conta e Todos os Dados"</strong>. Todos os seus relatórios e logs de sincronização serão apagados irreversivelmente.</li>
+              <li>Vá até a sessão &quot;Conexão Meta Ads&quot; e clique no botão <strong>&quot;Desconectar Meta&quot;</strong>. Isso revogará o Access Token imediatamente no nosso banco de dados.</li>
+              <li>Em seguida, vá até &quot;Zona de Perigo&quot; no final da página e clique em <strong>&quot;Excluir Minha Conta e Todos os Dados&quot;</strong>. Todos os seus relatórios e logs de sincronização serão apagados irreversivelmente.</li>
             </ol>
           </section>
 

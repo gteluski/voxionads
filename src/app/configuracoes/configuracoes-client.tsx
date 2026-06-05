@@ -543,6 +543,7 @@ export function ConfiguracoesClient({
             <Card className="bg-glass glow-orange border-[rgba(216,197,182,0.2)] hover:border-[rgba(216,197,182,0.3)] transition-all duration-300">
               <CardHeader className="pb-4">
                 <CardTitle className="text-sm font-bold text-[#d8c5b6] flex items-center gap-2">
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src="/meta-logo.svg" alt="Meta" className="h-5 w-5" />
                   1. Conta Meta Ads
                 </CardTitle>

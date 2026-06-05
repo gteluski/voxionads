@@ -39,6 +39,7 @@ export function Sidebar({ onSync, isSyncing }: SidebarProps) {
     <aside className="vx-sidebar">
       {/* Logo */}
       <div className="flex items-center px-5 py-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
+        // eslint-disable-next-line @next/next/no-img-element
         <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-8 w-auto" />
       </div>
 

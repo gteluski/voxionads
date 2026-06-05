@@ -11,6 +11,7 @@ export default function TermosServico() {
       <div className="max-w-4xl mx-auto bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-8 md:p-12 shadow-2xl">
         
         <div className="flex flex-col items-center mb-12 text-center border-b border-[rgba(216,197,182,0.1)] pb-8">
+          // eslint-disable-next-line @next/next/no-img-element
           <img src="/voxion-ads-logo.svg" alt="Voxion Ads" className="h-20 w-auto mb-6" />
           <h1 className="text-3xl md:text-5xl font-bold text-[#f18535] mb-4 font-['Jetbrains_Mono'] tracking-tight">
             Termos de Serviço
