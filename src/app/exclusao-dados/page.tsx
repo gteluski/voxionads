@@ -54,7 +54,7 @@ export default function DataDeletion() {
             <h2 className="text-2xl font-bold text-[#f18535] mb-4">Contato para Suporte de Exclusão</h2>
             <p className="text-[#d8c5b6]/90">
               Se você encontrar qualquer dificuldade nos métodos descritos acima, ou preferir que um administrador humano delete os seus dados por você, basta enviar um e-mail para nossa equipe de privacidade: <br/><br/>
-              <strong>Email:</strong> privacidade@voxion.com.br <br/>
+              <strong>Email:</strong> contato@voxion.com.br <br/>
               Nós processaremos sua exclusão num prazo máximo de 48 horas úteis e enviaremos um comprovante da deleção.
             </p>
           </section>
