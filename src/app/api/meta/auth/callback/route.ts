@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { encrypt } from '@/utils/crypto';
 
 export async function GET(req: Request) {
@@ -104,7 +104,7 @@ export async function GET(req: Request) {
 
     // 5. Store / Update meta_tokens inside Supabase
     // Check if the user already has a connected meta_token
-    const { data: existingToken } = await supabase
+    const { data: existingToken } = await supabaseAdmin
       .from('meta_tokens')
       .select('id')
       .eq('admin_id', session.user.admin_id)
@@ -112,7 +112,7 @@ export async function GET(req: Request) {
       .maybeSingle();
 
     if (existingToken) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('meta_tokens')
         .update({
           access_token: encryptedAccessToken,
@@ -126,7 +126,7 @@ export async function GET(req: Request) {
 
       if (updateError) throw updateError;
     } else {
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('meta_tokens')
         .insert({
           admin_id: session.user.admin_id,
@@ -142,7 +142,7 @@ export async function GET(req: Request) {
     }
 
     // Log connection inside audit_logs
-    await supabase.from('audit_logs').insert({
+    await supabaseAdmin.from('audit_logs').insert({
       admin_id: session.user.admin_id,
       action: 'META_AUTH_CONNECTED',
       details: `Conta de anúncios Meta ${accountName} (${accountId}) conectada ${isMock ? '(Modo Demo)' : '(Real)'}.`,
