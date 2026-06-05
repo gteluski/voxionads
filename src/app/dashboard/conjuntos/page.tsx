@@ -112,7 +112,7 @@ export default function ConjuntosPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-[#f18535] font-mono">
-                      {adset.daily_budget ? `R$ ${(adset.daily_budget / 100).toFixed(2)}` : 'N/A'}
+                      {adset.daily_budget ? `R$ ${adset.daily_budget.toFixed(2)}` : 'N/A'}
                     </td>
                     <td className="px-6 py-4 text-[#d8c5b6]/70 text-sm">{adset.optimization_goal}</td>
                     <td className="px-6 py-4 text-[#d8c5b6]/70 text-sm font-mono">

@@ -7,6 +7,7 @@ export async function GET(req: Request) {
   try {
     const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID || process.env.META_CLIENT_ID || process.env.META_APP_ID || '';
     const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI || process.env.META_REDIRECT_URI || '';
+    const configId = process.env.NEXT_PUBLIC_META_CONFIG_ID || process.env.META_CONFIG_ID || '2277687166399404';
 
     if (!clientId || !redirectUri) {
       return NextResponse.json(
@@ -21,7 +22,7 @@ export async function GET(req: Request) {
     const scopes = ['ads_management', 'ads_read', 'business_management'].join(',');
     const fbOAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
-    )}&scope=${scopes}&state=${state}&response_type=code`;
+    )}&scope=${scopes}&state=${state}&response_type=code&config_id=${configId}`;
 
     const response = NextResponse.redirect(fbOAuthUrl);
 
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
   try {
     const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID || process.env.META_CLIENT_ID || process.env.META_APP_ID || '';
     const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI || process.env.META_REDIRECT_URI || '';
+    const configId = process.env.NEXT_PUBLIC_META_CONFIG_ID || process.env.META_CONFIG_ID || '2277687166399404';
 
     if (!clientId || !redirectUri) {
       return NextResponse.json(
@@ -61,7 +63,7 @@ export async function POST(req: Request) {
     const scopes = ['ads_management', 'ads_read', 'business_management'].join(',');
     const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
-    )}&scope=${scopes}&state=${state}&response_type=code`;
+    )}&scope=${scopes}&state=${state}&response_type=code&config_id=${configId}`;
 
     const response = NextResponse.json({ url });
 

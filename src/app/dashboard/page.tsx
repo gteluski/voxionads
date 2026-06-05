@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
+import { ensureAdminUserExists } from '@/lib/supabase/admin';
 import { DashboardClient } from './dashboard-client';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +18,10 @@ export default async function DashboardPage() {
 
   if (!session || !session.user) {
     redirect('/login');
+  }
+
+  if (user && user.email) {
+    await ensureAdminUserExists(user.id, user.email, user.user_metadata?.name);
   }
 
   let isDbConnected = false;

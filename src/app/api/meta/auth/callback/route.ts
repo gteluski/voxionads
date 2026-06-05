@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { supabaseAdmin, ensureAdminUserExists } from '@/lib/supabase/admin';
 import { encrypt } from '@/utils/crypto';
 
 export async function GET(req: Request) {
@@ -11,6 +11,10 @@ export async function GET(req: Request) {
     const supabase = createClient(cookies());
     const { data: { user } } = await supabase.auth.getUser();
     
+    if (user && user.email) {
+      await ensureAdminUserExists(user.id, user.email, user.user_metadata?.name);
+    }
+
     let realAdminId = user?.id;
     if (user?.email) {
       const { data: adminRecord } = await supabaseAdmin

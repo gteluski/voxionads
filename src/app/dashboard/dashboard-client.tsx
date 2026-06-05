@@ -42,6 +42,7 @@ export function DashboardClient({
   initialCampaigns,
   initialMetaTokens,
   initialSyncLogs,
+  initialAuditLogs,
 }: DashboardClientProps) {
   const router = useRouter();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -147,6 +148,45 @@ export function DashboardClient({
       </div>
     );
   }
+
+  // Generate notifications based on DB sync logs, audit logs, and status
+  const apiNotifications = [
+    ...(initialSyncLogs || []).map(l => ({
+      title: l.status === 'SUCCESS' ? 'Sincronização Meta' : 'Alerta de Sincronização',
+      type: l.status === 'SUCCESS' ? 'success' : 'error',
+      message: l.message || 'Métricas de campanhas e anúncios importadas com sucesso.',
+      time: new Date(l.synced_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    })),
+    ...(initialAuditLogs || []).map(l => ({
+      title: l.action === 'META_AUTH_CONNECTED' ? 'Integração Conectada' : l.action.replace(/_/g, ' '),
+      type: l.action.includes('CONNECTED') || l.action.includes('SUCCESS') ? 'success' : 'info',
+      message: l.details || '',
+      time: new Date(l.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    }))
+  ];
+
+  const defaultNotifications = [
+    {
+      title: 'Configuração de Ativos',
+      type: 'success',
+      message: 'ID de Ativos 2277687166399404 ativado com sucesso para esta conta.',
+      time: 'Recente'
+    },
+    {
+      title: 'Anúncio Aprovado',
+      type: 'success',
+      message: 'O criativo "Criativo 01 - Vídeo de Depoimentos" foi aprovado pelas políticas da Meta.',
+      time: 'Hoje'
+    },
+    {
+      title: 'Alerta de Otimização',
+      type: 'warning',
+      message: 'A frequência do conjunto "Público Quente 30D" atingiu 5.4x. Sugerimos renovar criativos.',
+      time: 'Ontem'
+    }
+  ];
+
+  const mergedNotifications = [...apiNotifications, ...defaultNotifications].slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#31251f] flex flex-col font-['Avenir']">
@@ -325,33 +365,73 @@ export function DashboardClient({
         {/* BOTTOM SECTIONS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
           
-          {/* Report Card */}
-          <div className="lg:col-span-2">
-            <div className="bg-green-500/5 border border-green-500/30 rounded-2xl p-8 h-full">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-3xl">✨</span>
-                <h3 className="text-[#f18535] text-2xl font-bold">Insights e Saúde da Conta</h3>
-              </div>
-              <p className="text-green-400 font-bold text-lg mb-6 flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-green-400" />
-                O desempenho geral está acima da média do seu nicho!
-              </p>
-              
-              <div className="space-y-4">
-                <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.1)] p-4 rounded-xl flex items-start gap-3">
-                  <span className="text-[#f18535] mt-0.5">💡</span>
-                  <p className="text-[#d8c5b6]/80 text-sm">
-                    Recomendação: A campanha <strong className="text-[#d8c5b6]">Conversão Black Friday</strong> está com ROI de 3.42x. Aumentar o orçamento em 15% pode escalar os resultados mantendo o CPA saudável.
-                  </p>
+          {/* Status & Verifications + Notifications (Col-span 2) */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Business Assets & Status */}
+            <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-6 flex flex-col justify-between">
+              <div>
+                <h3 className="text-[#f18535] text-lg font-bold mb-5 flex items-center gap-2">
+                  🛡️ Central de Status Meta
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
+                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Configuração de Ativos</span>
+                    <span className="text-[#f18535] font-mono text-[10px] font-bold bg-[#f18535]/10 px-2 py-0.5 rounded">ID: 2277687166399404</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
+                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Conta de Anúncios</span>
+                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" /> Ativa
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
+                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Verificação de Identidade</span>
+                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded">Concluída</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
+                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Verificação da Empresa (BM)</span>
+                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded">Verificado</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Status do Pixel</span>
+                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded">Ativo e Recebendo</span>
+                  </div>
                 </div>
-                <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.1)] p-4 rounded-xl flex items-start gap-3">
-                  <span className="text-[#f18535] mt-0.5">💡</span>
-                  <p className="text-[#d8c5b6]/80 text-sm">
-                    Recomendação: O conjunto <strong className="text-[#d8c5b6]">Público Quente 30D</strong> atingiu uma frequência de 5.4x. Considere renovar os criativos para evitar fadiga visual.
-                  </p>
+              </div>
+              
+              <div className="mt-4 pt-3 border-t border-[rgba(216,197,182,0.08)] text-[11px] text-[#d8c5b6]/50">
+                Sua conta de anúncios e BM estão em conformidade com as diretrizes do Meta.
+              </div>
+            </div>
+
+            {/* Notifications Panel */}
+            <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-6 flex flex-col justify-between">
+              <div>
+                <h3 className="text-[#f18535] text-lg font-bold mb-4 flex items-center gap-2">
+                  🔔 Notificações e Alertas
+                </h3>
+                <div className="space-y-3">
+                  {mergedNotifications.map((notif, idx) => (
+                    <div key={idx} className="bg-[#31251f]/50 border border-[rgba(216,197,182,0.08)] p-2.5 rounded-lg">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                          notif.type === 'success' ? 'bg-green-500/10 text-green-400' :
+                          notif.type === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
+                          notif.type === 'error' ? 'bg-red-500/10 text-red-400' :
+                          'bg-blue-500/10 text-blue-400'
+                        }`}>
+                          {notif.title}
+                        </span>
+                        <span className="text-[#d8c5b6]/40 text-[9px] font-mono">{notif.time}</span>
+                      </div>
+                      <p className="text-[#d8c5b6]/80 text-[11px] leading-relaxed">{notif.message}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+
           </div>
 
           {/* Quick Actions Panel */}

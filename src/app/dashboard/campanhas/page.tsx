@@ -119,7 +119,7 @@ export default function CampaignasPage() {
                   </p>
                   <div className="flex gap-4">
                     <span className="text-[#f18535] text-sm">
-                      Budget: R$ {campaign.daily_budget ? (campaign.daily_budget / 100).toFixed(2) : 'N/A'}
+                      Budget: R$ {campaign.daily_budget ? campaign.daily_budget.toFixed(2) : 'N/A'}
                     </span>
                     <span className="text-[#d8c5b6] text-sm">
                       Criada: {new Date(campaign.created_at).toLocaleDateString('pt-BR')}

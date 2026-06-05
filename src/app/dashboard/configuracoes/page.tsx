@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { supabaseAdmin as supabase } from '@/lib/supabase/admin';
+import { ensureAdminUserExists } from '@/lib/supabase/admin';
 import { ConfiguracoesClient } from './configuracoes-client';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +18,10 @@ export default async function ConfiguracoesPage() {
 
   if (!session || !session.user) {
     redirect('/auth/login');
+  }
+
+  if (user && user.email) {
+    await ensureAdminUserExists(user.id, user.email, user.user_metadata?.name);
   }
 
   let shares: any[] = [];
