@@ -147,6 +147,20 @@ export function ConfiguracoesClient({
     }
   };
 
+  const handleConnectMeta = async () => {
+    const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID;
+    const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI;
+
+    if (!clientId || !redirectUri) {
+      console.error('Variáveis faltando:', { clientId, redirectUri });
+      alert('Erro: Variáveis Meta não configuradas no ambiente. Verifique o arquivo .env ou o painel da Hostinger.');
+      return;
+    }
+
+    // Redirect to API route which handles the OAuth
+    window.location.href = '/api/meta/auth/redirect';
+  };
+
   // 2. Token Rotation
   const handleRotateToken = async () => {
     setIsRotating(true);
@@ -588,12 +602,10 @@ export function ConfiguracoesClient({
                         Nenhuma conta do Meta Ads está conectada atualmente. O painel está em modo offline.
                       </p>
                     </div>
-                    <Link href="/api/meta/auth/redirect" className="block">
-                      <Button className="w-full bg-gradient-to-r from-indigo-500 to-emerald-500 text-[#d8c5b6] text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center">
-                        <Globe className="h-3.5 w-3.5" />
-                        Conectar Conta Meta Ads
-                      </Button>
-                    </Link>
+                    <Button onClick={handleConnectMeta} className="w-full bg-gradient-to-r from-[#f18535] to-amber-500 text-[#31251f] text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center">
+                      <Globe className="h-3.5 w-3.5" />
+                      Conectar Conta Meta Ads
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -637,17 +649,16 @@ export function ConfiguracoesClient({
                     {isRotating ? 'Rotacionando...' : 'Rotacionar Token'}
                   </Button>
                   
-                  <Link href="/api/meta/auth/redirect" className="block w-full">
-                    <Button
-                      variant="outline"
-                      type="button"
-                      disabled={!isMetaConnected}
-                      className="w-full border-[rgba(216,197,182,0.3)] bg-[#1f1915]/20 hover:bg-[#1f1915] text-[#d8c5b6]/90 text-[10px] font-semibold h-7 flex items-center gap-1 justify-center"
-                    >
-                      <Globe className="h-3 w-3" />
-                      Reconectar OAuth
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    disabled={!isMetaConnected}
+                    onClick={handleConnectMeta}
+                    className="w-full border-[rgba(216,197,182,0.3)] bg-[#1f1915]/20 hover:bg-[#1f1915] text-[#d8c5b6]/90 text-[10px] font-semibold h-7 flex items-center gap-1 justify-center"
+                  >
+                    <Globe className="h-3 w-3" />
+                    Reconectar OAuth
+                  </Button>
                 </div>
               </CardContent>
             </Card>

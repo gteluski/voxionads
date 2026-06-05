@@ -5,8 +5,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
-    const clientId = process.env.META_CLIENT_ID || '';
-    const redirectUri = process.env.META_REDIRECT_URI || '';
+    const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID || process.env.META_CLIENT_ID || process.env.META_APP_ID || '';
+    const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI || process.env.META_REDIRECT_URI || '';
 
     if (!clientId || !redirectUri) {
       return NextResponse.json(
@@ -47,8 +47,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const clientId = process.env.META_CLIENT_ID || '';
-    const redirectUri = process.env.META_REDIRECT_URI || '';
+    const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID || process.env.META_CLIENT_ID || process.env.META_APP_ID || '';
+    const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI || process.env.META_REDIRECT_URI || '';
 
     if (!clientId || !redirectUri) {
       return NextResponse.json(
