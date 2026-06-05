@@ -9,8 +9,21 @@ import { encrypt } from '@/utils/crypto';
 export async function GET(req: Request) {
   try {
     const supabase = createClient(cookies());
-  const { data: { user } } = await supabase.auth.getUser();
-  const session = user ? { user: { admin_id: user.id, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let realAdminId = user?.id;
+    if (user?.email) {
+      const { data: adminRecord } = await supabaseAdmin
+        .from('admin_users')
+        .select('id')
+        .eq('email', user.email)
+        .maybeSingle();
+      if (adminRecord?.id) {
+        realAdminId = adminRecord.id;
+      }
+    }
+
+    const session = user ? { user: { admin_id: realAdminId, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
     if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Não autorizado. Inicie sessão administrativamente.' },
@@ -161,11 +174,19 @@ export async function GET(req: Request) {
     // Log failures to sync_log/audit_logs
     try {
       const supabase = createClient(cookies());
-  const { data: { user } } = await supabase.auth.getUser();
-  const session = user ? { user: { admin_id: user.id, email: user.email, name: user.user_metadata?.name || 'Admin' } } : null;
-      if (session?.user?.admin_id) {
-        await supabase.from('sync_log').insert({
-          admin_id: session.user.admin_id,
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      let realAdminId = user?.id;
+      if (user?.email) {
+        const { data: adminRecord } = await supabaseAdmin.from('admin_users').select('id').eq('email', user.email).maybeSingle();
+        if (adminRecord?.id) {
+          realAdminId = adminRecord.id;
+        }
+      }
+      
+      if (realAdminId) {
+        await supabaseAdmin.from('sync_log').insert({
+          admin_id: realAdminId,
           status: 'ERROR',
           message: `Falha no callback Meta OAuth: ${error.message || 'Erro desconhecido'}`,
           synced_at: new Date().toISOString(),
