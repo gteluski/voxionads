@@ -614,6 +614,10 @@ export function ConfiguracoesClient({
           <p className="text-xs text-[#d8c5b6]/70 mt-1.5 max-w-2xl">
             Gerencie integrações com a API do Meta Graph, configure a sincronização automática de métricas, crie links de compartilhamento protegidos para clientes e administre a retenção de dados históricos.
           </p>
+          <div className="mt-3 p-3 rounded bg-black/40 border border-amber-950/40 text-[10px] font-mono text-amber-500/80 space-y-1">
+            <div>DEBUG SESSION: email={session?.user?.email} | admin_id={session?.user?.admin_id}</div>
+            <div>DEBUG TOKENS ({initialMetaTokens.length}): {JSON.stringify(initialMetaTokens)}</div>
+          </div>
         </div>
 
         {/* 2-Column Section Layout */}
