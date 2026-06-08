@@ -56,6 +56,7 @@ export function ConfiguracoesClient({
 }: ConfiguracoesClientProps) {
   const router = useRouter();
   const [isDbConnected] = useState(initialDbConnected);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   // Debug: Detect OAuth callback results from URL query params
   useEffect(() => {
@@ -65,21 +66,28 @@ export function ConfiguracoesClient({
 
     const params = new URLSearchParams(window.location.search);
     const connected = params.get('connected');
-    const error = params.get('error');
+    const oauthErr = params.get('oauth_error');
+    const failedStep = params.get('failed_step');
+    const accountName = params.get('account');
 
-    console.log('🔵 [CONFIG] Parâmetros URL:', { connected, error });
+    console.log('🔵 [CONFIG] Parâmetros URL:', { connected, oauthErr, failedStep, accountName });
 
     if (connected === 'true') {
       console.log('🟢 [CONFIG] ✓ OAuth retornou com sucesso!');
-      showToast('✓ Conta Meta conectada com sucesso! Recarregue para ver os dados.', 'success');
-      // Clean URL params without reload
+      const msg = accountName 
+        ? `✓ Conta "${decodeURIComponent(accountName)}" conectada com sucesso!`
+        : '✓ Conta Meta conectada com sucesso! Recarregue para ver os dados.';
+      showToast(msg, 'success');
       window.history.replaceState({}, '', window.location.pathname);
     }
 
-    if (error) {
-      console.log('🔴 [CONFIG] ✗ OAuth retornou com erro:', error);
-      showToast(`✗ Erro na conexão Meta: ${decodeURIComponent(error)}`, 'error');
-      window.history.replaceState({}, '', window.location.pathname);
+    if (oauthErr) {
+      const decodedError = decodeURIComponent(oauthErr);
+      const decodedStep = failedStep ? decodeURIComponent(failedStep) : '';
+      console.log('🔴 [CONFIG] ✗ OAuth ERRO:', decodedError, '| Step:', decodedStep);
+      setOauthError(decodedError);
+      showToast(`✗ Erro OAuth: ${decodedError}`, 'error');
+      // Don't clean URL so user can screenshot/share the error
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -520,6 +528,31 @@ export function ConfiguracoesClient({
             'bg-orange-400'
           }`} />
           <span className="text-xs font-semibold">{toast.message}</span>
+        </div>
+      )}
+
+      {/* OAuth Error Banner - persistent and visible */}
+      {oauthError && (
+        <div className="bg-red-950/95 border-b-2 border-red-500 px-4 py-3 relative z-50">
+          <div className="max-w-7xl mx-auto flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-red-300 font-bold text-xs">🔴 Erro na conexão OAuth Meta</p>
+              <p className="text-red-200/80 text-[11px] mt-1 font-mono break-all">{oauthError}</p>
+              <p className="text-red-400/60 text-[10px] mt-1.5">
+                Copie esta mensagem e envie para diagnóstico. A URL contém os detalhes completos.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setOauthError(null);
+                window.history.replaceState({}, '', window.location.pathname);
+              }}
+              className="text-red-400 hover:text-red-300 text-xs px-2 py-1 border border-red-800 rounded shrink-0"
+            >
+              ✕ Fechar
+            </button>
+          </div>
         </div>
       )}
 
