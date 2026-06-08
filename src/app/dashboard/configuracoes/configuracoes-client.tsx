@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // removed Session import
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -56,6 +56,33 @@ export function ConfiguracoesClient({
 }: ConfiguracoesClientProps) {
   const router = useRouter();
   const [isDbConnected] = useState(initialDbConnected);
+
+  // Debug: Detect OAuth callback results from URL query params
+  useEffect(() => {
+    console.log('🔵 [CONFIG] Página Configurações carregada');
+    console.log('🔵 [CONFIG] Meta tokens iniciais:', initialMetaTokens.length);
+    console.log('🔵 [CONFIG] DB conectado:', initialDbConnected);
+
+    const params = new URLSearchParams(window.location.search);
+    const connected = params.get('connected');
+    const error = params.get('error');
+
+    console.log('🔵 [CONFIG] Parâmetros URL:', { connected, error });
+
+    if (connected === 'true') {
+      console.log('🟢 [CONFIG] ✓ OAuth retornou com sucesso!');
+      showToast('✓ Conta Meta conectada com sucesso! Recarregue para ver os dados.', 'success');
+      // Clean URL params without reload
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
+    if (error) {
+      console.log('🔴 [CONFIG] ✗ OAuth retornou com erro:', error);
+      showToast(`✗ Erro na conexão Meta: ${decodeURIComponent(error)}`, 'error');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // 1. Meta Account & Token states
   const [isMetaConnected, setIsMetaConnected] = useState(initialMetaTokens.length > 0);
