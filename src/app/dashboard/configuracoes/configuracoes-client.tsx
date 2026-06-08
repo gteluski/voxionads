@@ -770,8 +770,10 @@ export function ConfiguracoesClient({
                   
                   {/* Frequency select */}
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-[#d8c5b6]/70 uppercase">Frequência da Sync</label>
+                    <label htmlFor="syncFrequency" className="text-[9px] font-bold text-[#d8c5b6]/70 uppercase">Frequência da Sync</label>
                     <select
+                      id="syncFrequency"
+                      name="syncFrequency"
                       value={syncFrequency}
                       disabled={!autoSync}
                       onChange={(e) => {
@@ -1012,11 +1014,13 @@ export function ConfiguracoesClient({
                 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-[#31251f]/30 border border-[rgba(216,197,182,0.2)]/50">
                   <div className="space-y-1 flex-1">
-                    <span className="text-[9px] font-bold text-[#d8c5b6]/70 uppercase block">Período de Armazenamento</span>
+                    <label htmlFor="retentionPeriod" className="text-[9px] font-bold text-[#d8c5b6]/70 uppercase block">Período de Armazenamento</label>
                     <span className="text-[10px] text-[#d8c5b6]/50 block">
                       Dados antigos são automaticamente deletados para otimizar espaço de banco.
                     </span>
                     <select
+                      id="retentionPeriod"
+                      name="retentionPeriod"
                       value={retentionPeriod}
                       onChange={(e) => {
                         setRetentionPeriod(e.target.value);
@@ -1134,8 +1138,10 @@ export function ConfiguracoesClient({
                 
                 {/* Share Name */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">Nome do Compartilhamento</label>
+                  <label htmlFor="shareName" className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">Nome do Compartilhamento</label>
                   <Input
+                    id="shareName"
+                    name="shareName"
                     type="text"
                     placeholder="Ex: Dashboard Cliente Voxion"
                     value={shareName}
@@ -1147,9 +1153,11 @@ export function ConfiguracoesClient({
 
                 {/* Account / BM selector (Read-only if editing) */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">Business Manager Conectada</label>
+                  <label htmlFor="bmId" className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">Business Manager Conectada</label>
                   {editingShareId ? (
                     <Input
+                      id="bmId"
+                      name="bmId"
                       type="text"
                       readOnly
                       disabled
@@ -1158,6 +1166,8 @@ export function ConfiguracoesClient({
                     />
                   ) : (
                     <select
+                      id="bmId"
+                      name="bmId"
                       value={bmId}
                       onChange={(e) => setBmId(e.target.value)}
                       required
@@ -1202,11 +1212,13 @@ export function ConfiguracoesClient({
 
                 {/* Expiration Date picker */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase flex items-center gap-1">
+                  <label htmlFor="expiresAt" className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" />
                     Data de Expiração (Opcional)
                   </label>
                   <Input
+                    id="expiresAt"
+                    name="expiresAt"
                     type="date"
                     value={expiresAt}
                     onChange={(e) => setExpiresAt(e.target.value)}
@@ -1236,12 +1248,14 @@ export function ConfiguracoesClient({
                 {/* Password field - only if toggled */}
                 {passwordProtected && (
                   <div className="space-y-1 animate-in slide-in-from-top-2 duration-200">
-                    <label className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">
+                    <label htmlFor="password" className="text-[10px] font-bold text-[#d8c5b6]/70 uppercase">
                       {editingShareId ? 'Redefinir Senha do Link (Opcional)' : 'Definir Senha do Link'}
                     </label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 h-4 w-4 text-[#d8c5b6]/50" />
                       <Input
+                        id="password"
+                        name="password"
                         type="password"
                         placeholder={editingShareId ? 'Deixe em branco para manter a senha atual' : 'Senha de acesso para o cliente'}
                         value={password}
