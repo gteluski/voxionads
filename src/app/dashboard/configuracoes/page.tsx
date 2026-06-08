@@ -45,38 +45,58 @@ export default async function ConfiguracoesPage() {
     } else {
       isDbConnected = true;
 
-      const { data: dbShares } = await supabase
+      const { data: dbShares, error: sharesError } = await supabase
         .from('shared_dashboards')
         .select('*')
         .eq('admin_id', session.user.admin_id)
         .order('created_at', { ascending: false });
+      if (sharesError) {
+        dbErrorDetails = dbErrorDetails ? `${dbErrorDetails} | Shares: ${sharesError.message}` : `Shares: ${sharesError.message}`;
+        console.error('Shares query error:', sharesError);
+      }
       shares = dbShares || [];
 
-      const { data: dbTokens } = await supabase
+      const { data: dbTokens, error: tokensError } = await supabase
         .from('meta_tokens')
         .select('id, account_name, business_manager_id, account_id, updated_at')
         .eq('admin_id', session.user.admin_id);
+      if (tokensError) {
+        dbErrorDetails = dbErrorDetails ? `${dbErrorDetails} | Tokens: ${tokensError.message}` : `Tokens: ${tokensError.message}`;
+        console.error('Tokens query error:', tokensError);
+      }
       metaTokens = dbTokens || [];
 
-      const { data: dbCampaigns } = await supabase
+      const { data: dbCampaigns, error: campaignsError } = await supabase
         .from('campaigns')
         .select('id, name, meta_campaign_id')
         .eq('admin_id', session.user.admin_id);
+      if (campaignsError) {
+        dbErrorDetails = dbErrorDetails ? `${dbErrorDetails} | Campaigns: ${campaignsError.message}` : `Campaigns: ${campaignsError.message}`;
+        console.error('Campaigns query error:', campaignsError);
+      }
       campaigns = dbCampaigns || [];
 
-      const { data: dbSettings } = await supabase
+      const { data: dbSettings, error: settingsError } = await supabase
         .from('admin_settings')
         .select('*')
         .eq('admin_id', session.user.admin_id)
         .maybeSingle();
+      if (settingsError) {
+        dbErrorDetails = dbErrorDetails ? `${dbErrorDetails} | Settings: ${settingsError.message}` : `Settings: ${settingsError.message}`;
+        console.error('Settings query error:', settingsError);
+      }
       settings = dbSettings || null;
 
-      const { data: dbSyncLogs } = await supabase
+      const { data: dbSyncLogs, error: syncLogsError } = await supabase
         .from('sync_log')
         .select('*')
         .eq('admin_id', session.user.admin_id)
         .order('synced_at', { ascending: false })
         .limit(10);
+      if (syncLogsError) {
+        dbErrorDetails = dbErrorDetails ? `${dbErrorDetails} | SyncLogs: ${syncLogsError.message}` : `SyncLogs: ${syncLogsError.message}`;
+        console.error('SyncLogs query error:', syncLogsError);
+      }
       syncLogs = dbSyncLogs || [];
     }
   } catch (err: any) {
