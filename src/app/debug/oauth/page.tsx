@@ -177,8 +177,8 @@ export default function DebugOAuthPage() {
           </h2>
           <ol className="space-y-1.5 text-xs text-[#d8c5b6]/80">
             <li className="flex gap-2"><span className="text-[#f18535] font-bold">1.</span> Abra <kbd className="bg-[#31251f] px-1.5 py-0.5 rounded text-[10px] border border-[#d8c5b6]/20">F12</kbd> (Developer Tools) → Console</li>
-            <li className="flex gap-2"><span className="text-[#f18535] font-bold">2.</span> Clique em <strong>"Executar Diagnóstico"</strong> abaixo</li>
-            <li className="flex gap-2"><span className="text-[#f18535] font-bold">3.</span> Se tudo OK, clique em <strong>"Testar OAuth Completo"</strong></li>
+            <li className="flex gap-2"><span className="text-[#f18535] font-bold">2.</span> Clique em <strong>&quot;Executar Diagnóstico&quot;</strong> abaixo</li>
+            <li className="flex gap-2"><span className="text-[#f18535] font-bold">3.</span> Se tudo OK, clique em <strong>&quot;Testar OAuth Completo&quot;</strong></li>
             <li className="flex gap-2"><span className="text-[#f18535] font-bold">4.</span> Após voltar do Facebook, veja os logs no console do <strong>servidor</strong> (terminal)</li>
             <li className="flex gap-2"><span className="text-[#f18535] font-bold">5.</span> Procure por <span className="text-red-400">🔴</span> = ERRO que explica ONDE falhou</li>
           </ol>
@@ -255,23 +255,23 @@ export default function DebugOAuthPage() {
             </h2>
             <div className="space-y-2 text-[11px]">
               <div className="p-2 rounded bg-[#31251f]/50 border border-red-900/20">
-                <strong className="text-red-300">"Usuário não autenticado"</strong>
+                <strong className="text-red-300">&quot;Usuário não autenticado&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ Login expirou. Faça login novamente.</p>
               </div>
               <div className="p-2 rounded bg-[#31251f]/50 border border-red-900/20">
-                <strong className="text-red-300">"State inválido ou cookie expirado"</strong>
+                <strong className="text-red-300">&quot;State inválido ou cookie expirado&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ Cookie perdido no redirect. Cheque HTTPS e SameSite.</p>
               </div>
               <div className="p-2 rounded bg-[#31251f]/50 border border-red-900/20">
-                <strong className="text-red-300">"Falha ao trocar código pelo token"</strong>
+                <strong className="text-red-300">&quot;Falha ao trocar código pelo token&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ META_CLIENT_SECRET errado ou código expirado.</p>
               </div>
               <div className="p-2 rounded bg-[#31251f]/50 border border-red-900/20">
-                <strong className="text-red-300">"ERRO na encriptação"</strong>
+                <strong className="text-red-300">&quot;ERRO na encriptação&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ Módulo crypto com problema. Cheque ENCRYPTION_KEY.</p>
               </div>
               <div className="p-2 rounded bg-[#31251f]/50 border border-red-900/20">
-                <strong className="text-red-300">"ERRO ao inserir Supabase"</strong>
+                <strong className="text-red-300">&quot;ERRO ao inserir Supabase&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ RLS bloqueando ou FK inválida. Cheque SERVICE_ROLE_KEY.</p>
               </div>
             </div>
@@ -283,15 +283,15 @@ export default function DebugOAuthPage() {
             </h2>
             <div className="space-y-2 text-[11px]">
               <div className="p-2 rounded bg-[#31251f]/50 border border-green-900/20">
-                <strong className="text-green-300">"✓✓✓ SUCESSO COMPLETO"</strong>
+                <strong className="text-green-300">&quot;✓✓✓ SUCESSO COMPLETO&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ Token foi salvo no Supabase. Volte para Configurações.</p>
               </div>
               <div className="p-2 rounded bg-[#31251f]/50 border border-green-900/20">
-                <strong className="text-green-300">"✓ Token recebido"</strong>
+                <strong className="text-green-300">&quot;✓ Token recebido&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ Meta autorizou. Se falhar depois, é Supabase.</p>
               </div>
               <div className="p-2 rounded bg-[#31251f]/50 border border-green-900/20">
-                <strong className="text-green-300">"✓ Long-lived token recebido"</strong>
+                <strong className="text-green-300">&quot;✓ Long-lived token recebido&quot;</strong>
                 <p className="text-[#d8c5b6]/60 mt-0.5">→ Token de 60 dias gerado com sucesso.</p>
               </div>
             </div>
