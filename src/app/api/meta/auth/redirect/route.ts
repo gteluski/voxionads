@@ -11,12 +11,12 @@ export async function GET(req: Request) {
   try {
     const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID || process.env.META_CLIENT_ID || process.env.META_APP_ID || '';
     const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI || process.env.META_REDIRECT_URI || '';
-    const configId = process.env.NEXT_PUBLIC_META_CONFIG_ID || process.env.META_CONFIG_ID || '2277687166399404';
+    const configId = process.env.NEXT_PUBLIC_META_CONFIG_ID || process.env.META_CONFIG_ID || ''; // Omitir config_id por padrão se não configurado nas variáveis de ambiente
 
     console.log('🔵 [REDIRECT] Credenciais:', {
       clientId: clientId ? `✓ (${clientId})` : '✗ FALTA',
       redirectUri: redirectUri || '✗ FALTA',
-      configId: configId || '✗ FALTA',
+      configId: configId ? `✓ (${configId})` : '✗ Opcional (não definido)',
     });
 
     if (!clientId || !redirectUri) {
@@ -32,9 +32,10 @@ export async function GET(req: Request) {
     console.log('🔵 [REDIRECT] State gerado:', state.substring(0, 15) + '...');
 
     const scopes = ['ads_management', 'ads_read', 'business_management'].join(',');
+    const configParam = configId ? `&config_id=${configId}` : '';
     const fbOAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
-    )}&scope=${scopes}&state=${state}&response_type=code&config_id=${configId}`;
+    )}&scope=${scopes}&state=${state}&response_type=code${configParam}`;
 
     console.log('🔵 [REDIRECT] OAuth URL:', fbOAuthUrl);
 
@@ -74,12 +75,12 @@ export async function POST(req: Request) {
   try {
     const clientId = process.env.NEXT_PUBLIC_META_CLIENT_ID || process.env.META_CLIENT_ID || process.env.META_APP_ID || '';
     const redirectUri = process.env.NEXT_PUBLIC_META_REDIRECT_URI || process.env.META_REDIRECT_URI || '';
-    const configId = process.env.NEXT_PUBLIC_META_CONFIG_ID || process.env.META_CONFIG_ID || '2277687166399404';
+    const configId = process.env.NEXT_PUBLIC_META_CONFIG_ID || process.env.META_CONFIG_ID || '';
 
     console.log('🔵 [REDIRECT] Credenciais:', {
       clientId: clientId ? `✓ (${clientId})` : '✗ FALTA',
       redirectUri: redirectUri || '✗ FALTA',
-      configId: configId || '✗ FALTA',
+      configId: configId ? `✓ (${configId})` : '✗ Opcional (não definido)',
     });
 
     if (!clientId || !redirectUri) {
@@ -94,9 +95,10 @@ export async function POST(req: Request) {
     console.log('🔵 [REDIRECT] State gerado:', state.substring(0, 15) + '...');
 
     const scopes = ['ads_management', 'ads_read', 'business_management'].join(',');
+    const configParam = configId ? `&config_id=${configId}` : '';
     const url = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
-    )}&scope=${scopes}&state=${state}&response_type=code&config_id=${configId}`;
+    )}&scope=${scopes}&state=${state}&response_type=code${configParam}`;
 
     console.log('🔵 [REDIRECT] OAuth URL:', url);
 

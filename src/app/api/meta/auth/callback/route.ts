@@ -30,6 +30,20 @@ export async function GET(req: Request) {
   console.log('========================================');
 
   try {
+    const { searchParams } = new URL(req.url);
+    await supabaseAdmin.from('audit_logs').insert({
+      action: 'DEBUG_CALLBACK_RECEIVED',
+      details: JSON.stringify({
+        url: req.url,
+        params: Object.fromEntries(searchParams.entries()),
+        headers: Object.fromEntries(req.headers.entries()),
+      }),
+    });
+  } catch (e: any) {
+    console.log('⚠️ [CALLBACK] Falha ao registrar log de debug no Supabase:', e.message);
+  }
+
+  try {
     // ── Step 1: Authenticate user ──────────────────────────────
     console.log('🔵 [CALLBACK] Step 1: Autenticando usuário...');
     let supabase;
@@ -77,17 +91,54 @@ export async function GET(req: Request) {
     console.log('🟢 [CALLBACK] ✓ Sessão:', session.user.email, '| admin_id:', realAdminId);
 
     // ── Step 2: Extract query params ───────────────────────────
-    const { searchParams } = new URL(req.url);
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
+    // Função auxiliar para extrair parâmetros da URL ou de cabeçalhos de proxy (essencial para Hostinger/Nginx que podem filtrar a query string)
+    const getParam = (paramName: string): string | null => {
+      try {
+        const { searchParams } = new URL(req.url);
+        const val = searchParams.get(paramName);
+        if (val) return val;
+      } catch (e) {}
+
+      // Cabeçalhos comuns onde proxies guardam o path e a query string originais
+      const headersToTry = [
+        'x-original-url',
+        'x-rewrite-url',
+        'x-request-uri',
+        'x-forwarded-uri',
+        'x-original-uri',
+        'x-forwarded-url'
+      ];
+
+      for (const header of headersToTry) {
+        const headerVal = req.headers.get(header);
+        if (headerVal) {
+          try {
+            // Reconstrói URL absoluta fictícia caso seja um path relativo (/api/...)
+            const urlStr = headerVal.startsWith('http') 
+              ? headerVal 
+              : `http://localhost${headerVal.startsWith('/') ? '' : '/'}${headerVal}`;
+            const parsed = new URL(urlStr);
+            const val = parsed.searchParams.get(paramName);
+            if (val) {
+              console.log(`🟢 [CALLBACK] Parâmetro '${paramName}' recuperado do cabeçalho de proxy '${header}'`);
+              return val;
+            }
+          } catch (err) {}
+        }
+      }
+      return null;
+    };
+
+    const code = getParam('code');
+    const state = getParam('state');
 
     console.log('🔵 [CALLBACK] Step 2: code:', code ? '✓' : '✗', '| state:', state ? '✓' : '✗');
 
     if (!code) {
       // Check if Facebook returned an error
-      const fbError = searchParams.get('error');
-      const fbErrorReason = searchParams.get('error_reason');
-      const fbErrorDesc = searchParams.get('error_description');
+      const fbError = getParam('error');
+      const fbErrorReason = getParam('error_reason');
+      const fbErrorDesc = getParam('error_description');
       if (fbError) {
         return redirectWithError(req, 'Step2-FacebookDenied', `Facebook negou: ${fbErrorDesc || fbErrorReason || fbError}`);
       }
