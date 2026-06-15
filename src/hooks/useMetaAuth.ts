@@ -162,7 +162,7 @@ export function useMetaAuth() {
   }, [expiresIn, checkLoginStatus])
 
   const loginWithFacebook = async (
-    scope: string = 'public_profile,email,ads_management,business_management'
+    scope: string = 'public_profile,email'
   ) => {
     console.log('🔵 [AUTH] Iniciando login...')
     const fb = typeof window !== 'undefined' ? (window as any).FB : null

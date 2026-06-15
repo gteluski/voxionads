@@ -112,7 +112,7 @@ export default function FacebookLoginButton() {
       <div className="flex justify-center bg-white rounded-lg p-1 py-1.5 overflow-hidden">
         <div 
           className="fb-login-button"
-          data-scope="public_profile,email,ads_management,business_management"
+          data-scope="public_profile,email"
           data-onlogin="checkLoginState();"
           data-size="large"
           data-button-type="continue_with"
