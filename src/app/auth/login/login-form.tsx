@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react';
+import FacebookLoginButton from '@/components/FacebookLoginButton';
 
 export function LoginForm() {
   const router = useRouter();
@@ -269,6 +270,21 @@ export function LoginForm() {
               </Button>
             </motion.div>
           </form>
+
+          {/* Divisor */}
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[rgba(216,197,182,0.15)]"></div>
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-3 bg-[#1f1915] text-[#d8c5b6]/60">ou acesse com</span>
+            </div>
+          </div>
+
+          {/* Facebook Login Button */}
+          <div className="mb-6">
+            <FacebookLoginButton />
+          </div>
 
           {/* Demo Credentials */}
           <div className="mt-6 text-center leading-relaxed" style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--color-accent)', opacity: 0.6 }}>
