@@ -12,7 +12,7 @@ interface MetricCardProps {
   change?: number
   trend?: "up" | "down" | "neutral"
   /** accent color variant for the card */
-  color?: "orange" | "success" | "warning" | "info" | "muted"
+  color?: "orange" | "success" | "warning" | "info" | "muted" | "blue" | "green" | "purple" | "red"
   className?: string
   /** stagger index for entrance animation */
   index?: number
@@ -28,6 +28,10 @@ const colorMap: Record<NonNullable<MetricCardProps["color"]>, {
   warning: { iconBg: "rgba(255,152,0,0.12)",   valueColor: "#FF9800",  borderHover: "rgba(255,152,0,0.5)"   },
   info:    { iconBg: "rgba(33,150,243,0.12)",  valueColor: "#2196F3",  borderHover: "rgba(33,150,243,0.5)"  },
   muted:   { iconBg: "rgba(216,197,182,0.08)", valueColor: "#d8c5b6",  borderHover: "rgba(216,197,182,0.3)" },
+  blue:    { iconBg: "rgba(59,130,246,0.12)",   valueColor: "#3b82f6",  borderHover: "rgba(59,130,246,0.5)"  },
+  green:   { iconBg: "rgba(16,185,129,0.12)",  valueColor: "#10b981",  borderHover: "rgba(16,185,129,0.5)"  },
+  purple:  { iconBg: "rgba(139,92,246,0.12)",  valueColor: "#8b5cf6",  borderHover: "rgba(139,92,246,0.5)"  },
+  red:     { iconBg: "rgba(239,68,68,0.12)",   valueColor: "#ef4444",  borderHover: "rgba(239,68,68,0.5)"   },
 }
 
 const trendConfig = {
