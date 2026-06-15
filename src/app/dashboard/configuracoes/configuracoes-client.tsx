@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 // removed Session import
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useMetaAuth } from '@/hooks/useMetaAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,8 @@ export function ConfiguracoesClient({
   const router = useRouter();
   const [isDbConnected] = useState(initialDbConnected);
   const [oauthError, setOauthError] = useState<string | null>(null);
+
+  const { loginWithFacebook, logout: fbLogout } = useMetaAuth();
 
   // Debug: Detect OAuth callback results from URL query params
   useEffect(() => {
@@ -169,6 +172,7 @@ export function ConfiguracoesClient({
     }
     setIsDisconnecting(true);
     try {
+      await fbLogout();
       const res = await fetch('/api/meta/disconnect', { method: 'DELETE' });
       if (res.ok) {
         setIsMetaConnected(false);
@@ -199,37 +203,15 @@ export function ConfiguracoesClient({
   };
 
   const handleLoginWithFacebook = async () => {
-    console.log('🔵 [FB LOGIN] Iniciando...');
-    
-    const fb = typeof window !== 'undefined' ? (window as any).FB : null;
-    if (!fb) {
-      console.error('🔴 [FB LOGIN] Facebook SDK não está inicializado na janela.');
-      alert('Erro: SDK do Facebook não carregado. Verifique sua conexão ou bloqueadores de anúncios.');
-      return;
+    console.log('🔵 [FB LOGIN] Iniciando login com hook useMetaAuth...');
+    try {
+      await loginWithFacebook();
+      setIsMetaConnected(true);
+      showToast('Conta do Meta conectada com sucesso!', 'success');
+    } catch (err) {
+      console.log('Login cancelado ou falhou:', err);
+      showToast('Login cancelado.', 'error');
     }
-
-    fb.login(function(response: any) {
-      console.log('🔵 [FB LOGIN] Resposta:', response);
-      
-      if (response.authResponse) {
-        const accessToken = response.authResponse.accessToken;
-        const userId = response.authResponse.userID;
-        
-        console.log('🟢 [FB LOGIN] Token recebido:', {
-          accessToken: accessToken.substring(0, 20) + '...',
-          userId: userId
-        });
-        
-        // Buscar informações do usuário
-        fb.api('/me', {fields: 'id,name,email'}, function(user: any) {
-          console.log('🟢 [FB LOGIN] Usuário:', user);
-          alert(`Bem-vindo, ${user.name}!`);
-        });
-      } else {
-        console.log('🔴 [FB LOGIN] Usuário cancelou');
-        alert('Login cancelado');
-      }
-    }, {scope: 'public_profile,email,ads_management,business_management'});
   };
 
   // 2. Token Rotation
