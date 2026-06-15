@@ -16,7 +16,7 @@ export default function FacebookSDK() {
       window.FB.init({
         appId: process.env.NEXT_PUBLIC_META_CLIENT_ID || '',
         cookie: true,
-        xfbml: false, // Desabilitar XFBML (não usamos)
+        xfbml: true, // Habilitar XFBML para renderizar plugins sociais
         version: 'v18.0'
       });
       

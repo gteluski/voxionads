@@ -20,19 +20,3 @@ export interface FacebookUser {
     }
   }
 }
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'fb:login-button': {
-        scope?: string
-        onlogin?: string
-        size?: 'small' | 'medium' | 'large' | 'xlarge'
-        button_type?: 'login' | 'continue_with'
-        show_faces?: 'true' | 'false'
-        auto_logout_link?: 'true' | 'false'
-        [key: string]: any
-      }
-    }
-  }
-}

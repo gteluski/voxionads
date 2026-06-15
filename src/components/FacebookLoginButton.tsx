@@ -12,6 +12,7 @@ export default function FacebookLoginButton() {
       window.checkLoginState = checkLoginState
       window.statusChangeCallback = statusChangeCallback
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const checkLoginState = () => {
@@ -109,13 +110,14 @@ export default function FacebookLoginButton() {
     <div className="flex flex-col gap-3.5 w-full">
       {/* Botão visual do Facebook SDK */}
       <div className="flex justify-center bg-white rounded-lg p-1 py-1.5 overflow-hidden">
-        <fb:login-button 
-          scope="public_profile,email,ads_management,business_management"
-          onlogin="checkLoginState();"
-          size="large"
-          button_type="continue_with"
-          show_faces="false"
-          auto_logout_link="false"
+        <div 
+          className="fb-login-button"
+          data-scope="public_profile,email,ads_management,business_management"
+          data-onlogin="checkLoginState();"
+          data-size="large"
+          data-button-type="continue_with"
+          data-show-faces="false"
+          data-auto-logout-link="false"
         />
       </div>
       
