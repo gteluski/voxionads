@@ -198,6 +198,40 @@ export function ConfiguracoesClient({
     window.location.href = '/api/meta/auth/redirect';
   };
 
+  const handleLoginWithFacebook = async () => {
+    console.log('🔵 [FB LOGIN] Iniciando...');
+    
+    const fb = typeof window !== 'undefined' ? (window as any).FB : null;
+    if (!fb) {
+      console.error('🔴 [FB LOGIN] Facebook SDK não está inicializado na janela.');
+      alert('Erro: SDK do Facebook não carregado. Verifique sua conexão ou bloqueadores de anúncios.');
+      return;
+    }
+
+    fb.login(function(response: any) {
+      console.log('🔵 [FB LOGIN] Resposta:', response);
+      
+      if (response.authResponse) {
+        const accessToken = response.authResponse.accessToken;
+        const userId = response.authResponse.userID;
+        
+        console.log('🟢 [FB LOGIN] Token recebido:', {
+          accessToken: accessToken.substring(0, 20) + '...',
+          userId: userId
+        });
+        
+        // Buscar informações do usuário
+        fb.api('/me', {fields: 'id,name,email'}, function(user: any) {
+          console.log('🟢 [FB LOGIN] Usuário:', user);
+          alert(`Bem-vindo, ${user.name}!`);
+        });
+      } else {
+        console.log('🔴 [FB LOGIN] Usuário cancelou');
+        alert('Login cancelado');
+      }
+    }, {scope: 'public_profile,email,ads_management,business_management'});
+  };
+
   // 2. Token Rotation
   const handleRotateToken = async () => {
     setIsRotating(true);
@@ -672,7 +706,7 @@ export function ConfiguracoesClient({
                         Nenhuma conta do Meta Ads está conectada atualmente. O painel está em modo offline.
                       </p>
                     </div>
-                    <Button onClick={handleConnectMeta} className="w-full bg-gradient-to-r from-[#f18535] to-amber-500 text-[#31251f] text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center">
+                    <Button onClick={handleLoginWithFacebook} className="w-full bg-gradient-to-r from-[#f18535] to-amber-500 text-[#31251f] text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center">
                       <Globe className="h-3.5 w-3.5" />
                       Conectar Conta Meta Ads
                     </Button>

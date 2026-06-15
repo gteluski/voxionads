@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import FacebookSDK from "@/components/FacebookSDK";
 
 export const metadata: Metadata = {
   title: "Voxion Ads — Dashboard",
@@ -38,7 +39,10 @@ export default function RootLayout({
           MozOsxFontSmoothing: "grayscale",
         }}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <FacebookSDK />
+          {children}
+        </Providers>
       </body>
     </html>
   );
