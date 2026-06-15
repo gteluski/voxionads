@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
+import NotificationsSection from '@/components/NotificationsSection';
+import RecommendationsCard from '@/components/RecommendationsCard';
 
 interface DashboardMetrics {
   spend: number;
@@ -128,10 +130,7 @@ export function DashboardClient({
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/auth/login');
-  };
+
 
   if (loading) {
     return (
@@ -149,44 +148,7 @@ export function DashboardClient({
     );
   }
 
-  // Generate notifications based on DB sync logs, audit logs, and status
-  const apiNotifications = [
-    ...(initialSyncLogs || []).map(l => ({
-      title: l.status === 'SUCCESS' ? 'Sincronização Meta' : 'Alerta de Sincronização',
-      type: l.status === 'SUCCESS' ? 'success' : 'error',
-      message: l.message || 'Métricas de campanhas e anúncios importadas com sucesso.',
-      time: new Date(l.synced_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    })),
-    ...(initialAuditLogs || []).map(l => ({
-      title: l.action === 'META_AUTH_CONNECTED' ? 'Integração Conectada' : l.action.replace(/_/g, ' '),
-      type: l.action.includes('CONNECTED') || l.action.includes('SUCCESS') ? 'success' : 'info',
-      message: l.details || '',
-      time: new Date(l.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    }))
-  ];
 
-  const defaultNotifications = [
-    {
-      title: 'Configuração de Ativos',
-      type: 'success',
-      message: 'ID de Ativos 2277687166399404 ativado com sucesso para esta conta.',
-      time: 'Recente'
-    },
-    {
-      title: 'Anúncio Aprovado',
-      type: 'success',
-      message: 'O criativo "Criativo 01 - Vídeo de Depoimentos" foi aprovado pelas políticas da Meta.',
-      time: 'Hoje'
-    },
-    {
-      title: 'Alerta de Otimização',
-      type: 'warning',
-      message: 'A frequência do conjunto "Público Quente 30D" atingiu 5.4x. Sugerimos renovar criativos.',
-      time: 'Ontem'
-    }
-  ];
-
-  const mergedNotifications = [...apiNotifications, ...defaultNotifications].slice(0, 5);
 
   return (
     <div className="min-h-screen bg-[#31251f] flex flex-col font-['Avenir']">
@@ -195,39 +157,17 @@ export function DashboardClient({
       <header className="bg-[#1f1915] h-32 flex items-center px-8 border-b border-[rgba(216,197,182,0.2)] sticky top-0 z-50">
         <div className="flex items-center gap-6">
           {/* Logo Voxion - MAIOR (80px) */}
-          
           <img 
             src="/voxion-ads-logo.svg" 
             alt="Voxion Ads"
             className="h-20 w-auto drop-shadow-md cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => router.push('/dashboard')}
           />
-          <div>
-            <h1 className="text-[#f18535] text-3xl font-bold font-['Jetbrains_Mono'] tracking-tight">Voxion Ads</h1>
-            <p className="text-[#d8c5b6]/70 text-sm font-medium">Painel de Controle de Tráfego Pago</p>
-          </div>
         </div>
 
         <div className="flex-1" />
 
         <div className="flex items-center gap-8">
-          {/* Status Sync + Meta Logo */}
-          <div className="flex items-center gap-3">
-            
-            <img src="/meta-logo.svg" alt="Meta" className="h-8 w-8 opacity-80" />
-            <div className="text-right">
-              <p className="text-green-400 text-sm font-bold flex items-center justify-end gap-1">
-                <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-                Sincronizado
-              </p>
-              <p className="text-[#d8c5b6]/60 text-xs font-mono">
-                {initialSyncLogs[0]?.synced_at 
-                  ? new Date(initialSyncLogs[0].synced_at).toLocaleString('pt-BR') 
-                  : 'Há 15 min'}
-              </p>
-            </div>
-          </div>
-
           <button 
             onClick={handleSyncNow}
             disabled={isSyncing}
@@ -245,13 +185,6 @@ export function DashboardClient({
             title="Configurações"
           >
             ⚙️
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="text-[#d8c5b6] hover:text-red-400 transition-all p-2 bg-[#31251f] rounded-lg border border-[rgba(216,197,182,0.1)] hover:border-red-400/50"
-            title="Sair"
-          >
-            🚪
           </button>
         </div>
       </header>
@@ -299,168 +232,33 @@ export function DashboardClient({
           ))}
         </div>
 
-        {/* 12 KPIs GRID */}
-        <div className="space-y-6">
-          {/* Linha 1 - Principais */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard
-              icon="💰" label="TOTAL INVESTIDO" value={metrics.spend} unit="R$" format="currency"
-              change={changes.spend} color="orange" onClick={() => router.push('/dashboard')}
-            />
-            <MetricCard
-              icon="👁️" label="IMPRESSÕES" value={metrics.impressions} unit="" format="number"
-              change={changes.impressions} color="blue" onClick={() => router.push('/dashboard/campanhas')}
-            />
-            <MetricCard
-              icon="👆" label="CLIQUES (CTR)" value={metrics.clicks} unit={`${metrics.ctr?.toFixed(2)}%`} format="number"
-              change={changes.clicks} color="purple" onClick={() => router.push('/dashboard/conjuntos')}
-            />
-            <MetricCard
-              icon="🎯" label="ALCANCE" value={metrics.reach} unit="" format="number"
-              change={changes.reach} color="green" onClick={() => router.push('/dashboard/anuncios')}
-            />
-          </div>
-
-          {/* Linha 2 - Conversões */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard
-              icon="✅" label="CONVERSÕES (ROI)" value={metrics.conversions} unit={`${metrics.roi?.toFixed(1)}x`} format="number"
-              change={changes.conversions} color="success"
-            />
-            <MetricCard
-              icon="📧" label="LEADS" value={metrics.leads} unit="" format="number"
-              change={changes.leads} color="info"
-            />
-            <MetricCard
-              icon="💬" label="MENSAGENS" value={metrics.messages} unit="" format="number"
-              change={changes.messages} color="accent"
-            />
-            <MetricCard
-              icon="🔄" label="FREQUÊNCIA" value={metrics.frequency} unit="x" format="decimal"
-              change={changes.frequency} color="warning"
-            />
-          </div>
-
-          {/* Linha 3 - Custos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard
-              icon="💵" label="CPC MÉDIO" value={metrics.cpc} unit="R$" format="currency"
-              change={changes.cpc} color="orange"
-            />
-            <MetricCard
-              icon="📊" label="CPM MÉDIO" value={metrics.cpm} unit="R$" format="currency"
-              change={changes.cpm} color="blue"
-            />
-            <MetricCard
-              icon="🛒" label="CPA MÉDIO" value={metrics.cpa} unit="R$" format="currency"
-              change={changes.cpa} color="purple"
-            />
-            <MetricCard
-              icon="📈" label="ROI MÉDIO" value={metrics.roi * 100} unit="%" format="decimal"
-              change={changes.roi} color="success"
-            />
-          </div>
+        {/* 4 KPIs GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            icon="💰" label="TOTAL INVESTIDO" value={metrics.spend} unit="R$" format="currency"
+            change={changes.spend} color="orange" onClick={() => router.push('/dashboard')}
+          />
+          <MetricCard
+            icon="👁️" label="IMPRESSÕES" value={metrics.impressions} unit="" format="number"
+            change={changes.impressions} color="blue" onClick={() => router.push('/dashboard/campanhas')}
+          />
+          <MetricCard
+            icon="👆" label="CLIQUES (CTR)" value={metrics.clicks} unit={`${metrics.ctr?.toFixed(2)}%`} format="number"
+            change={changes.clicks} color="purple" onClick={() => router.push('/dashboard/conjuntos')}
+          />
+          <MetricCard
+            icon="🎯" label="ALCANCE" value={metrics.reach} unit="" format="number"
+            change={changes.reach} color="green" onClick={() => router.push('/dashboard/anuncios')}
+          />
         </div>
 
         {/* BOTTOM SECTIONS */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
-          
-          {/* Status & Verifications + Notifications (Col-span 2) */}
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Business Assets & Status */}
-            <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-6 flex flex-col justify-between">
-              <div>
-                <h3 className="text-[#f18535] text-lg font-bold mb-5 flex items-center gap-2">
-                  🛡️ Central de Status Meta
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
-                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Configuração de Ativos</span>
-                    <span className="text-[#f18535] font-mono text-[10px] font-bold bg-[#f18535]/10 px-2 py-0.5 rounded">ID: 2277687166399404</span>
-                  </div>
-                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
-                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Conta de Anúncios</span>
-                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" /> Ativa
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
-                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Verificação de Identidade</span>
-                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded">Concluída</span>
-                  </div>
-                  <div className="flex justify-between items-center pb-2.5 border-b border-[rgba(216,197,182,0.08)]">
-                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Verificação da Empresa (BM)</span>
-                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded">Verificado</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[#d8c5b6]/80 text-xs font-semibold">Status do Pixel</span>
-                    <span className="text-green-400 text-[10px] font-bold bg-green-500/10 px-2 py-0.5 rounded">Ativo e Recebendo</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 pt-3 border-t border-[rgba(216,197,182,0.08)] text-[11px] text-[#d8c5b6]/50">
-                Sua conta de anúncios e BM estão em conformidade com as diretrizes do Meta.
-              </div>
-            </div>
+        <div className="grid grid-cols-1 gap-6 mt-10">
+          {/* Notificações e Alertas */}
+          <NotificationsSection />
 
-            {/* Notifications Panel */}
-            <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-6 flex flex-col justify-between">
-              <div>
-                <h3 className="text-[#f18535] text-lg font-bold mb-4 flex items-center gap-2">
-                  🔔 Notificações e Alertas
-                </h3>
-                <div className="space-y-3">
-                  {mergedNotifications.map((notif, idx) => (
-                    <div key={idx} className="bg-[#31251f]/50 border border-[rgba(216,197,182,0.08)] p-2.5 rounded-lg">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                          notif.type === 'success' ? 'bg-green-500/10 text-green-400' :
-                          notif.type === 'warning' ? 'bg-yellow-500/10 text-yellow-400' :
-                          notif.type === 'error' ? 'bg-red-500/10 text-red-400' :
-                          'bg-blue-500/10 text-blue-400'
-                        }`}>
-                          {notif.title}
-                        </span>
-                        <span className="text-[#d8c5b6]/40 text-[9px] font-mono">{notif.time}</span>
-                      </div>
-                      <p className="text-[#d8c5b6]/80 text-[11px] leading-relaxed">{notif.message}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Quick Actions Panel */}
-          <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-8">
-            <h3 className="text-[#f18535] text-xl font-bold mb-6 flex items-center gap-2">
-              ⚡ Ações Rápidas
-            </h3>
-            <div className="space-y-4">
-              <button 
-                onClick={handleSyncNow}
-                className="w-full bg-[#f18535] text-[#31251f] py-3.5 px-4 rounded-xl font-bold hover:bg-[#f5a35f] transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(241,133,53,0.2)]"
-              >
-                🔄 {isSyncing ? 'Sincronizando...' : 'Forçar Sincronização Meta'}
-              </button>
-              <button 
-                onClick={() => router.push('/dashboard/relatorios')}
-                className="w-full bg-[rgba(241,133,53,0.1)] border border-[#f18535] text-[#f18535] py-3.5 px-4 rounded-xl font-bold hover:bg-[rgba(241,133,53,0.2)] transition-all flex items-center justify-center gap-2"
-              >
-                📈 Gerar Relatório PDF
-              </button>
-              <button 
-                onClick={() => router.push('/dashboard/configuracoes')}
-                className="w-full bg-[#31251f] border border-[rgba(216,197,182,0.2)] text-[#d8c5b6] py-3.5 px-4 rounded-xl font-bold hover:border-[#d8c5b6] transition-all flex items-center justify-center gap-2"
-              >
-                🔗 Criar Compartilhamento
-              </button>
-            </div>
-          </div>
-
+          {/* NOVA: Recomendações */}
+          <RecommendationsCard />
         </div>
       </main>
     </div>

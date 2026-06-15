@@ -614,10 +614,7 @@ export function ConfiguracoesClient({
           <p className="text-xs text-[#d8c5b6]/70 mt-1.5 max-w-2xl">
             Gerencie integrações com a API do Meta Graph, configure a sincronização automática de métricas, crie links de compartilhamento protegidos para clientes e administre a retenção de dados históricos.
           </p>
-          <div className="mt-3 p-3 rounded bg-black/40 border border-amber-950/40 text-[10px] font-mono text-amber-500/80 space-y-1">
-            <div>DEBUG SESSION: email={session?.user?.email} | admin_id={session?.user?.admin_id}</div>
-            <div>DEBUG TOKENS ({initialMetaTokens.length}): {JSON.stringify(initialMetaTokens)}</div>
-          </div>
+
         </div>
 
         {/* 2-Column Section Layout */}
@@ -684,57 +681,7 @@ export function ConfiguracoesClient({
               </CardContent>
             </Card>
 
-            {/* 2. Token Meta Section */}
-            <Card className="bg-glass glow-orange border-[rgba(216,197,182,0.2)] hover:border-[rgba(216,197,182,0.3)] transition-all duration-300">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-sm font-bold text-[#d8c5b6] flex items-center gap-2">
-                  <Lock className="h-4.5 w-4.5 text-[#f18535]" />
-                  2. Token de Acesso Meta
-                </CardTitle>
-                <CardDescription className="text-xs text-[#d8c5b6]/70">
-                  Credencial de autenticação criptografada com chaves AES.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[9px] font-bold text-[#d8c5b6]/50 uppercase">Meta API Token</span>
-                    <div className="bg-[#31251f] border border-[rgba(216,197,182,0.2)] rounded-lg p-2.5 font-mono text-[10px] text-[#d8c5b6]/50 tracking-widest text-center">
-                      ••••••••••••••••••••••••••••
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-[10px] text-[#d8c5b6]/70 bg-[#31251f]/30 p-2 rounded border border-[rgba(216,197,182,0.2)]/40 font-medium">
-                    <span>Última Rotação:</span>
-                    <span className="font-mono text-[#d8c5b6]">
-                      {new Date(lastRotationDate).toLocaleString('pt-BR')}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    disabled={isRotating || !isMetaConnected}
-                    onClick={handleRotateToken}
-                    className="border-[rgba(216,197,182,0.3)] bg-[#1f1915]/20 hover:bg-[#1f1915] text-[#d8c5b6] text-[10px] font-semibold h-7 flex items-center gap-1 justify-center transition-all"
-                  >
-                    <RefreshCw className={`h-3 w-3 ${isRotating ? 'animate-spin' : ''}`} />
-                    {isRotating ? 'Rotacionando...' : 'Rotacionar Token'}
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    type="button"
-                    disabled={!isMetaConnected}
-                    onClick={handleConnectMeta}
-                    className="w-full border-[rgba(216,197,182,0.3)] bg-[#1f1915]/20 hover:bg-[#1f1915] text-[#d8c5b6]/90 text-[10px] font-semibold h-7 flex items-center gap-1 justify-center"
-                  >
-                    <Globe className="h-3 w-3" />
-                    Reconectar OAuth
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
 
           </div>
 
