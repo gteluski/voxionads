@@ -15,7 +15,18 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
-    const adminId = session.user.admin_id;
+    // Resolve adminId from admin_users by email first to be resilient to ID mapping mismatches
+    let adminId = session.user.admin_id;
+    if (session.user.email) {
+      const { data: adminRecord } = await supabase
+        .from('admin_users')
+        .select('id')
+        .eq('email', session.user.email)
+        .maybeSingle();
+      if (adminRecord?.id) {
+        adminId = adminRecord.id;
+      }
+    }
     let success = false;
     let dbError: any = null;
 

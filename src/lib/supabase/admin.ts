@@ -18,19 +18,35 @@ export const supabaseAdmin = createClient(
  */
 export async function ensureAdminUserExists(userId: string, email: string, name?: string) {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data: userById, error: errorById } = await supabaseAdmin
       .from('admin_users')
       .select('id')
       .eq('id', userId)
       .maybeSingle();
 
-    if (error) {
-      console.error('Error checking admin user existence in DB:', error);
+    if (errorById) {
+      console.error('Error checking admin user existence in DB:', errorById);
       return;
     }
 
-    if (!data) {
-      // User doesn't exist, insert them to link Auth ID with admin_users
+    if (!userById) {
+      // User with this ID does not exist. Check if same email exists with a different ID
+      const { data: userByEmail } = await supabaseAdmin
+        .from('admin_users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (userByEmail) {
+        console.log(`⚠️ User with email ${email} exists with different ID ${userByEmail.id}. Re-linking ID to ${userId}...`);
+        // Delete old mismatched record (ON DELETE CASCADE will clear related rows)
+        await supabaseAdmin
+          .from('admin_users')
+          .delete()
+          .eq('id', userByEmail.id);
+      }
+
+      // Insert/Create the admin user with the correct Auth userId
       const { error: insertError } = await supabaseAdmin
         .from('admin_users')
         .insert({
@@ -44,7 +60,7 @@ export async function ensureAdminUserExists(userId: string, email: string, name?
       if (insertError) {
         console.error('Failed to auto-insert user into admin_users:', insertError);
       } else {
-        console.log(`Successfully auto-inserted auth user ${email} into admin_users.`);
+        console.log(`Successfully auto-inserted and linked auth user ${email} into admin_users.`);
       }
     }
   } catch (err) {
