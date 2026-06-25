@@ -59,7 +59,7 @@ export function ConfiguracoesClient({
   const [isDbConnected] = useState(initialDbConnected);
   const [oauthError, setOauthError] = useState<string | null>(null);
 
-  const { loginWithFacebook, logout: fbLogout } = useMetaAuth();
+  const { handleMetaLogin, logout: fbLogout, isLoading: fbAuthLoading, error: fbAuthError } = useMetaAuth();
 
   // Debug: Detect OAuth callback results from URL query params
   useEffect(() => {
@@ -205,12 +205,17 @@ export function ConfiguracoesClient({
   const handleLoginWithFacebook = async () => {
     console.log('🔵 [FB LOGIN] Iniciando login com hook useMetaAuth...');
     try {
-      await loginWithFacebook();
+      await handleMetaLogin();
       setIsMetaConnected(true);
       showToast('Conta do Meta conectada com sucesso!', 'success');
-    } catch (err) {
+      router.refresh();
+    } catch (err: any) {
       console.log('Login cancelado ou falhou:', err);
-      showToast('Login cancelado.', 'error');
+      if (err.message === 'not_authorized') {
+        showToast('Permissão negada. A aplicação não foi autorizada.', 'error');
+      } else {
+        showToast('Login cancelado ou falhou.', 'error');
+      }
     }
   };
 
@@ -688,9 +693,17 @@ export function ConfiguracoesClient({
                         Nenhuma conta do Meta Ads está conectada atualmente. O painel está em modo offline.
                       </p>
                     </div>
-                    <Button onClick={handleLoginWithFacebook} className="w-full bg-gradient-to-r from-[#f18535] to-amber-500 text-[#31251f] text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center">
-                      <Globe className="h-3.5 w-3.5" />
-                      Conectar Conta Meta Ads
+                    <Button 
+                      onClick={handleLoginWithFacebook} 
+                      disabled={fbAuthLoading}
+                      className="w-full bg-gradient-to-r from-[#f18535] to-amber-500 text-[#31251f] text-xs font-bold py-1.5 h-8 flex items-center gap-1.5 justify-center"
+                    >
+                      {fbAuthLoading ? (
+                        <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                      ) : (
+                        <Globe className="h-3.5 w-3.5" />
+                      )}
+                      {fbAuthLoading ? 'Conectando...' : 'Conectar Conta Meta Ads'}
                     </Button>
                   </div>
                 )}
