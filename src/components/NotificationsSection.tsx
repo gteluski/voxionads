@@ -26,102 +26,75 @@ export default function NotificationsSection() {
         }
 
         const adminId = user.id;
+        const list: NotificationItem[] = [];
 
-        // 1. Buscar o ID do ativo real em meta_tokens
+        // 1. Buscar os tokens de ativos reais cadastrados
         const { data: tokenData } = await supabase
           .from('meta_tokens')
-          .select('business_manager_id, account_id, created_at, updated_at')
+          .select('account_name, account_id, updated_at')
           .eq('admin_id', adminId)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        // 2. Buscar anúncios ativos reais
-        const { data: adsData } = await supabase
-          .from('ads')
-          .select('name, status, updated_at')
-          .eq('admin_id', adminId)
-          .eq('status', 'ACTIVE')
           .order('updated_at', { ascending: false })
           .limit(1);
 
-        // 3. Buscar conjuntos de anúncios ou métricas
-        const { data: adSetsData } = await supabase
-          .from('ad_sets')
-          .select('id, name, updated_at')
-          .eq('admin_id', adminId)
-          .limit(1);
-
-        const list: NotificationItem[] = [];
-
-        // Notificação de Configuração de Ativos
         if (tokenData && tokenData.length > 0) {
           const t = tokenData[0];
-          const assetId = t.business_manager_id || t.account_id || 'Não configurado';
           list.push({
-            title: 'Configuração de Ativos',
+            title: 'Ativo Conectado',
             type: 'success',
-            message: `ID de Ativos ${assetId} ativado com sucesso para esta conta.`,
-            time: new Date(t.updated_at || t.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            message: `Conta de anúncios "${t.account_name}" (${t.account_id}) está ativa.`,
+            time: new Date(t.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
           });
         } else {
           list.push({
-            title: 'Configuração de Ativos',
-            type: 'success',
-            message: 'ID de Ativos 2277687166399404 ativado com sucesso para esta conta.',
-            time: 'Recente',
+            title: 'Configuração',
+            type: 'info',
+            message: 'Nenhuma conta Meta conectada. Vá em configurações para vincular sua conta.',
+            time: 'Aviso',
           });
         }
 
-        // Notificação de Anúncio Aprovado
-        if (adsData && adsData.length > 0) {
-          const ad = adsData[0];
-          list.push({
-            title: 'Anúncio Aprovado',
-            type: 'success',
-            message: `O criativo "${ad.name}" foi aprovado pelas políticas da Meta.`,
-            time: new Date(ad.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-          });
-        } else {
-          list.push({
-            title: 'Anúncio Aprovado',
-            type: 'success',
-            message: 'O criativo "Criativo 01 - Vídeo de Depoimentos" foi aprovado pelas políticas da Meta.',
-            time: 'Hoje',
-          });
-        }
-
-        // Alerta de Otimização
-        const adSetName = adSetsData && adSetsData.length > 0 ? adSetsData[0].name : 'Público Quente 30D';
-        const adSetTime = adSetsData && adSetsData.length > 0 
-          ? new Date(adSetsData[0].updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-          : 'Ontem';
-
-        list.push({
-          title: 'Alerta de Otimização',
-          type: 'warning',
-          message: `A frequência do conjunto "${adSetName}" atingiu 5.4x. Sugerimos renovar criativos.`,
-          time: adSetTime,
-        });
-
-        // Buscar logs reais de sincronização da tabela sync_log
+        // 2. Buscar logs de sincronização reais (sync_log)
         const { data: syncLogs } = await supabase
           .from('sync_log')
           .select('status, message, synced_at')
           .eq('admin_id', adminId)
           .order('synced_at', { ascending: false })
-          .limit(2);
+          .limit(3);
 
         if (syncLogs && syncLogs.length > 0) {
-          syncLogs.forEach(log => {
+          syncLogs.forEach((log) => {
             list.push({
-              title: log.status === 'SUCCESS' ? 'Sincronização Realizada' : 'Erro de Sincronização',
+              title: log.status === 'SUCCESS' ? 'Sincronização OK' : 'Falha no Sync',
               type: log.status === 'SUCCESS' ? 'success' : 'error',
-              message: log.message || 'Dados de campanhas importados com sucesso.',
+              message: log.message || 'Sincronização de campanhas concluída.',
               time: new Date(log.synced_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
             });
           });
         }
 
+        // 3. Buscar relatórios/alertas de IA críticos (reports)
+        const { data: reportsData } = await supabase
+          .from('reports')
+          .select('overall_health, main_issues, generated_at')
+          .eq('admin_id', adminId)
+          .in('overall_health', ['warning', 'critical'])
+          .order('generated_at', { ascending: false })
+          .limit(2);
+
+        if (reportsData && reportsData.length > 0) {
+          reportsData.forEach((rep) => {
+            if (rep.main_issues && rep.main_issues.length > 0) {
+              list.push({
+                title: rep.overall_health === 'critical' ? 'Alerta Crítico' : 'Alerta de Otimização',
+                type: rep.overall_health === 'critical' ? 'error' : 'warning',
+                message: rep.main_issues[0],
+                time: new Date(rep.generated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+              });
+            }
+          });
+        }
+
+        // Ordenação final: mais recentes primeiro (estimado por ordem de inserção)
         setNotifications(list.slice(0, 5));
       } catch (err) {
         console.error('Erro ao buscar notificações do Supabase:', err);
@@ -131,11 +104,11 @@ export default function NotificationsSection() {
     }
 
     fetchRealData();
-  }, []);
+  }, [supabase]);
 
   if (loading) {
     return (
-      <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-6 flex flex-col justify-between h-full min-h-[300px] items-center justify-center">
+      <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-6 flex items-center justify-center min-h-[200px]">
         <div className="animate-spin text-[#f18535] text-2xl">⏳</div>
       </div>
     );
@@ -145,7 +118,7 @@ export default function NotificationsSection() {
     <div className="bg-[#1f1915] border border-[rgba(216,197,182,0.2)] rounded-2xl p-6 flex flex-col justify-between h-full">
       <div>
         <h3 className="text-[#f18535] text-lg font-bold mb-4 flex items-center gap-2">
-          🔔 Notificações e Alertas
+          🔔 Notificações e Alertas Reais
         </h3>
         <div className="space-y-3">
           {notifications.map((notif, idx) => (
@@ -165,7 +138,7 @@ export default function NotificationsSection() {
             </div>
           ))}
           {notifications.length === 0 && (
-            <p className="text-sm text-[#d8c5b6]/50 text-center py-4">Nenhum alerta recente.</p>
+            <p className="text-sm text-[#d8c5b6]/50 text-center py-4">Nenhum alerta recente no sistema.</p>
           )}
         </div>
       </div>

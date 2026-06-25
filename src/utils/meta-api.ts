@@ -40,17 +40,18 @@ async function fetchMetaAPI(
     if (!res.ok) {
       const errorCode = data.error?.code;
       const errorSubcode = data.error?.error_subcode;
+      const errorMessage = data.error?.message || 'Erro desconhecido na API do Meta.';
 
       // Token Expired / Invalid (Error code 190)
       if (errorCode === 190) {
-        throw new TokenExpiredError(data.error?.message || 'Token expirado ou inválido.');
+        throw new TokenExpiredError(errorMessage);
       }
 
       // Rate limit / Throttling (Error code 4 or 17)
-      if (errorCode === 4 || errorCode === 17 || data.error?.message?.includes('rate limit')) {
+      if (errorCode === 4 || errorCode === 17 || errorMessage.includes('rate limit')) {
         if (attempt <= maxAttempts) {
-          const backoffSecs = Math.pow(2, attempt); // 2^1, 2^2, 2^3...
-          console.warn(`[Meta API] Rate limit atingida. Tentativa ${attempt} de ${maxAttempts}. Aguardando ${backoffSecs}s...`);
+          const backoffSecs = Math.pow(2, attempt); // 2, 4, 8, 16...
+          console.warn(`[Meta API] Rate limit atingido. Tentativa ${attempt} de ${maxAttempts}. Aguardando ${backoffSecs}s...`);
           await sleep(backoffSecs * 1000);
           return fetchMetaAPI(url, options, attempt + 1);
         } else {
@@ -58,18 +59,30 @@ async function fetchMetaAPI(
         }
       }
 
-      throw new Error(data.error?.message || 'Erro desconhecido na API do Meta.');
+      // Se for um erro temporário do servidor (5xx), tentamos novamente
+      if (res.status >= 500 && attempt <= maxAttempts) {
+        const backoffSecs = Math.pow(2, attempt);
+        console.warn(`[Meta API] Erro do servidor (${res.status}). Tentativa ${attempt} de ${maxAttempts}. Aguardando ${backoffSecs}s...`);
+        await sleep(backoffSecs * 1000);
+        return fetchMetaAPI(url, options, attempt + 1);
+      }
+
+      // Outros erros da API (como parâmetros errados 400/403) são permanentes. Não devem ser retentados.
+      const error = new Error(errorMessage);
+      (error as any).isPermanent = true;
+      throw error;
     }
 
     return data;
   } catch (error: any) {
-    if (error instanceof TokenExpiredError || error instanceof RateLimitError) {
+    if (error instanceof TokenExpiredError || error instanceof RateLimitError || error.isPermanent) {
       throw error;
     }
     
-    // Retry other unexpected network failures
+    // Tenta novamente em caso de falha física de rede (ex: timeout, DNS)
     if (attempt <= maxAttempts) {
       const backoffSecs = Math.pow(2, attempt);
+      console.warn(`[Meta API] Falha de rede. Tentativa ${attempt} de ${maxAttempts}. Recuando ${backoffSecs}s. Erro: ${error.message}`);
       await sleep(backoffSecs * 1000);
       return fetchMetaAPI(url, options, attempt + 1);
     }
@@ -139,7 +152,7 @@ export async function refreshMetaToken(adminId: string, tokenId: string): Promis
 /**
  * Execute a Meta API call, handling automatic token refresh if token expired.
  */
-async function executeWithTokenRefresh(
+export async function executeWithTokenRefresh(
   adminId: string,
   tokenId: string,
   encryptedToken: string,

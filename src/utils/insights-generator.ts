@@ -37,6 +37,24 @@ export async function generateInsightsReport(
     recommendations.push('Nenhuma recomendação disponível. Elemento sem investimento ativo.');
   }
 
+  // Deleta relatórios anteriores para evitar duplicados e acúmulo no banco
+  try {
+    let deleteQuery = supabase.from('reports').delete().eq('admin_id', adminId).eq('campaign_id', campaignId);
+    if (adsetId === null) {
+      deleteQuery = deleteQuery.is('adset_id', null);
+    } else {
+      deleteQuery = deleteQuery.eq('adset_id', adsetId);
+    }
+    if (adId === null) {
+      deleteQuery = deleteQuery.is('ad_id', null);
+    } else {
+      deleteQuery = deleteQuery.eq('ad_id', adId);
+    }
+    await deleteQuery;
+  } catch (delErr) {
+    console.error('Erro ao limpar relatórios antigos:', delErr);
+  }
+
   // Insert report record into database
   const { data, error } = await supabase
     .from('reports')

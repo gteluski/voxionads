@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import Script from 'next/script';
 
 declare global {
   interface Window {
@@ -10,30 +10,29 @@ declare global {
 }
 
 export default function FacebookSDK() {
-  useEffect(() => {
-    // Inicializar Facebook SDK
-    window.fbAsyncInit = function() {
-      window.FB.init({
-        appId: process.env.NEXT_PUBLIC_META_CLIENT_ID || '',
-        cookie: true,
-        xfbml: true, // Habilitar XFBML para renderizar plugins sociais
-        version: 'v18.0'
-      });
-      
-      console.log('🟢 Facebook SDK inicializado');
-    };
-    
-    // Carregar SDK de forma assíncrona
-    (function(d: Document, s: string, id: string) {
-      var js: any, fjs: any = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) { return; }
-      js = d.createElement(s);
-      js.id = id;
-      js.src = "https://connect.facebook.net/pt_BR/sdk.js";
-      fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-    
-  }, []);
+  const appId = process.env.NEXT_PUBLIC_META_CLIENT_ID || '1014118244486954';
   
-  return null; // Componente invisível
+  return (
+    <>
+      <Script id="facebook-init" strategy="afterInteractive">
+        {`
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId: '${appId}',
+              cookie: true,
+              xfbml: true,
+              version: 'v18.0'
+            });
+            FB.AppEvents.logPageView();
+            console.log('🟢 Facebook SDK inicializado com App ID: ${appId}');
+          };
+        `}
+      </Script>
+      <Script
+        id="facebook-jssdk"
+        src="https://connect.facebook.net/pt_BR/sdk.js"
+        strategy="afterInteractive"
+      />
+    </>
+  );
 }

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
 import NotificationsSection from '@/components/NotificationsSection';
 import RecommendationsCard from '@/components/RecommendationsCard';
+import { PerformanceCharts } from '@/components/ui/performance-charts';
 
 interface DashboardMetrics {
   spend: number;
@@ -47,18 +48,45 @@ export function DashboardClient({
   initialAuditLogs,
 }: DashboardClientProps) {
   const router = useRouter();
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [changes, setChanges] = useState<Record<string, MetricChange>>({});
+  const [selectedAccountId, setSelectedAccountId] = useState<string>('all');
+  const [rawMetrics, setRawMetrics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('30d');
   const [isSyncing, setIsSyncing] = useState(false);
   const supabase = createClient();
 
+  // Helper para gerar métricas simuladas nos últimos 90 dias caso não haja dados no banco
+  const generateMockDailyMetrics = () => {
+    return Array.from({ length: 90 }, (_, i) => {
+      const date = new Date(Date.now() - (90 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const spend = 150 + Math.random() * 200;
+      const clicks = Math.floor(60 + Math.random() * 80);
+      const impressions = Math.floor(3000 + Math.random() * 2000);
+      const conversions = Math.floor(2 + Math.random() * 5);
+      const reach = impressions - Math.floor(impressions * 0.25);
+      return {
+        date,
+        spend,
+        impressions,
+        clicks,
+        reach,
+        frequency: 1.1 + Math.random() * 0.15,
+        conversions,
+        messages: Math.floor(conversions * 0.8),
+        cpc: spend / clicks,
+        cpm: (spend / impressions) * 1000,
+        cpa: conversions > 0 ? spend / conversions : 0,
+        roi: spend > 0 ? ((conversions * 120 - spend) / spend) * 100 : 0,
+        ctr: (clicks / impressions) * 100,
+        campaign_id: i % 2 === 0 ? 'c1' : 'c2'
+      };
+    });
+  };
+
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
         setLoading(true);
-        
         let data: any[] = [];
         
         if (initialDbConnected && session?.user?.admin_id) {
@@ -66,47 +94,17 @@ export function DashboardClient({
             .from('ads_metrics')
             .select('*')
             .eq('admin_id', session.user.admin_id)
-            .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+            .gte('date', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString());
           if (dbData && dbData.length > 0) {
             data = dbData;
           }
         }
 
-        // Se não houver dados, usa fallback estético como sugerido no prompt
-        const hasData = data.length > 0;
-        const totals = {
-          spend: hasData ? data.reduce((sum, m) => sum + (m.spend || 0), 0) : 18450.00,
-          impressions: hasData ? data.reduce((sum, m) => sum + (m.impressions || 0), 0) : 842190,
-          clicks: hasData ? data.reduce((sum, m) => sum + (m.clicks || 0), 0) : 22840,
-          reach: hasData ? data.reduce((sum, m) => sum + (m.reach || 0), 0) : 156203,
-          conversions: hasData ? data.reduce((sum, m) => sum + (m.conversions || 0), 0) : 748,
-          leads: hasData ? Math.floor(data.reduce((sum, m) => sum + (m.conversions || 0), 0) * 0.194) : 145,
-          messages: hasData ? data.reduce((sum, m) => sum + (m.messages || 0), 0) : 923,
-          frequency: hasData ? data.reduce((sum, m) => sum + (m.frequency || 0), 0) / data.length : 5.4,
-          cpc: hasData ? data.reduce((sum, m) => sum + (m.cpc || 0), 0) / data.length : 0.81,
-          cpm: hasData ? data.reduce((sum, m) => sum + (m.cpm || 0), 0) / data.length : 21.89,
-          cpa: hasData ? data.reduce((sum, m) => sum + (m.cpa || 0), 0) / data.length : 24.65,
-          roi: hasData ? data.reduce((sum, m) => sum + (m.roi || 0), 0) / data.length : 2.85,
-          ctr: hasData ? ((data.reduce((sum, m) => sum + (m.clicks || 0), 0) / data.reduce((sum, m) => sum + (m.impressions || 0), 0)) * 100) : 2.7,
-        };
+        if (data.length === 0) {
+          data = generateMockDailyMetrics();
+        }
 
-        setMetrics(totals);
-
-        setChanges({
-          spend: { value: totals.spend, percent: 14.2, trend: 'up' },
-          impressions: { value: totals.impressions, percent: 8.1, trend: 'up' },
-          clicks: { value: totals.clicks, percent: 5.3, trend: 'up' },
-          reach: { value: totals.reach, percent: 12.1, trend: 'up' },
-          conversions: { value: totals.conversions, percent: 3.2, trend: 'up' },
-          leads: { value: totals.leads, percent: 7.8, trend: 'up' },
-          messages: { value: totals.messages, percent: 11.2, trend: 'up' },
-          frequency: { value: totals.frequency, percent: 2.1, trend: 'down' },
-          cpc: { value: totals.cpc, percent: 0.5, trend: 'up' },
-          cpm: { value: totals.cpm, percent: 3.2, trend: 'down' },
-          cpa: { value: totals.cpa, percent: 5.1, trend: 'down' },
-          roi: { value: totals.roi, percent: 18.3, trend: 'up' },
-          ctr: { value: totals.ctr, percent: 2.5, trend: 'up' },
-        });
+        setRawMetrics(data);
       } catch (err) {
         console.error('Erro ao carregar métricas:', err);
       } finally {
@@ -115,22 +113,99 @@ export function DashboardClient({
     };
 
     fetchMetrics();
-  }, [session, period, initialDbConnected, supabase]);
+  }, [session, initialDbConnected, supabase]);
 
   const handleSyncNow = async () => {
     setIsSyncing(true);
     try {
-      await fetch('/api/sync/manual', { method: 'POST' });
-      // Fake delay for UX
-      await new Promise(r => setTimeout(r, 1500));
+      const response = await fetch('/api/sync/manual', { method: 'POST' });
+      if (response.ok) {
+        router.refresh();
+      }
+      await new Promise(r => setTimeout(r, 1000));
     } catch (err) {
-      console.log('Sync simulated error', err);
+      console.error('Sync error', err);
     } finally {
       setIsSyncing(false);
     }
   };
 
+  // 1. Filtrar campanhas pela conta selecionada
+  const filteredCampaigns = initialCampaigns.filter(c => {
+    if (selectedAccountId === 'all') return true;
+    // O mock_campaign_id ou meta_campaign_id pode conter o ID da conta
+    return c.meta_campaign_id.includes(selectedAccountId);
+  });
+  
+  const campaignIds = filteredCampaigns.map(c => c.id);
 
+  // 2. Resolver quantidade de dias do período selecionado
+  const getPeriodDays = () => {
+    if (period === '7d') return 7;
+    if (period === '14d') return 14;
+    if (period === '30d') return 30;
+    return 90;
+  };
+
+  // 3. Filtrar métricas pelo período e conta selecionados
+  const filteredMetrics = rawMetrics.filter(m => {
+    // Se a conta selecionada for específica, a métrica deve pertencer a uma campanha daquela conta
+    // (Em mocks, associamos as campanhas c1/c2 à conta mockada. Em real, mapeamos os IDs)
+    if (selectedAccountId !== 'all') {
+      const belongsToCampaign = campaignIds.includes(m.campaign_id) || m.campaign_id === selectedAccountId;
+      // Trata também fallback de mock
+      const belongsToMock = selectedAccountId === 'act_12093849102' && (m.campaign_id === 'c1' || m.campaign_id === 'c2');
+      if (!belongsToCampaign && !belongsToMock) return false;
+    }
+
+    const limitDate = new Date();
+    limitDate.setDate(limitDate.getDate() - getPeriodDays());
+    const mDate = new Date(m.date);
+    return mDate >= limitDate;
+  });
+
+  // 4. Calcular KPIs consolidados
+  const totalSpend = filteredMetrics.reduce((sum, m) => sum + (parseFloat(m.spend) || 0), 0);
+  const totalImpressions = filteredMetrics.reduce((sum, m) => sum + (parseInt(m.impressions) || 0), 0);
+  const totalClicks = filteredMetrics.reduce((sum, m) => sum + (parseInt(m.clicks) || 0), 0);
+  const totalReach = filteredMetrics.reduce((sum, m) => sum + (parseInt(m.reach) || 0), 0);
+  const totalConversions = filteredMetrics.reduce((sum, m) => sum + (parseInt(m.conversions) || 0), 0);
+  const totalMessages = filteredMetrics.reduce((sum, m) => sum + (parseInt(m.messages) || 0), 0);
+  
+  const avgFrequency = filteredMetrics.length > 0
+    ? filteredMetrics.reduce((sum, m) => sum + (parseFloat(m.frequency) || 0), 0) / filteredMetrics.length
+    : 0;
+  const avgCpc = totalClicks > 0 ? totalSpend / totalClicks : 0;
+  const avgCpm = totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0;
+  const avgCpa = totalConversions > 0 ? totalSpend / totalConversions : 0;
+  
+  // Supõe um ticket de conversão fictício de R$ 120 para calcular o ROI
+  const totalValue = totalConversions * 120;
+  const avgRoi = totalSpend > 0 ? ((totalValue - totalSpend) / totalSpend) * 100 : 0;
+  const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+
+  const metricsData: DashboardMetrics = {
+    spend: totalSpend,
+    impressions: totalImpressions,
+    clicks: totalClicks,
+    reach: totalReach,
+    conversions: totalConversions,
+    leads: Math.floor(totalConversions * 0.194),
+    messages: totalMessages,
+    frequency: avgFrequency,
+    cpc: avgCpc,
+    cpm: avgCpm,
+    cpa: avgCpa,
+    roi: avgRoi,
+    ctr: avgCtr
+  };
+
+  const changes = {
+    spend: { value: totalSpend, percent: 14.2, trend: 'up' as const },
+    impressions: { value: totalImpressions, percent: 8.1, trend: 'up' as const },
+    clicks: { value: totalClicks, percent: 5.3, trend: 'up' as const },
+    reach: { value: totalReach, percent: 12.1, trend: 'up' as const },
+  };
 
   if (loading) {
     return (
@@ -140,29 +215,35 @@ export function DashboardClient({
     );
   }
 
-  if (!metrics) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-[#31251f]">
-        <div className="text-[#d8c5b6]">Sem dados para exibir</div>
-      </div>
-    );
-  }
-
-
-
   return (
     <div className="min-h-screen bg-[#31251f] flex flex-col font-['Avenir']">
       
       {/* HEADER (Sem Sidebar) */}
       <header className="bg-[#1f1915] h-32 flex items-center px-8 border-b border-[rgba(216,197,182,0.2)] sticky top-0 z-50">
         <div className="flex items-center gap-6">
-          {/* Logo Voxion - MAIOR (80px) */}
+          {/* Logo Voxion */}
           <img 
             src="/voxion-ads-logo.svg" 
             alt="Voxion Ads"
             className="h-20 w-auto drop-shadow-md cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => router.push('/dashboard')}
           />
+        </div>
+
+        {/* Seletor Dinâmico de Contas */}
+        <div className="ml-8">
+          <select
+            value={selectedAccountId}
+            onChange={(e) => setSelectedAccountId(e.target.value)}
+            className="bg-[#31251f] border border-[#d8c5b6]/30 text-[#d8c5b6] px-4 py-2 rounded-xl font-bold outline-none cursor-pointer focus:border-[#f18535] transition-all text-sm"
+          >
+            <option value="all">Todas as Contas</option>
+            {initialMetaTokens.map((t) => (
+              <option key={t.id} value={t.account_id}>
+                {t.account_name} ({t.account_id})
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex-1" />
@@ -233,32 +314,38 @@ export function DashboardClient({
         </div>
 
         {/* 4 KPIs GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <MetricCard
-            icon="💰" label="TOTAL INVESTIDO" value={metrics.spend} unit="R$" format="currency"
-            change={changes.spend} color="orange" onClick={() => router.push('/dashboard')}
+            icon="💰" label="TOTAL INVESTIDO" value={metricsData.spend} unit="R$" format="currency"
+            change={changes.spend} color="orange" onClick={() => {}}
           />
           <MetricCard
-            icon="👁️" label="IMPRESSÕES" value={metrics.impressions} unit="" format="number"
+            icon="👁️" label="IMPRESSÕES" value={metricsData.impressions} unit="" format="number"
             change={changes.impressions} color="blue" onClick={() => router.push('/dashboard/campanhas')}
           />
           <MetricCard
-            icon="👆" label="CLIQUES (CTR)" value={metrics.clicks} unit={`${metrics.ctr?.toFixed(2)}%`} format="number"
+            icon="👆" label="CLIQUES (CTR)" value={metricsData.clicks} unit={`${metricsData.ctr?.toFixed(2)}%`} format="number"
             change={changes.clicks} color="purple" onClick={() => router.push('/dashboard/conjuntos')}
           />
           <MetricCard
-            icon="🎯" label="ALCANCE" value={metrics.reach} unit="" format="number"
+            icon="🎯" label="ALCANCE" value={metricsData.reach} unit="" format="number"
             change={changes.reach} color="green" onClick={() => router.push('/dashboard/anuncios')}
           />
         </div>
 
+        {/* GRÁFICOS DE DESEMPENHO (RECHARTS) */}
+        <div className="mb-10">
+          <h3 className="text-2xl font-bold text-[#d8c5b6] mb-6">Evolução Temporal das Métricas</h3>
+          <PerformanceCharts data={filteredMetrics} />
+        </div>
+
         {/* BOTTOM SECTIONS */}
-        <div className="grid grid-cols-1 gap-6 mt-10">
+        <div className="grid grid-cols-1 gap-6">
           {/* Notificações e Alertas */}
           <NotificationsSection />
 
-          {/* NOVA: Recomendações */}
-          <RecommendationsCard />
+          {/* Recomendações de IA */}
+          <RecommendationsCard selectedAccountId={selectedAccountId} />
         </div>
       </main>
     </div>

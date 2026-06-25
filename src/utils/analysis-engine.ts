@@ -297,6 +297,15 @@ Seja analítico. Sugira pausar anúncios, revisar landing pages, combater fadiga
   let saveToMock = false;
 
   try {
+    // Limpa relatórios anteriores para evitar duplicados
+    await supabase
+      .from('reports')
+      .delete()
+      .eq('admin_id', adminId)
+      .eq('campaign_id', campaignId)
+      .is('adset_id', null)
+      .is('ad_id', null);
+
     const { data, error } = await supabase
       .from('reports')
       .insert({
